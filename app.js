@@ -5,11 +5,13 @@
 const STORE_KEYS = {
   apiKey: 'recipe_api_key',
   model: 'recipe_model',
+  provider: 'recipe_provider',
   recipes: 'recipe_library',
   habits: 'recipe_habits', // { cuisines: {name: count}, ingredients: {name: count} }
 };
 
-const DEFAULT_MODEL = 'claude-sonnet-4-6';
+const DEFAULT_MODEL = 'gemini-2.0-flash';
+const DEFAULT_PROVIDER = 'gemini';
 
 // ---------- Storage helpers ----------
 const store = {
@@ -93,12 +95,35 @@ function renderHabitHint() {
   });
 }
 
-// ---------- Anthropic API call ----------
-async function callClaude(messages, maxTokens = 2048) {
+// ---------- AI API call (Gemini or Claude) ----------
+async function callAI(prompt, maxTokens = 2048) {
   const apiKey = store.get(STORE_KEYS.apiKey, '');
   const model = store.get(STORE_KEYS.model, DEFAULT_MODEL);
+  const provider = store.get(STORE_KEYS.provider, DEFAULT_PROVIDER);
   if (!apiKey) throw new Error('Configure ta clé API dans Réglages.');
 
+  if (provider === 'gemini') {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          maxOutputTokens: maxTokens,
+          responseMimeType: 'application/json',
+        },
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`API ${res.status}: ${err}`);
+    }
+    const data = await res.json();
+    return data.candidates[0].content.parts[0].text;
+  }
+
+  // Anthropic
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -107,7 +132,10 @@ async function callClaude(messages, maxTokens = 2048) {
       'anthropic-version': '2023-06-01',
       'anthropic-dangerous-direct-browser-access': 'true',
     },
-    body: JSON.stringify({ model, max_tokens: maxTokens, messages }),
+    body: JSON.stringify({
+      model, max_tokens: maxTokens,
+      messages: [{ role: 'user', content: prompt }],
+    }),
   });
   if (!res.ok) {
     const err = await res.text();
@@ -176,9 +204,7 @@ Génère UNE recette complète au format JSON demandé.`;
   out.innerHTML = '<div class="recipe-block"><span class="loading"></span>Préparation de ta recette…</div>';
 
   try {
-    const text = await callClaude([
-      { role: 'user', content: RECIPE_SCHEMA_PROMPT + '\n\n' + userPrompt },
-    ], 2500);
+    const text = await callAI(RECIPE_SCHEMA_PROMPT + '\n\n' + userPrompt, 2500);
     const recipe = parseRecipeJSON(text);
     recipe.id = 'r_' + Date.now();
     recipe.source = 'ai';
@@ -236,9 +262,7 @@ function renderRecipe(container, recipe, { showSave = false } = {}) {
     regenBtn.disabled = true;
     regenBtn.innerHTML = '<span class="loading"></span>Variante…';
     try {
-      const text = await callClaude([
-        { role: 'user', content: RECIPE_SCHEMA_PROMPT + '\n\nVoici une recette précédente :\n' + JSON.stringify(recipe) + '\n\nPropose une VARIANTE différente (autre technique, autre ingrédient principal ou autre style) tout en respectant les ingrédients de base. Format JSON.' },
-      ], 2500);
+      const text = await callAI(RECIPE_SCHEMA_PROMPT + '\n\nVoici une recette précédente :\n' + JSON.stringify(recipe) + '\n\nPropose une VARIANTE différente (autre technique, autre ingrédient principal ou autre style) tout en respectant les ingrédients de base. Format JSON.', 2500);
       const variant = parseRecipeJSON(text);
       variant.id = 'r_' + Date.now();
       variant.source = 'ai';
@@ -380,7 +404,7 @@ Réponds UNIQUEMENT en JSON :
 }`;
 
   try {
-    const text = await callClaude([{ role: 'user', content: prompt }], 1500);
+    const text = await callAI(prompt, 1500);
     const list = parseRecipeJSON(text);
     out.innerHTML = '<h3>🛒 Liste de courses</h3>' + list.categories.map(cat => `
       <h4>${escapeHTML(cat.name)}</h4>
@@ -397,12 +421,35 @@ Réponds UNIQUEMENT en JSON :
 function loadSettings() {
   document.getElementById('api-key').value = store.get(STORE_KEYS.apiKey, '') || '';
   document.getElementById('model').value = store.get(STORE_KEYS.model, DEFAULT_MODEL);
+  document.getElementById('provider').value = store.get(STORE_KEYS.provider, DEFAULT_PROVIDER);
+  updateModelOptions();
 }
 document.getElementById('save-settings').addEventListener('click', () => {
   store.set(STORE_KEYS.apiKey, document.getElementById('api-key').value.trim());
   store.set(STORE_KEYS.model, document.getElementById('model').value);
+  store.set(STORE_KEYS.provider, document.getElementById('provider').value);
   alert('Réglages enregistrés ✓');
 });
+
+function updateModelOptions() {
+  const provider = document.getElementById('provider').value;
+  const modelSelect = document.getElementById('model');
+  const options = provider === 'gemini'
+    ? [
+        ['gemini-2.0-flash', 'Gemini 2.0 Flash (gratuit, rapide)'],
+        ['gemini-2.5-flash', 'Gemini 2.5 Flash'],
+        ['gemini-2.5-pro', 'Gemini 2.5 Pro (max qualité)'],
+      ]
+    : [
+        ['claude-sonnet-4-6', 'Claude Sonnet 4.6 (recommandé)'],
+        ['claude-haiku-4-5-20251001', 'Claude Haiku 4.5 (rapide)'],
+        ['claude-opus-4-7', 'Claude Opus 4.7 (max qualité)'],
+      ];
+  const current = modelSelect.value;
+  modelSelect.innerHTML = options.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
+  if (options.some(o => o[0] === current)) modelSelect.value = current;
+}
+document.getElementById('provider').addEventListener('change', updateModelOptions);
 document.getElementById('reset-habits').addEventListener('click', () => {
   if (confirm('Effacer toutes les habitudes ?')) {
     store.set(STORE_KEYS.habits, { cuisines: {}, ingredients: {} });
