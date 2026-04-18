@@ -204,8 +204,7 @@ Génère UNE recette complète au format JSON demandé.`;
   out.innerHTML = '<div class="recipe-block"><span class="loading"></span>Préparation de ta recette…</div>';
 
   try {
-    const text = await callAI(RECIPE_SCHEMA_PROMPT + '\n\n' + userPrompt, 2500);
-    const recipe = parseRecipeJSON(text);
+    const recipe = await generateWithRetry(RECIPE_SCHEMA_PROMPT + '\n\n' + userPrompt);
     recipe.id = 'r_' + Date.now();
     recipe.source = 'ai';
     recipe.created_at = Date.now();
@@ -215,12 +214,51 @@ Génère UNE recette complète au format JSON demandé.`;
   }
 });
 
+async function generateWithRetry(prompt, attempts = 2) {
+  let lastError;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const text = await callAI(prompt, 4000);
+      return parseRecipeJSON(text);
+    } catch (e) {
+      lastError = e;
+      if (!String(e.message).includes('JSON')) throw e;
+    }
+  }
+  throw lastError;
+}
+
 function parseRecipeJSON(text) {
-  // Try direct parse, then extract JSON block
+  // Strategy 1: direct parse
   try { return JSON.parse(text); } catch {}
-  const match = text.match(/\{[\s\S]*\}/);
-  if (match) return JSON.parse(match[0]);
-  throw new Error("Réponse IA invalide (JSON non détecté)");
+
+  // Strategy 2: strip markdown code fences
+  let cleaned = text.replace(/```(?:json)?\s*/gi, '').replace(/```/g, '').trim();
+  try { return JSON.parse(cleaned); } catch {}
+
+  // Strategy 3: extract first {...} block
+  const match = cleaned.match(/\{[\s\S]*\}/);
+  if (match) {
+    let candidate = match[0];
+    try { return JSON.parse(candidate); } catch {}
+
+    // Strategy 4: repair common issues
+    // - smart quotes -> straight quotes
+    candidate = candidate
+      .replace(/[\u2018\u2019]/g, "'")
+      .replace(/[\u201C\u201D]/g, '"')
+      // - trailing commas before } or ]
+      .replace(/,(\s*[}\]])/g, '$1');
+    try { return JSON.parse(candidate); } catch {}
+
+    // Strategy 5: truncate at last valid closing brace
+    for (let i = candidate.length; i > 0; i--) {
+      if (candidate[i - 1] === '}') {
+        try { return JSON.parse(candidate.slice(0, i)); } catch {}
+      }
+    }
+  }
+  throw new Error('Réponse IA invalide (JSON cassé). Réessaie.');
 }
 
 // ---------- Render recipe ----------
