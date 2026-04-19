@@ -168,6 +168,7 @@ RÈGLES DE FIABILITÉ (importantes) :
 document.getElementById('generate-btn').addEventListener('click', async () => {
   const cuisine = selectedCuisine || document.getElementById('cuisine-other').value.trim();
   const ingredientsRaw = document.getElementById('ingredients').value.trim();
+  const excludedRaw = document.getElementById('excluded').value.trim();
   const servings = document.getElementById('servings').value;
   const timeLimit = document.getElementById('time-limit').value;
   const difficulty = document.getElementById('difficulty').value;
@@ -177,6 +178,7 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
   if (!ingredientsRaw) return alert('Ajoute au moins un ingrédient');
 
   const ingredientList = ingredientsRaw.split(',').map(s => s.trim()).filter(Boolean);
+  const excludedList = excludedRaw.split(',').map(s => s.trim()).filter(Boolean);
 
   // Track habits
   bumpHabit('cuisines', cuisine);
@@ -191,20 +193,32 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
 
   const userPrompt = `Cuisine : ${cuisine}
 Ingrédients disponibles : ${ingredientList.join(', ')}
+${excludedList.length ? `🚫 INGRÉDIENTS INTERDITS (ne JAMAIS utiliser, même en petite quantité, même sous une autre forme comme purée/coulis/jus) : ${excludedList.join(', ')}` : ''}
 Personnes : ${servings}
 ${timeLimit ? `Temps maximum : ${timeLimit} minutes` : ''}
 Difficulté visée : ${difficulty}
 ${preferences ? `Préférences/contraintes : ${preferences}` : ''}
 ${variantHint}
 
-Génère UNE recette complète au format JSON demandé.`;
+Génère UNE recette complète au format JSON demandé.${excludedList.length ? ' Vérifie deux fois que les ingrédients interdits ne figurent NULLE PART dans la liste finale.' : ''}`;
 
   const out = document.getElementById('recipe-output');
   out.classList.remove('hidden');
   out.innerHTML = '<div class="recipe-block"><span class="loading"></span>Préparation de ta recette…</div>';
 
   try {
-    const recipe = await generateWithRetry(RECIPE_SCHEMA_PROMPT + '\n\n' + userPrompt);
+    let recipe = await generateWithRetry(RECIPE_SCHEMA_PROMPT + '\n\n' + userPrompt);
+
+    // Safety check: if a forbidden ingredient slipped through, ask for a fix
+    if (excludedList.length) {
+      const violations = findViolations(recipe, excludedList);
+      if (violations.length) {
+        const fixPrompt = RECIPE_SCHEMA_PROMPT + '\n\n' + userPrompt +
+          `\n\nLa recette précédente contenait : ${violations.join(', ')}. Refais-la SANS ces ingrédients. Voici la version à corriger :\n${JSON.stringify(recipe)}`;
+        recipe = await generateWithRetry(fixPrompt);
+      }
+    }
+
     recipe.id = 'r_' + Date.now();
     recipe.source = 'ai';
     recipe.created_at = Date.now();
@@ -213,6 +227,15 @@ Génère UNE recette complète au format JSON demandé.`;
     out.innerHTML = `<div class="error">Erreur : ${escapeHTML(e.message)}</div>`;
   }
 });
+
+function findViolations(recipe, excluded) {
+  const text = JSON.stringify(recipe).toLowerCase();
+  return excluded.filter(ex => {
+    const word = ex.toLowerCase().trim();
+    if (!word) return false;
+    return new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'i').test(text);
+  });
+}
 
 async function generateWithRetry(prompt, attempts = 2) {
   let lastError;
