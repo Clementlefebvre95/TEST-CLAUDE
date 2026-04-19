@@ -27,6 +27,12 @@ Le travail est 80% process (hook + structure + CTA) et 20% interview du client. 
 | [06-outils-gratuits.md](06-outils-gratuits.md) | Stack complète gratuite |
 | [07-budget.md](07-budget.md) | Où va chaque euro des 500€ |
 | [08-templates-scripts.md](08-templates-scripts.md) | DMs, bio, pages de vente, thread templates |
+| [09-adaptation-faceless.md](09-adaptation-faceless.md) | Pivot brand anonyme (sans visage ni voix) |
+| [10-version-automatique.md](10-version-automatique.md) | **Version finale : produit digital automatisé** |
+
+## ⚠️ Ordre de lecture recommandé
+
+Le fichier **10 override les fichiers 1–9** pour refléter les dernières contraintes (faceless + automatisé). Lis d'abord le 10, puis reviens sur les fichiers 3 (stratégie X), 6 (outils), 8 (templates) qui restent utiles tels quels.
 
 ## Objectif 90 jours réaliste
 - **Mois 1** : 1–2 clients, 500–800€ revenu, 500 abonnés X.
