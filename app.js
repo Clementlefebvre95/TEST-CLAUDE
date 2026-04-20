@@ -96,53 +96,90 @@ function renderHabitHint() {
 }
 
 // ---------- AI API call (Gemini or Claude) ----------
+const RETRYABLE_STATUSES = [429, 500, 502, 503, 504];
+
 async function callAI(prompt, maxTokens = 2048) {
   const apiKey = store.get(STORE_KEYS.apiKey, '');
   const model = store.get(STORE_KEYS.model, DEFAULT_MODEL);
   const provider = store.get(STORE_KEYS.provider, DEFAULT_PROVIDER);
   if (!apiKey) throw new Error('Configure ta clé API dans Réglages.');
 
-  if (provider === 'gemini') {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
-    const res = await fetch(url, {
+  const doFetch = async () => {
+    if (provider === 'gemini') {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            maxOutputTokens: maxTokens,
+            responseMimeType: 'application/json',
+          },
+        }),
+      });
+      return res;
+    }
+    return fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          maxOutputTokens: maxTokens,
-          responseMimeType: 'application/json',
-        },
+        model, max_tokens: maxTokens,
+        messages: [{ role: 'user', content: prompt }],
       }),
     });
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`API ${res.status}: ${err}`);
-    }
-    const data = await res.json();
-    return data.candidates[0].content.parts[0].text;
-  }
+  };
 
-  // Anthropic
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify({
-      model, max_tokens: maxTokens,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`API ${res.status}: ${err}`);
+  const maxAttempts = 4;
+  let lastStatus, lastErr;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    let res;
+    try { res = await doFetch(); }
+    catch (e) {
+      lastErr = e;
+      if (attempt < maxAttempts) {
+        updateRetryStatus(attempt, maxAttempts);
+        await sleep(attempt * 2000);
+        continue;
+      }
+      throw e;
+    }
+
+    if (res.ok) {
+      const data = await res.json();
+      return provider === 'gemini'
+        ? data.candidates[0].content.parts[0].text
+        : data.content[0].text;
+    }
+
+    lastStatus = res.status;
+    const errText = await res.text();
+    lastErr = new Error(`API ${res.status}: ${errText}`);
+
+    if (RETRYABLE_STATUSES.includes(res.status) && attempt < maxAttempts) {
+      updateRetryStatus(attempt, maxAttempts, res.status);
+      await sleep(attempt * 2000);
+      continue;
+    }
+    throw lastErr;
   }
-  const data = await res.json();
-  return data.content[0].text;
+  throw lastErr || new Error('API unreachable');
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function updateRetryStatus(attempt, max, status) {
+  const el = document.querySelector('#recipe-output .loading-msg');
+  if (!el) return;
+  const reason = status === 503 ? 'serveur saturé'
+    : status === 429 ? 'limite temporaire atteinte'
+    : 'erreur temporaire';
+  el.textContent = `${reason}, nouvelle tentative (${attempt}/${max - 1})…`;
 }
 
 // ---------- Generate recipe ----------
@@ -204,7 +241,7 @@ Génère UNE recette complète au format JSON demandé.${excludedList.length ? '
 
   const out = document.getElementById('recipe-output');
   out.classList.remove('hidden');
-  out.innerHTML = '<div class="recipe-block"><span class="loading"></span>Préparation de ta recette…</div>';
+  out.innerHTML = '<div class="recipe-block"><span class="loading"></span><span class="loading-msg">Préparation de ta recette…</span></div>';
 
   try {
     let recipe = await generateWithRetry(RECIPE_SCHEMA_PROMPT + '\n\n' + userPrompt);
