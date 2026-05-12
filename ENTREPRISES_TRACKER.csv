@@ -1,0 +1,140 @@
+Categorie,Ville,Entreprise,Type,Email_contact,Site_carriere,Offre_publiee,Date_envoi,Relance_J7,Statut,Notes
+GRANDE ENTREPRISE,Paris,BNP Paribas,Banque,recrutement.alternance@bnpparibas.com,https://group.bnpparibas/emploi-carriere,Oui,,,,Très gros pôle Data/IA
+GRANDE ENTREPRISE,Paris,Société Générale,Banque,recrutement.alternance@socgen.com,https://careers.societegenerale.com,Oui,,,,Pôle DataLab actif
+GRANDE ENTREPRISE,Paris,Crédit Agricole CIB,Banque,alternance.ca-cib@ca-cib.com,https://www.ca-cib.com/carrieres,Oui (JOB_147 JOB_148),,,,Data Scientist alternance ouvert
+GRANDE ENTREPRISE,Paris,CIC,Banque,recrutement@cic.fr,https://www.cic.fr/recrutement,Oui (JOB_123),,,,Data Analyst
+GRANDE ENTREPRISE,Paris,BPCE IG,Banque,recrutement@bpce-it.fr,https://groupebpce.com/carrieres,Oui (JOB_136),,,,Data AI Engineer
+GRANDE ENTREPRISE,Paris,AXA France,Assurance,recrutement.france@axa.fr,https://careers.axa.com,Oui (JOB_149 JOB_159),,,,ML Engineer alternance
+GRANDE ENTREPRISE,Paris,CNP Assurances,Assurance,recrutement@cnp.fr,https://www.cnp.fr/carriere,Non,,,,Pôle data en croissance
+GRANDE ENTREPRISE,Paris,Malakoff Humanis,Assurance,recrutement@malakoffhumanis.com,https://www.malakoffhumanis.com/carrieres,Oui (JOB_121),,,,IA Documentaire
+GRANDE ENTREPRISE,Paris,Harmonie Mutuelle,Assurance,recrutement@harmonie-mutuelle.fr,https://www.harmonie-mutuelle.fr/recrutement,Oui (JOB_158),,,,Études Data et IA
+GRANDE ENTREPRISE,Paris,Groupama,Assurance,recrutement@groupama.com,https://recrutement.groupama.com,Oui (JOB_141 Montpellier),,,,
+GRANDE ENTREPRISE,Paris,Capgemini,ESN,recrutement.fr@capgemini.com,https://www.capgemini.com/fr/carrieres,Oui,,,,Practice Data/IA énorme
+GRANDE ENTREPRISE,Paris,Sopra Steria,ESN,recrutement@soprasteria.com,https://www.soprasteria.com/fr/carrieres,Oui,,,,
+GRANDE ENTREPRISE,Paris,Atos,ESN,recruitment.fr@atos.net,https://atos.net/fr/carrieres,Oui,,,,Pôle IA et HPC
+GRANDE ENTREPRISE,Paris,Accenture,Conseil,recrutement.france@accenture.com,https://www.accenture.com/fr-fr/careers,Oui,,,,Applied Intelligence
+GRANDE ENTREPRISE,Paris,Deloitte,Conseil,recrutement@deloitte.fr,https://careers.deloitte.fr,Oui,,,,Risk Advisory + AI Institute
+GRANDE ENTREPRISE,Paris,EY,Conseil,recrutement@fr.ey.com,https://www.ey.com/fr_fr/careers,Oui,,,,Data Science consulting
+GRANDE ENTREPRISE,Paris,KPMG,Conseil,recrutement@kpmg.fr,https://kpmgrecrute.fr,Oui,,,,Lighthouse (Data & IA)
+GRANDE ENTREPRISE,Paris,PwC,Conseil,recrutement@pwc.com,https://www.pwc.fr/carrieres,Oui,,,,Analytics & AI
+GRANDE ENTREPRISE,Paris,CGI,ESN,recrutement.france@cgi.com,https://www.cgi.com/fr/carrieres,Oui,,,,
+GRANDE ENTREPRISE,Paris,Devoteam,ESN,recrutement@devoteam.com,https://www.devoteam.com/careers,Oui,,,,Practice AI for Business
+GRANDE ENTREPRISE,Paris,Inetum,ESN,recrutement.fr@inetum.com,https://www.inetum.com/fr/carrieres,Oui,,,,
+GRANDE ENTREPRISE,Paris,Onepoint,Conseil,recrutement@groupeonepoint.com,https://www.groupeonepoint.com/fr/carrieres,Oui,,,,
+GRANDE ENTREPRISE,Paris,Talan,Conseil,recrutement@talan.com,https://www.talan.com/carrieres,Oui,,,,Innovation Factory + IA
+GRANDE ENTREPRISE,Paris,Mc2i,Conseil,recrutement@mc2i.fr,https://www.mc2i.fr/carrieres,Oui,,,,
+GRANDE ENTREPRISE,Paris,Magellan Partners,Conseil,recrutement@magellan-partners.com,https://www.magellan-partners.com,Oui,,,,
+GRANDE ENTREPRISE,Paris,TotalEnergies,Énergie,recrutement.france@totalenergies.com,https://careers.totalenergies.com,Oui,,,,Digital Factory à Paris
+GRANDE ENTREPRISE,Paris,EDF,Énergie,recrutement@edf.fr,https://www.edf.fr/edf-recrute,Oui,,,,EDF Lab Paris-Saclay (R&D IA)
+GRANDE ENTREPRISE,Paris,Engie,Énergie,recrutement@engie.com,https://www.engie.com/carrieres,Oui,,,,Engie Digital + Engie Lab
+GRANDE ENTREPRISE,Paris,Orange,Telecom,recrutement.france@orange.com,https://orange.jobs,Oui,,,,Orange Labs IA
+GRANDE ENTREPRISE,Paris,SFR,Telecom,recrutement@sfr.fr,https://recrutement.sfr.fr,Oui (JOB_134),,,,Chef de projet IA
+GRANDE ENTREPRISE,Paris,Bouygues Telecom,Telecom,recrutement@bouyguestelecom.fr,https://recrutement.bouyguestelecom.fr,Non,,,,
+GRANDE ENTREPRISE,Paris,Thales,Industrie,recrutement.france@thalesgroup.com,https://careers.thalesgroup.com,Oui (JOB_164),,,,Cortaix (TRT) - IA défense
+GRANDE ENTREPRISE,Paris,Airbus,Industrie,recruitment@airbus.com,https://jobs.airbus.com,Oui,,,,
+GRANDE ENTREPRISE,Paris,MBDA,Industrie,recrutement@mbda-systems.com,https://www.mbda-careers.com,Oui (JOB_114),,,,
+GRANDE ENTREPRISE,Paris,Safran,Industrie,recrutement@safrangroup.com,https://www.safran-group.com/careers,Non,,,,
+GRANDE ENTREPRISE,Paris,Naval Group,Industrie,recrutement@naval-group.com,https://www.naval-group.com/fr/carrieres,Non,,,,
+GRANDE ENTREPRISE,Paris,Renault Group,Auto,recrutement.france@renault.com,https://careers.renaultgroup.com,Non,,,,Software République (IA véhicule)
+GRANDE ENTREPRISE,Paris,Stellantis,Auto,recrutement@stellantis.com,https://www.stellantis.com/fr/carrieres,Non,,,,
+GRANDE ENTREPRISE,Paris,L'Oréal,Cosmétique,recrutement.france@loreal.com,https://careers.loreal.com,Non,,,,Beauty Tech / Data Hub
+GRANDE ENTREPRISE,Paris,LVMH,Luxe,recrutement@lvmh.fr,https://www.lvmh.com/talents,Non,,,,Maisons digitales
+GRANDE ENTREPRISE,Paris,Kering,Luxe,recrutement@kering.com,https://www.kering.com/fr/talents,Non,,,,
+GRANDE ENTREPRISE,Paris,Carrefour,Retail,recrutement.france@carrefour.com,https://recrute.carrefour.com,Oui (JOB_152),,,,Carrefour Links (Data Retail)
+GRANDE ENTREPRISE,Paris,Decathlon,Retail,recrutement@decathlon.com,https://joinus.decathlon.com,Non,,,,Decathlon Digital + Tech
+GRANDE ENTREPRISE,Paris,Veolia,Environnement,recrutement.france@veolia.com,https://jobs.veolia.com,Non,,,,Smart Data
+GRANDE ENTREPRISE,Paris,Suez,Environnement,recrutement.france@suez.com,https://www.suez.com/fr/carrieres,Non,,,,
+GRANDE ENTREPRISE,Paris,SNCF Connect & Tech,Transport,recrutement@sncf.fr,https://www.sncfconnectandtech.fr/carrieres,Non,,,,
+GRANDE ENTREPRISE,Paris,RATP Smart Systems,Transport,recrutement@ratp.fr,https://www.ratp.fr/carrieres,Non,,,,
+GRANDE ENTREPRISE,Paris,Air France-KLM,Transport,recrutement@airfrance.fr,https://recrutement.airfrance.com,Non,,,,Air France Lab (Data)
+GRANDE ENTREPRISE,Paris,AP-HP,Santé,recrutement@aphp.fr,https://www.aphp.fr/carrieres,Non,,,,Pôle data santé
+GRANDE ENTREPRISE,Paris,Sanofi,Pharma,recrutement.france@sanofi.com,https://www.sanofi.com/en/careers,Oui (JOB_142 JOB_143),,,,Aussi Montpellier
+GRANDE ENTREPRISE,Paris,Servier,Pharma,recrutement@servier.com,https://servier.com/carrieres,Non,,,,
+GRANDE ENTREPRISE,Paris,Pierre Fabre,Pharma,recrutement@pierre-fabre.com,https://www.pierre-fabre.com/fr/carrieres,Non,,,,
+GRANDE ENTREPRISE,Paris,Ipsen,Pharma,recrutement@ipsen.com,https://www.ipsen.com/carrieres,Non,,,,
+GRANDE ENTREPRISE,Paris,LFB,Pharma,recrutement@lfb.fr,https://www.lfb.fr/carrieres,Oui (JOB_150),,,,
+GRANDE ENTREPRISE,Paris,GE HealthCare,Santé,recruitment.france@gehealthcare.com,https://careers.gehealthcare.com,Oui (JOB_154),,,,IA robot médical
+GRANDE ENTREPRISE,Paris,Framatome,Énergie,recrutement@framatome.com,https://www.framatome.com/carrieres,Oui (JOB_160 JOB_162),,,,
+GRANDE ENTREPRISE,Paris,CEA,Recherche,recrutement@cea.fr,https://www.cea.fr/emploi,Oui (JOB_137),,,,IA + MOE
+GRANDE ENTREPRISE,Paris,Inria,Recherche,recrutement@inria.fr,https://recrutement.inria.fr,Non,,,,Équipes ML/IA top niveau
+GRANDE ENTREPRISE,Paris,CNRS,Recherche,recrutement@cnrs.fr,https://carrieres.cnrs.fr,Non,,,,
+GRANDE ENTREPRISE,Paris,IFP Energies Nouvelles,Recherche,recrutement@ifpen.fr,https://www.ifpenergiesnouvelles.fr/carrieres,Non,,,,IA pour l'énergie
+GRANDE ENTREPRISE,Paris,Mars (Royal Canin),Agro,recrutement@mars.com,https://www.mars.com/careers,Oui (JOB_165 JOB_166 Aimargues),,,,Data Engineer
+GRANDE ENTREPRISE,Paris,Danone,Agro,recrutement.france@danone.com,https://careers.danone.com,Non,,,,
+GRANDE ENTREPRISE,Paris,Bel,Agro,recrutement@groupe-bel.com,https://www.groupe-bel.com/fr/carrieres,Non,,,,
+GRANDE ENTREPRISE,Paris,Pernod Ricard,Agro,recrutement@pernod-ricard.com,https://www.pernod-ricard.com/fr/carrieres,Non,,,,Conviviality Platform (data)
+STARTUP / SCALE-UP,Paris,Mistral AI,IA / LLM,careers@mistral.ai,https://mistral.ai/careers,Non,,,,Le leader européen LLM
+STARTUP / SCALE-UP,Paris,Hugging Face,IA / ML,jobs@huggingface.co,https://apply.workable.com/huggingface,Non,,,,Plateforme ML open source
+STARTUP / SCALE-UP,Paris,Dataiku,Data Platform,careers@dataiku.com,https://www.dataiku.com/careers,Non,,,,Licorne française
+STARTUP / SCALE-UP,Paris,H Company,IA agents,via formulaire,https://www.hcompany.ai,Non,,,,Ex-Holistic AI
+STARTUP / SCALE-UP,Paris,PhotoRoom,Computer Vision,jobs@photoroom.com,https://www.photoroom.com/careers,Non,,,,
+STARTUP / SCALE-UP,Paris,Poolside AI,LLM coding,via Greenhouse,https://www.poolside.ai,Non,,,,
+STARTUP / SCALE-UP,Paris,LightOn,LLM,contact@lighton.ai,https://www.lighton.ai,Non,,,,
+STARTUP / SCALE-UP,Paris,Owkin,IA santé,careers@owkin.com,https://owkin.com/careers,Non,,,,Licorne IA biomédicale
+STARTUP / SCALE-UP,Paris,Nabla,IA santé,careers@nabla.com,https://www.nabla.com,Non,,,,Copilot IA pour médecins
+STARTUP / SCALE-UP,Paris,Giskard,ML testing,hello@giskard.ai,https://www.giskard.ai,Non,,,,Open source ML test
+STARTUP / SCALE-UP,Paris,Alma,Paiement + ML,jobs@getalma.eu,https://jobs.getalma.eu,Non,,,,
+STARTUP / SCALE-UP,Paris,Pigment,FP&A + IA,via Lever,https://www.pigment.com/careers,Non,,,,
+STARTUP / SCALE-UP,Paris,Doctolib,Health tech,careers-fr@doctolib.com,https://careers.doctolib.com,Non,,,,Très gros pôle data
+STARTUP / SCALE-UP,Paris,Qonto,Fintech,talent@qonto.com,https://qonto.com/jobs,Non,,,,
+STARTUP / SCALE-UP,Paris,Alan,Assurance santé,jobs@alan.com,https://alan.com/careers,Non,,,,
+STARTUP / SCALE-UP,Paris,Contentsquare,Analytics,via Greenhouse,https://contentsquare.com/careers,Non,,,,
+STARTUP / SCALE-UP,Paris,Shift Technology,Insurtech / IA,careers@shift-technology.com,https://www.shift-technology.com/careers,Non,,,,IA assurance / fraude
+STARTUP / SCALE-UP,Paris,Aircall,SaaS télécom,via portail,https://aircall.io/jobs,Non,,,,
+STARTUP / SCALE-UP,Paris,Spendesk,Fintech,via portail,https://careers.spendesk.com,Non,,,,
+STARTUP / SCALE-UP,Paris,PayFit,RH SaaS,via portail,https://careers.payfit.com,Non,,,,
+STARTUP / SCALE-UP,Paris,Swile,Fintech,careers@swile.co,https://www.swile.co/careers,Non,,,,
+STARTUP / SCALE-UP,Paris,BlaBlaCar,Mobilité,via portail,https://careers.blablacar.com,Non,,,,Pôle data trip
+STARTUP / SCALE-UP,Paris,Back Market,Marketplace,via portail,https://careers.backmarket.com,Non,,,,
+STARTUP / SCALE-UP,Paris,ManoMano,E-commerce,via portail,https://careers.manomano.com,Non,,,,
+STARTUP / SCALE-UP,Paris,Veepee,E-commerce,via portail,https://careers.veepee.com,Non,,,,
+STARTUP / SCALE-UP,Paris,Believe,Music tech,via portail,https://careers.believe.com,Non,,,,
+STARTUP / SCALE-UP,Paris,Ledger,Crypto,via portail,https://www.ledger.com/careers,Non,,,,
+STARTUP / SCALE-UP,Paris,Sorare,Web3,via portail,https://careers.sorare.com,Non,,,,
+STARTUP / SCALE-UP,Paris,Lydia / Sumeria,Fintech,careers@lydia-app.com,https://lydia-app.com/jobs,Non,,,,
+STARTUP / SCALE-UP,Paris,Pennylane,Compta SaaS,via portail,https://careers.pennylane.com,Non,,,,
+STARTUP / SCALE-UP,Paris,Ekimetrics,Conseil data,recrutement@ekimetrics.com,https://www.ekimetrics.com/careers,Non,,,,Pure player Data Science
+STARTUP / SCALE-UP,Paris,Quantmetry,Conseil data,recrutement@quantmetry.com,https://www.quantmetry.com/carrieres,Non,,,,
+STARTUP / SCALE-UP,Paris,Artefact,Conseil data,recrutement@artefact.com,https://www.artefact.com/careers,Non,,,,Très gros recruteur Data
+STARTUP / SCALE-UP,Paris,Sicara,Conseil data,recrutement@sicara.com,https://www.sicara.fr/careers,Non,,,,
+STARTUP / SCALE-UP,Paris,Octo Technology,Conseil tech,recrutement@octo.com,https://www.octo.com/carrieres,Non,,,,
+STARTUP / SCALE-UP,Paris,Theodo Data & AI,Conseil data,via portail,https://www.theodo.com/careers,Non,,,,
+STARTUP / SCALE-UP,Paris,Saegus,Conseil data,recrutement@saegus.com,https://www.saegus.com/carrieres,Non,,,,
+STARTUP / SCALE-UP,Paris,Aplon,Conseil IA,via portail,https://aplon.ai,Non,,,,
+STARTUP / SCALE-UP,Paris,Datadog Paris,Observabilité,via portail,https://careers.datadoghq.com,Non,,,,
+STARTUP / SCALE-UP,Paris,Algolia,Search/IA,via portail,https://www.algolia.com/careers,Non,,,,
+STARTUP / SCALE-UP,Paris,Snowflake Paris,Data Cloud,via portail,https://careers.snowflake.com,Non,,,,
+GRANDE ENTREPRISE,Montpellier,Sanofi Montpellier,Pharma,recrutement.france@sanofi.com,https://www.sanofi.com/en/careers,Oui (JOB_142 JOB_143),,,,Gros site R&D
+GRANDE ENTREPRISE,Montpellier,Dell Technologies,IT,via portail,https://jobs.dell.com,Non,,,,Pôle EMEA à Montpellier
+GRANDE ENTREPRISE,Montpellier,IBM Montpellier,IT,recrutement.france@ibm.com,https://www.ibm.com/careers,Non,,,,Client Innovation Center
+GRANDE ENTREPRISE,Montpellier,Ubisoft Montpellier,Jeux vidéo,recrutement.montpellier@ubisoft.com,https://www.ubisoft.com/careers,Non,,,,IA dans le gaming
+GRANDE ENTREPRISE,Montpellier,ST Microelectronics,Semi-cond,recrutement@st.com,https://www.st.com/careers,Non,,,,
+GRANDE ENTREPRISE,Montpellier,Intel Montpellier,Semi-cond,via portail,https://www.intel.com/careers,Non,,,,
+GRANDE ENTREPRISE,Montpellier,Schneider Electric,Industrie,talentacquisition.fr@se.com,https://www.se.com/fr/careers,Non,,,,Pôle digital factory
+GRANDE ENTREPRISE,Montpellier,Veolia Eau,Environnement,recrutement.eaufrance@veolia.com,https://jobs.veolia.com,Non,,,,
+GRANDE ENTREPRISE,Montpellier,Groupama Méditerranée,Assurance,recrutement.gm@groupama-med.fr,https://www.groupama.fr/recrutement,Oui (JOB_141),,,,
+GRANDE ENTREPRISE,Montpellier,Caisse d'Épargne LR,Banque,recrutement@cels.caisse-epargne.fr,https://www.groupebpce.com/carrieres,Non,,,,
+GRANDE ENTREPRISE,Montpellier,BRL Group,Eau / Data,recrutement@brl.fr,https://www.brl.fr/carrieres,Non,,,,Data agriculture
+GRANDE ENTREPRISE,Montpellier,Horiba Medical,Diagnostic,recrutement@horiba.com,https://www.horiba.com/careers,Non,,,,
+GRANDE ENTREPRISE,Montpellier,TAM (Transports Agglo),Transport,recrutement@tam-voyages.com,https://www.tam-voyages.com,Oui (JOB_140),,,,Data Analyst
+GRANDE ENTREPRISE,Montpellier,Capgemini Montpellier,ESN,recrutement.fr@capgemini.com,https://www.capgemini.com/fr/carrieres,Non,,,,
+GRANDE ENTREPRISE,Montpellier,Sopra Steria Montpellier,ESN,recrutement@soprasteria.com,https://www.soprasteria.com/fr/carrieres,Non,,,,
+GRANDE ENTREPRISE,Montpellier,Atos Montpellier,ESN,recruitment.fr@atos.net,https://atos.net/fr/carrieres,Non,,,,
+GRANDE ENTREPRISE,Montpellier,Smile Montpellier,ESN,recrutement@smile.fr,https://www.smile.eu/fr/carrieres,Non,,,,
+GRANDE ENTREPRISE,Montpellier,Niji Montpellier,ESN,recrutement@niji.fr,https://www.niji.fr/carrieres,Non,,,,
+STARTUP / SCALE-UP,Montpellier,Teads,Pub vidéo / Data,careers@teads.com,https://careers.teads.com,Non,,,,Gros pôle Data
+STARTUP / SCALE-UP,Montpellier,Ubitransport,Transport SaaS,contact@ubitransport.com,https://www.ubi-transport.com,Non,,,,
+STARTUP / SCALE-UP,Montpellier,Synox,IoT / IA,contact@synox.io,https://www.synox.io,Non,,,,
+STARTUP / SCALE-UP,Montpellier,Predict Services,Météo IA,contact@predictservices.com,https://www.predictservices.com,Non,,,,Filiale Airbus
+STARTUP / SCALE-UP,Montpellier,Sensorial,Data,contact@sensorial.fr,https://www.sensorial.fr,Non,,,,
+STARTUP / SCALE-UP,Montpellier,Cleyrop,Data platform,contact@cleyrop.com,https://www.cleyrop.com,Non,,,,
+STARTUP / SCALE-UP,Montpellier,Cosmian,Crypto / IA,contact@cosmian.com,https://www.cosmian.com,Non,,,,
+STARTUP / SCALE-UP,Montpellier,OpenStudio,E-com data,contact@openstudio.fr,https://www.openstudio.fr,Non,,,,
+STARTUP / SCALE-UP,Montpellier,Idemia,Biométrie / IA,recrutement@idemia.com,https://www.idemia.com/careers,Non,,,,
+STARTUP / SCALE-UP,Montpellier,Quadient,SaaS,recrutement@quadient.com,https://www.quadient.com/careers,Non,,,,
+STARTUP / SCALE-UP,Montpellier,MGEN Technologies,Santé,recrutement@mgen.fr,https://www.mgen.fr/recrutement,Non,,,,
+STARTUP / SCALE-UP,Montpellier,Wakeo,SupplyChain IA,contact@wakeo.co,https://www.wakeo.co,Non,,,,
+STARTUP / SCALE-UP,Montpellier,Mailinblack,Cybersécu IA,contact@mailinblack.com,https://www.mailinblack.com,Non,,,,
+STARTUP / SCALE-UP,Montpellier,Sigfox / UnaBiz,IoT,via portail,https://unabiz.com/careers,Non,,,,
+STARTUP / SCALE-UP,Montpellier,Anybuddy,Sport tech,contact@anybuddyapp.com,https://www.anybuddyapp.com,Non,,,,
+STARTUP / SCALE-UP,Montpellier,Aiway,IA conseil,contact@aiway.fr,https://www.aiway.fr,Non,,,,

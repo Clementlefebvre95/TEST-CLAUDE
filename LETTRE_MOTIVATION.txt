@@ -1,0 +1,49 @@
+[Prénom NOM]                                              [Ville], le [JJ/MM/AAAA]
+[Adresse]
+[Code postal Ville]
+[Téléphone]
+[Email]
+[LinkedIn]
+
+                                                          À l'attention du service RH
+                                                          [Nom de l'entreprise]
+                                                          [Adresse]
+
+Objet : Candidature pour une alternance en Data Science / Intelligence Artificielle — Rentrée 2026
+
+Madame, Monsieur,
+
+Actuellement en dernière année de Master à l'EPF Engineering School (Bac+5),
+je recherche une alternance d'un à deux ans pour mettre en pratique mes
+compétences en analyse de données et intelligence artificielle au sein de
+votre entreprise.
+
+Mon cursus d'ingénieur m'a permis de développer une solide expertise
+technique : programmation en Python, R, Java et C++, gestion de bases de
+données avec MySQL, ainsi que la modélisation et la simulation via MatLab,
+Simulink et Comsol. J'ai pu appliquer ces compétences dans des projets
+académiques mêlant traitement de données, automatisation et résolution de
+problèmes complexes — des fondations directement transposables aux
+problématiques de Data Science et de Machine Learning.
+
+Au-delà de la technique, mes expériences professionnelles (stage en milieu
+associatif à la SPA, travail en atelier chez Renault) m'ont appris à
+m'adapter rapidement, à travailler en équipe et à faire preuve de rigueur
+dans des environnements exigeants. Curieux et autonome, je sais prendre du
+recul sur un problème et proposer des solutions concrètes.
+
+Rejoindre [NOM DE L'ENTREPRISE] représente pour moi une réelle opportunité :
+[À PERSONNALISER — 1 phrase précise sur l'entreprise : produit, techno,
+mission, valeurs]. Je serais ravi de contribuer à vos projets Data / IA et
+de monter en compétences aux côtés de vos équipes expertes. Mon niveau
+d'anglais (B2) et d'espagnol (B2) me permet par ailleurs d'évoluer dans un
+environnement international.
+
+Je serais honoré de pouvoir échanger avec vous sur vos besoins et vous
+exposer plus en détail ma motivation lors d'un entretien, en visio ou en
+présentiel.
+
+Je vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations
+distinguées.
+
+                                                          [Prénom NOM]

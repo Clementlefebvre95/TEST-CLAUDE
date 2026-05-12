@@ -1,0 +1,56 @@
+==========================================================================
+EMAIL DE CANDIDATURE — ALTERNANCE DATA / IA
+==========================================================================
+
+À      : [email RH / recrutement de l'entreprise]
+Objet  : Candidature alternance Data / IA — Étudiant Bac+5 EPF — Rentrée 2026
+Pièces : CV_[Nom].pdf  |  Lettre_motivation_[Nom]_[Entreprise].pdf
+
+--------------------------------------------------------------------------
+CORPS DU MAIL
+--------------------------------------------------------------------------
+
+Madame, Monsieur,
+
+Étudiant en dernière année à l'EPF Engineering School (Bac+5), je suis
+actuellement à la recherche d'une alternance en Data Science / Data Analyse
+/ Intelligence Artificielle pour la rentrée prochaine (rythme : [3 sem.
+entreprise / 1 sem. école — À ADAPTER]).
+
+Votre entreprise [NOM] m'intéresse particulièrement pour [1 phrase
+ULTRA-spécifique : produit, techno utilisée, levée de fonds récente,
+mission — À PERSONNALISER]. Je serais ravi de mettre mes compétences en
+Python, R, MySQL et modélisation au service de vos équipes Data.
+
+Vous trouverez ci-joint mon CV et ma lettre de motivation. Je suis
+disponible pour un entretien à votre convenance, en visio ou en présentiel
+sur Paris ou Montpellier.
+
+Je reste à votre disposition pour tout complément d'information et vous
+remercie par avance de l'attention que vous porterez à ma candidature.
+
+Bien cordialement,
+
+[Prénom NOM]
+Étudiant Bac+5 — EPF Engineering School
+[Téléphone] · [Email]
+LinkedIn : [URL]
+
+==========================================================================
+EMAIL DE RELANCE (à envoyer J+7)
+==========================================================================
+
+Objet : Re : Candidature alternance Data / IA — [Prénom NOM]
+
+Madame, Monsieur,
+
+Je me permets de revenir vers vous concernant ma candidature envoyée le
+[DATE] pour une alternance en Data / IA.
+
+Je reste vivement intéressé par [NOM DE L'ENTREPRISE] et serais ravi
+d'échanger sur vos besoins éventuels. Je me tiens à votre disposition pour
+un entretien.
+
+Bien cordialement,
+[Prénom NOM]
+[Téléphone]
