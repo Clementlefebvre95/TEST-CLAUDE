@@ -15,11 +15,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  # Étape 1 : activer Pages (crée l'environnement github-pages si besoin)
+  # et préparer le contenu du site. Pas d'environnement déclaré ici, sinon
+  # le job est refusé avant d'avoir pu activer Pages.
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -33,6 +33,14 @@ jobs:
         with:
           path: .
 
+  # Étape 2 : publier.
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
