@@ -3,191 +3,110 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Mes Recettes IA</title>
+  <title>Mon Livre de Recettes</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#e85d3a" />
+  <meta name="theme-color" content="#8c5a2b" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Recettes IA" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
+  <meta name="apple-mobile-web-app-title" content="Mes Recettes" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon.svg" />
 </head>
 <body>
+
   <header class="topbar">
-    <h1>🍽️ Mes Recettes IA</h1>
-    <nav>
-      <button class="tab active" data-tab="generate">Générer</button>
-      <button class="tab" data-tab="library">Bibliothèque</button>
-      <button class="tab" data-tab="shopping">Courses</button>
-      <button class="tab" data-tab="settings">Réglages</button>
-    </nav>
+    <button id="btn-home" class="icon-btn" title="Sommaire">📖</button>
+    <h1 id="page-title">Mon Livre de Recettes</h1>
+    <button id="btn-new" class="icon-btn primary" title="Nouvelle recette">＋</button>
   </header>
 
   <main>
-    <!-- GENERATE -->
-    <section id="generate" class="view active">
-      <div class="card">
-        <h2>Que veux-tu cuisiner ?</h2>
+
+    <!-- ========== SOMMAIRE ========== -->
+    <section id="view-home" class="view active">
+      <div class="search-wrap">
+        <input type="search" id="search" placeholder="🔎 Chercher une recette…" autocomplete="off" />
+      </div>
+
+      <div id="search-results" class="hidden"></div>
+
+      <div id="summary">
+        <h2 class="section-title">Sommaire</h2>
+        <div id="category-grid" class="category-grid"></div>
+
+        <div id="recent-block" class="recent-block"></div>
+      </div>
+    </section>
+
+    <!-- ========== LISTE D'UNE CATEGORIE ========== -->
+    <section id="view-category" class="view">
+      <div id="category-header"></div>
+      <div id="category-list" class="recipe-list"></div>
+    </section>
+
+    <!-- ========== DETAIL RECETTE ========== -->
+    <section id="view-recipe" class="view">
+      <article id="recipe-detail" class="recipe-detail"></article>
+    </section>
+
+    <!-- ========== EDITEUR ========== -->
+    <section id="view-edit" class="view">
+      <form id="recipe-form" class="card" autocomplete="off">
+        <input type="hidden" id="f-id" />
 
         <label class="field">
-          <span>Type de cuisine</span>
-          <div class="chip-row" id="cuisine-chips">
-            <button class="chip" data-cuisine="Italien">🇮🇹 Italien</button>
-            <button class="chip" data-cuisine="Japonais">🇯🇵 Japonais</button>
-            <button class="chip" data-cuisine="Français">🇫🇷 Français</button>
-            <button class="chip" data-cuisine="Indien">🇮🇳 Indien</button>
-            <button class="chip" data-cuisine="Mexicain">🇲🇽 Mexicain</button>
-            <button class="chip" data-cuisine="Chinois">🇨🇳 Chinois</button>
-            <button class="chip" data-cuisine="Thaï">🇹🇭 Thaï</button>
-            <button class="chip" data-cuisine="Libanais">🇱🇧 Libanais</button>
-          </div>
-          <input type="text" id="cuisine-other" placeholder="ou tape autre chose…" />
+          <span>Titre de la recette *</span>
+          <input type="text" id="f-title" required placeholder="ex : Blanquette de veau de mamie" />
         </label>
 
         <label class="field">
-          <span>Tes ingrédients (séparés par virgule)</span>
-          <input type="text" id="ingredients" placeholder="ex: pâtes, tomate, poivron, basilic" />
-          <div class="suggestions" id="ingredient-suggestions"></div>
-        </label>
-
-        <label class="field">
-          <span>🚫 Ingrédients à exclure (séparés par virgule)</span>
-          <input type="text" id="excluded" placeholder="ex: tomate, oignon, coriandre" />
-          <small>L'IA ne les utilisera pas, même comme ingrédient secondaire.</small>
+          <span>Catégorie *</span>
+          <select id="f-category" required></select>
         </label>
 
         <div class="field-row">
           <label class="field small">
-            <span>Personnes</span>
-            <input type="number" id="servings" value="2" min="1" max="12" />
+            <span>Temps</span>
+            <input type="text" id="f-time" placeholder="ex : 1 h 30" />
           </label>
           <label class="field small">
-            <span>Temps max</span>
-            <select id="time-limit">
-              <option value="">Pas de limite</option>
-              <option value="15">15 min</option>
-              <option value="30" selected>30 min</option>
-              <option value="45">45 min</option>
-              <option value="60">1h</option>
-            </select>
-          </label>
-          <label class="field small">
-            <span>Difficulté</span>
-            <select id="difficulty">
-              <option value="facile" selected>Facile</option>
-              <option value="moyenne">Moyenne</option>
-              <option value="experte">Experte</option>
-            </select>
+            <span>Portions</span>
+            <input type="text" id="f-servings" placeholder="ex : 4 pers." />
           </label>
         </div>
 
         <label class="field">
-          <span>Préférences (optionnel)</span>
-          <input type="text" id="preferences" placeholder="ex: végétarien, sans gluten, peu épicé…" />
+          <span>Ingrédients — un par ligne</span>
+          <textarea id="f-ingredients" rows="8" placeholder="800 g de veau&#10;3 carottes&#10;1 oignon&#10;20 cl de crème"></textarea>
         </label>
 
-        <button id="generate-btn" class="primary">✨ Créer ma recette</button>
-        <p class="hint" id="habit-hint"></p>
-      </div>
+        <label class="field">
+          <span>Préparation — une étape par ligne</span>
+          <textarea id="f-steps" rows="10" placeholder="Faire revenir la viande 5 min.&#10;Ajouter les légumes et couvrir d'eau.&#10;Laisser mijoter 1 h."></textarea>
+        </label>
 
-      <div id="recipe-output" class="card hidden"></div>
-    </section>
+        <label class="field">
+          <span>Notes / astuces</span>
+          <textarea id="f-notes" rows="3" placeholder="ex : encore meilleur réchauffé le lendemain"></textarea>
+        </label>
 
-    <!-- LIBRARY -->
-    <section id="library" class="view">
-      <div class="card">
-        <div class="section-head">
-          <h2>Ma bibliothèque</h2>
-          <button id="add-own-btn" class="secondary">+ Ajouter une recette perso</button>
+        <div class="form-actions">
+          <button type="submit" class="btn primary">💾 Enregistrer</button>
+          <button type="button" id="btn-cancel" class="btn ghost">Annuler</button>
         </div>
-        <input type="text" id="library-search" placeholder="🔎 Rechercher…" />
-        <div id="library-list"></div>
-      </div>
+      </form>
     </section>
 
-    <!-- SHOPPING -->
-    <section id="shopping" class="view">
-      <div class="card">
-        <h2>Liste de courses</h2>
-        <p class="hint">Sélectionne des recettes dans ta bibliothèque, puis génère une liste consolidée.</p>
-        <div id="shopping-recipe-picker"></div>
-        <button id="build-shopping-btn" class="primary">🛒 Générer la liste</button>
-        <div id="shopping-output" class="hidden"></div>
-      </div>
-    </section>
-
-    <!-- SETTINGS -->
-    <section id="settings" class="view">
-      <div class="card">
-        <h2>Réglages</h2>
-        <label class="field">
-          <span>Fournisseur d'IA</span>
-          <select id="provider">
-            <option value="gemini" selected>Google Gemini (gratuit)</option>
-            <option value="anthropic">Anthropic Claude (payant)</option>
-          </select>
-        </label>
-        <label class="field">
-          <span>Clé API</span>
-          <input type="password" id="api-key" placeholder="AIza… (Gemini) ou sk-ant-… (Claude)" />
-          <small>Stockée uniquement dans ton navigateur (localStorage). Gemini : aistudio.google.com/apikey · Claude : console.anthropic.com</small>
-        </label>
-        <label class="field">
-          <span>Modèle</span>
-          <select id="model"></select>
-        </label>
-        <button id="save-settings" class="primary">Enregistrer</button>
-        <hr />
-        <h3>Mes habitudes</h3>
-        <div id="habits-display"></div>
-        <button id="reset-habits" class="danger">Réinitialiser les habitudes</button>
-      </div>
-    </section>
   </main>
 
-  <!-- MODAL: own recipe -->
-  <div id="own-recipe-modal" class="modal hidden">
-    <div class="modal-content">
-      <h2>Ajouter ma recette</h2>
-      <label class="field">
-        <span>Titre</span>
-        <input type="text" id="own-title" />
-      </label>
-      <label class="field">
-        <span>Cuisine</span>
-        <input type="text" id="own-cuisine" placeholder="ex: Italien" />
-      </label>
-      <label class="field">
-        <span>Personnes</span>
-        <input type="number" id="own-servings" value="2" min="1" max="12" />
-      </label>
-      <label class="field">
-        <span>Ingrédients (un par ligne, format: 200g pâtes)</span>
-        <textarea id="own-ingredients" rows="6"></textarea>
-      </label>
-      <label class="field">
-        <span>Étapes (une par ligne)</span>
-        <textarea id="own-steps" rows="6"></textarea>
-      </label>
-      <div class="row">
-        <button id="save-own-btn" class="primary">Enregistrer</button>
-        <button id="cancel-own-btn" class="secondary">Annuler</button>
-      </div>
-    </div>
-  </div>
+  <footer class="footer">
+    <button id="btn-export" class="btn tiny ghost">⬇️ Sauvegarder mes recettes</button>
+    <button id="btn-import" class="btn tiny ghost">⬆️ Restaurer</button>
+    <input type="file" id="import-file" accept="application/json" hidden />
+  </footer>
 
-  <!-- MODAL: recipe view -->
-  <div id="recipe-modal" class="modal hidden">
-    <div class="modal-content" id="recipe-modal-content"></div>
-  </div>
+  <div id="toast" class="toast"></div>
 
   <script src="app.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch(() => {});
-      });
-    }
-  </script>
 </body>
 </html>

@@ -1,11 +1,11 @@
 {
-  "name": "Mes Recettes IA",
-  "short_name": "Recettes IA",
-  "description": "Génère des recettes personnalisées avec l'IA",
+  "name": "Mon Livre de Recettes",
+  "short_name": "Mes Recettes",
+  "description": "Mon carnet de recettes personnel, classé par catégories",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#faf7f2",
-  "theme_color": "#e85d3a",
+  "background_color": "#fbf7f0",
+  "theme_color": "#8c5a2b",
   "orientation": "portrait",
   "icons": [
     {
