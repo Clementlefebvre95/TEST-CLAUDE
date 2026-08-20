@@ -1,8 +1,12 @@
 name: Deploy recipe book to GitHub Pages
 
+# Déclenchement manuel uniquement : l'environnement github-pages n'accepte,
+# par défaut, que la branche principale du dépôt. Pour publier via ce
+# workflow, ajouter d'abord la branche dans
+# Settings > Environments > github-pages > Deployment branches,
+# puis lancer le workflow à la main (onglet Actions > Run workflow).
+# Sinon, plus simple : Settings > Pages > Source = "Deploy from a branch".
 on:
-  push:
-    branches: [claude/recipe-book-app-oiv1jj]
   workflow_dispatch:
 
 permissions:
