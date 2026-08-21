@@ -3,6 +3,14 @@
 // ============================================================
 
 const STORE_KEY = 'livre_de_recettes';
+const DELETED_KEY = 'livre_recettes_supprimees';
+const SYNC_KEYS = {
+  token: 'livre_gh_token',
+  gist: 'livre_gist_id',
+  last: 'livre_derniere_synchro',
+  error: 'livre_synchro_erreur',
+};
+const GIST_FILE = 'mes-recettes.json';
 
 const CATEGORIES = [
   { id: 'aperitif', name: 'Apéritif', emoji: '🥂' },
@@ -28,7 +36,22 @@ function saveRecipes(list) {
   localStorage.setItem(STORE_KEY, JSON.stringify(list));
 }
 
+// Les suppressions sont mémorisées ({ id: date }) pour qu'une recette effacée
+// sur un appareil ne réapparaisse pas depuis un autre lors de la synchro.
+function loadDeleted() {
+  try {
+    const d = JSON.parse(localStorage.getItem(DELETED_KEY));
+    return d && typeof d === 'object' ? d : {};
+  } catch {
+    return {};
+  }
+}
+function saveDeleted(d) {
+  localStorage.setItem(DELETED_KEY, JSON.stringify(d));
+}
+
 let recipes = loadRecipes();
+let deletedAt = loadDeleted();
 
 // ---------- Petits utilitaires ----------
 const $ = sel => document.querySelector(sel);
@@ -244,6 +267,7 @@ $('#recipe-form').addEventListener('submit', e => {
   saveRecipes(recipes);
   toast('Recette enregistrée ✅');
   goRecipe(id || data.id);
+  scheduleSync();
 });
 
 $('#btn-cancel').addEventListener('click', () => {
@@ -257,8 +281,11 @@ function deleteRecipe(id) {
   if (!r) return;
   if (!confirm(`Supprimer « ${r.title} » ? Cette action est définitive.`)) return;
   recipes = recipes.filter(x => x.id !== id);
+  deletedAt[id] = Date.now();
   saveRecipes(recipes);
+  saveDeleted(deletedAt);
   toast('Recette supprimée');
+  scheduleSync();
   if (currentCategory) goCategory(currentCategory);
   else goHome();
 }
@@ -319,6 +346,7 @@ $('#import-file').addEventListener('change', e => {
       saveRecipes(recipes);
       goHome();
       toast(`${added.length} recette(s) restaurée(s)`);
+      scheduleSync();
     } catch {
       toast('Fichier illisible ❌');
     }
@@ -334,9 +362,273 @@ $('#btn-new').addEventListener('click', () => {
   openEditor(null);
 });
 
+// ============================================================
+// Synchronisation avec un gist GitHub privé
+// ============================================================
+
+const GH_API = 'https://api.github.com';
+
+const sync = {
+  get token() { return localStorage.getItem(SYNC_KEYS.token) || ''; },
+  set token(v) { v ? localStorage.setItem(SYNC_KEYS.token, v) : localStorage.removeItem(SYNC_KEYS.token); },
+  get gistId() { return localStorage.getItem(SYNC_KEYS.gist) || ''; },
+  set gistId(v) { v ? localStorage.setItem(SYNC_KEYS.gist, v) : localStorage.removeItem(SYNC_KEYS.gist); },
+  get lastAt() { return Number(localStorage.getItem(SYNC_KEYS.last)) || 0; },
+  set lastAt(v) { localStorage.setItem(SYNC_KEYS.last, String(v)); },
+  get error() { return localStorage.getItem(SYNC_KEYS.error) || ''; },
+  set error(v) { v ? localStorage.setItem(SYNC_KEYS.error, v) : localStorage.removeItem(SYNC_KEYS.error); },
+  get enabled() { return Boolean(this.token); },
+};
+
+let syncing = false;
+let activationError = '';   // message affiché quand une clé vient d'être refusée
+
+function ghFetch(path, options = {}) {
+  return fetch(GH_API + path, {
+    ...options,
+    headers: {
+      Accept: 'application/vnd.github+json',
+      Authorization: 'Bearer ' + sync.token,
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+  });
+}
+
+function localDoc() {
+  return { app: 'livre-de-recettes', version: 1, updatedAt: Date.now(), recipes, deleted: deletedAt };
+}
+
+// Fusion : la version la plus récente de chaque recette gagne ; une suppression
+// l'emporte si elle est postérieure à la dernière modification.
+function mergeDocs(a, b) {
+  const deleted = { ...(a.deleted || {}) };
+  for (const [id, at] of Object.entries(b.deleted || {})) {
+    deleted[id] = Math.max(deleted[id] || 0, at);
+  }
+
+  const byId = new Map();
+  for (const r of [...(a.recipes || []), ...(b.recipes || [])]) {
+    if (!r || !r.id) continue;
+    const kept = byId.get(r.id);
+    if (!kept || (r.updatedAt || 0) > (kept.updatedAt || 0)) byId.set(r.id, r);
+  }
+
+  const merged = [...byId.values()].filter(r => !(deleted[r.id] > (r.updatedAt || 0)));
+  return { app: 'livre-de-recettes', version: 1, recipes: merged, deleted };
+}
+
+function sameContent(a, b) {
+  const norm = doc => JSON.stringify({
+    recipes: [...(doc.recipes || [])].sort((x, y) => x.id.localeCompare(y.id)),
+    deleted: doc.deleted || {},
+  });
+  return norm(a) === norm(b);
+}
+
+async function readGist() {
+  const res = await ghFetch('/gists/' + sync.gistId);
+  if (res.status === 404) return null;           // gist supprimé côté GitHub
+  if (!res.ok) throw new Error(httpMessage(res.status));
+  const data = await res.json();
+  const file = data.files && data.files[GIST_FILE];
+  if (!file) return { recipes: [], deleted: {} };
+  const raw = file.truncated ? await (await fetch(file.raw_url)).text() : file.content;
+  try {
+    const doc = JSON.parse(raw);
+    return { recipes: doc.recipes || [], deleted: doc.deleted || {} };
+  } catch {
+    throw new Error('le fichier de sauvegarde en ligne est illisible');
+  }
+}
+
+// Sur un nouvel appareil, le gist existe déjà côté GitHub : on le retrouve
+// au lieu d'en créer un second, sinon les deux téléphones s'ignoreraient.
+async function findGist() {
+  const res = await ghFetch('/gists?per_page=100');
+  if (!res.ok) throw new Error(httpMessage(res.status));
+  const list = await res.json();
+  const found = list.find(g => g.files && g.files[GIST_FILE]);
+  return found ? found.id : '';
+}
+
+async function writeGist(doc) {
+  const body = JSON.stringify({
+    description: 'Mon livre de recettes — sauvegarde automatique',
+    files: { [GIST_FILE]: { content: JSON.stringify(doc, null, 2) } },
+  });
+  const res = sync.gistId
+    ? await ghFetch('/gists/' + sync.gistId, { method: 'PATCH', body })
+    : await ghFetch('/gists', { method: 'POST', body: JSON.stringify({ ...JSON.parse(body), public: false }) });
+  if (!res.ok) throw new Error(httpMessage(res.status));
+  const data = await res.json();
+  if (data.id) sync.gistId = data.id;
+}
+
+function httpMessage(status) {
+  if (status === 401) return 'clé refusée par GitHub (expirée ou incorrecte)';
+  if (status === 403) return 'accès refusé — la clé n\'a peut-être pas la permission « gist »';
+  if (status === 404) return 'sauvegarde en ligne introuvable';
+  return 'GitHub a répondu ' + status;
+}
+
+async function syncNow({ silent = false } = {}) {
+  if (!sync.enabled || syncing) return;
+  syncing = true;
+  renderSyncView();
+  try {
+    if (!sync.gistId) sync.gistId = await findGist();
+
+    let remote = sync.gistId ? await readGist() : null;
+    if (remote === null && sync.gistId) sync.gistId = '';   // gist supprimé : on le recrée
+
+    const mine = localDoc();
+    const merged = remote ? mergeDocs(mine, remote) : { recipes, deleted: deletedAt };
+
+    if (!remote || !sameContent(merged, remote)) await writeGist(merged);
+
+    if (!sameContent(merged, mine)) {
+      recipes = merged.recipes;
+      deletedAt = merged.deleted;
+      saveRecipes(recipes);
+      saveDeleted(deletedAt);
+      refreshCurrentView();
+    }
+
+    sync.lastAt = Date.now();
+    sync.error = '';
+    if (!silent) toast('Recettes synchronisées ☁️');
+  } catch (err) {
+    sync.error = err.message || 'synchronisation impossible';
+    if (!silent) toast('Synchro impossible : ' + sync.error);
+  } finally {
+    syncing = false;
+    renderSyncBanner();
+    renderSyncView();
+  }
+}
+
+let syncTimer = null;
+function scheduleSync() {
+  if (!sync.enabled) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => syncNow({ silent: true }), 1200);
+}
+
+function refreshCurrentView() {
+  if ($('#view-recipe').classList.contains('active') && currentRecipeId) renderRecipe(currentRecipeId);
+  else if ($('#view-category').classList.contains('active') && currentCategory) renderCategory(currentCategory);
+  else renderSummary();
+}
+
+// ---------- Affichage de l'état ----------
+function formatDelay(ts) {
+  if (!ts) return 'jamais';
+  const min = Math.floor((Date.now() - ts) / 60000);
+  if (min < 1) return "à l'instant";
+  if (min < 60) return `il y a ${min} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `il y a ${h} h`;
+  return `il y a ${Math.floor(h / 24)} j`;
+}
+
+function renderSyncBanner() {
+  const banner = $('#sync-banner');
+  if (sync.enabled && sync.error) {
+    banner.innerHTML = `<span>⚠️ Synchronisation en panne : ${escapeHtml(sync.error)}</span>
+      <button type="button" id="banner-fix">Réparer</button>`;
+    banner.classList.remove('hidden');
+    $('#banner-fix').addEventListener('click', showSyncView);
+  } else {
+    banner.classList.add('hidden');
+  }
+}
+
+function renderSyncView() {
+  const status = $('#sync-status');
+  status.classList.toggle('error', Boolean(sync.error));
+  $('#sync-on').classList.toggle('hidden', !sync.enabled);
+  $('#sync-off').classList.toggle('hidden', sync.enabled);
+
+  if (!sync.enabled) {
+    status.classList.toggle('error', Boolean(activationError));
+    status.innerHTML = activationError
+      ? `<span class="state">❌ Clé refusée</span><br />
+         ${escapeHtml(activationError)}<br />
+         Vérifie que la case <strong>gist</strong> était bien cochée en créant la clé.`
+      : `<span class="state">Synchronisation désactivée</span><br />
+         Tes recettes vivent uniquement dans ce navigateur.`;
+    return;
+  }
+  if (syncing) {
+    status.innerHTML = `<span class="state">Synchronisation en cours…</span>`;
+    return;
+  }
+  if (sync.error) {
+    status.innerHTML = `<span class="state">⚠️ Synchronisation en panne</span><br />
+      ${escapeHtml(sync.error)}<br />
+      Dernière réussie : ${formatDelay(sync.lastAt)}.`;
+    return;
+  }
+  status.innerHTML = `<span class="state">✅ Synchronisation active</span><br />
+    ${recipes.length} recette${recipes.length > 1 ? 's' : ''} en ligne · dernière synchro ${formatDelay(sync.lastAt)}.`;
+
+  $('#sync-gist-link').innerHTML = sync.gistId
+    ? `Tes recettes sont consultables sur
+       <a href="https://gist.github.com/${escapeHtml(sync.gistId)}" target="_blank" rel="noopener">gist.github.com</a>.`
+    : '';
+}
+
+function showSyncView() {
+  renderSyncView();
+  showView('sync', 'Synchronisation');
+}
+
+// ---------- Boutons de la vue synchro ----------
+$('#btn-sync-view').addEventListener('click', () => {
+  activationError = '';
+  showSyncView();
+});
+
+$('#btn-sync-on').addEventListener('click', async () => {
+  const token = $('#f-token').value.trim();
+  if (!token) return toast('Colle ta clé GitHub d\'abord');
+  sync.token = token;
+  sync.error = '';
+  activationError = '';
+  $('#f-token').value = '';
+  await syncNow();
+  if (sync.error) {
+    activationError = sync.error;
+    sync.token = '';     // clé invalide : inutile de la conserver
+    sync.error = '';
+    $('#f-token').value = token;
+    renderSyncView();
+  }
+});
+
+$('#btn-sync-now').addEventListener('click', () => syncNow());
+
+$('#btn-sync-off').addEventListener('click', () => {
+  if (!confirm('Désactiver la synchronisation ? Tes recettes restent sur cet appareil et en ligne.')) return;
+  sync.token = '';
+  sync.error = '';
+  renderSyncView();
+  renderSyncBanner();
+  toast('Synchronisation désactivée');
+});
+
+// Resynchroniser en revenant sur l'app (utile sur téléphone).
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) scheduleSync();
+});
+
 // ---------- Démarrage ----------
 fillCategorySelect();
 goHome();
+renderSyncView();
+renderSyncBanner();
+if (sync.enabled) syncNow({ silent: true });
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});

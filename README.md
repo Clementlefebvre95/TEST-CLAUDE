@@ -64,6 +64,36 @@ En bas de l'écran :
 
 Pense à exporter de temps en temps : vider les données du navigateur efface le livre.
 
+## Synchronisation entre appareils (optionnel)
+
+Par défaut les recettes vivent dans le navigateur de l'appareil. Le bouton
+**☁️ Synchro** en bas permet de les conserver dans un **gist privé** de ton compte
+GitHub : elles se retrouvent alors sur tous tes appareils et survivent à un
+changement de téléphone.
+
+Mise en route (une fois) :
+
+1. Crée une clé sur <https://github.com/settings/tokens/new> — expiration
+   « No expiration », et coche **uniquement** la case `gist`.
+2. Dans l'app : **☁️ Synchro** → colle la clé → **Activer la synchronisation**.
+
+Sur un nouvel appareil, tu colles la même clé : l'app retrouve la sauvegarde
+existante et rapatrie tes recettes.
+
+Fonctionnement :
+
+- la synchro part toute seule à chaque ajout, modification ou suppression,
+  au démarrage, et quand tu reviens sur l'app ;
+- en cas de conflit entre deux appareils, la version la plus récente de chaque
+  recette gagne ; une suppression est mémorisée pour qu'une recette effacée ne
+  réapparaisse pas depuis l'autre appareil ;
+- si la clé expire ou est révoquée, un bandeau rouge le signale sur le sommaire
+  au lieu d'échouer en silence ;
+- la clé reste dans le navigateur, elle n'est envoyée qu'à `api.github.com`.
+
+L'export `.json` reste disponible : c'est le filet de sécurité si tu désactives
+la synchro.
+
 ## Sur téléphone
 
 L'app est installable (PWA) : ouvre la page, puis « Ajouter à l'écran d'accueil ».

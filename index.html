@@ -28,6 +28,8 @@
         <input type="search" id="search" placeholder="🔎 Chercher une recette…" autocomplete="off" />
       </div>
 
+      <div id="sync-banner" class="sync-banner hidden"></div>
+
       <div id="search-results" class="hidden"></div>
 
       <div id="summary">
@@ -47,6 +49,53 @@
     <!-- ========== DETAIL RECETTE ========== -->
     <section id="view-recipe" class="view">
       <article id="recipe-detail" class="recipe-detail"></article>
+    </section>
+
+    <!-- ========== SYNCHRONISATION ========== -->
+    <section id="view-sync" class="view">
+      <div class="card">
+        <div id="sync-status" class="sync-status"></div>
+
+        <div id="sync-on" class="hidden">
+          <div class="form-actions">
+            <button type="button" id="btn-sync-now" class="btn primary">🔄 Synchroniser maintenant</button>
+            <button type="button" id="btn-sync-off" class="btn ghost">Désactiver</button>
+          </div>
+          <p class="hint" id="sync-gist-link"></p>
+        </div>
+
+        <div id="sync-off">
+          <p class="hint">
+            Tes recettes sont enregistrées sur cet appareil uniquement. Active la synchronisation
+            pour les conserver dans un espace privé de ton compte GitHub : elles se retrouveront
+            sur tous tes appareils, et survivront à un changement de téléphone.
+          </p>
+
+          <label class="field">
+            <span>Clé GitHub</span>
+            <input type="password" id="f-token" placeholder="ghp_…" autocomplete="off" />
+          </label>
+
+          <div class="form-actions">
+            <button type="button" id="btn-sync-on" class="btn primary">☁️ Activer la synchronisation</button>
+          </div>
+
+          <details class="help">
+            <summary>Comment obtenir ma clé GitHub ? (2 minutes)</summary>
+            <ol>
+              <li>Va sur <a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener">github.com/settings/tokens/new</a> (connecte-toi si besoin).</li>
+              <li>Dans <strong>Note</strong>, écris : <code>Livre de recettes</code>.</li>
+              <li>Dans <strong>Expiration</strong>, choisis <strong>No expiration</strong> — sinon la synchro s'arrêtera toute seule dans quelques mois.</li>
+              <li>Dans la liste des cases à cocher, coche uniquement <strong>gist</strong>.</li>
+              <li>Descends tout en bas, clique <strong>Generate token</strong>.</li>
+              <li>Copie la clé affichée (elle commence par <code>ghp_</code>) et colle-la ci-dessus. GitHub ne la réaffichera plus, garde-la aussi dans tes notes.</li>
+            </ol>
+            <p class="hint">
+              Cette clé ne donne accès qu'à tes gists, rien d'autre. Elle reste dans ce navigateur.
+            </p>
+          </details>
+        </div>
+      </div>
     </section>
 
     <!-- ========== EDITEUR ========== -->
@@ -102,6 +151,7 @@
   <footer class="footer">
     <button id="btn-export" class="btn tiny ghost">⬇️ Sauvegarder mes recettes</button>
     <button id="btn-import" class="btn tiny ghost">⬆️ Restaurer</button>
+    <button id="btn-sync-view" class="btn tiny ghost">☁️ Synchro</button>
     <input type="file" id="import-file" accept="application/json" hidden />
   </footer>
 
