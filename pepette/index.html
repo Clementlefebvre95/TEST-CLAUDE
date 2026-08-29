@@ -1,116 +1,784 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Pepette — messages</title>
-  <style>
-    :root { --bg:#fdf6f4; --card:#fff; --ink:#3b2f2c; --soft:#8b7a74; --accent:#e0607a; --line:#f0e2de; }
-    * { box-sizing: border-box; }
-    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
-           background:var(--bg); color:var(--ink); line-height:1.55; }
-    header { padding:24px 20px 8px; text-align:center; }
-    h1 { margin:0 0 4px; font-size:1.5rem; }
-    .sub { color:var(--soft); font-size:.9rem; margin:0; }
-    main { max-width:640px; margin:0 auto; padding:16px 16px 48px; }
-    .today { background:var(--card); border-radius:18px; padding:22px; text-align:center;
-             box-shadow:0 6px 20px rgba(190,140,140,.14); margin-bottom:20px; }
-    .today .date { color:var(--soft); font-size:.82rem; text-transform:uppercase; letter-spacing:.06em; }
-    .today .texte { font-size:1.15rem; margin:12px 0 0; }
-    .today .trad { color:var(--soft); font-size:.9rem; font-style:italic; margin-top:8px; }
-    .controls { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:20px; }
-    button, select, input[type=date] {
-      font:inherit; padding:8px 14px; border-radius:999px; border:1px solid var(--line);
-      background:var(--card); color:var(--ink); cursor:pointer; }
-    button.on { background:var(--accent); border-color:var(--accent); color:#fff; }
-    .mois { margin:26px 0 10px; font-size:1rem; color:var(--accent); text-transform:uppercase;
-            letter-spacing:.08em; }
-    .ligne { display:flex; gap:12px; padding:10px 12px; background:var(--card);
-             border-radius:12px; margin-bottom:6px; align-items:baseline; }
-    .ligne .j { flex:0 0 46px; color:var(--soft); font-size:.8rem; font-variant-numeric:tabular-nums; }
-    .ligne .t { flex:1; font-size:.95rem; }
-    .ligne .t small { display:block; color:var(--soft); font-style:italic; }
-    .ligne.special { border-left:3px solid var(--accent); }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#fff0f3">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Pepette">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<title>Pepette 💕</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --pink:#ff2d55;--pink-l:#ff6b81;--pink-bg:#fff0f3;--pink-mid:#ffe0e8;
+  --text:#2d1b20;--text2:#8c6470;--text3:#c4a0ac;
+  --white:#ffffff;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;background:var(--pink-bg);font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden;}
+
+/* ── LOGIN ── */
+#login-screen{
+  position:fixed;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--pink-bg);
+  padding:2rem 1.5rem;
+  transition:opacity .5s ease, transform .5s ease;
+}
+#login-screen.hidden{opacity:0;pointer-events:none;transform:scale(1.04);}
+
+/* LOGO SVG COEUR */
+.logo-wrap{
+  margin-bottom:20px;
+  animation:heartbeat 1.6s ease-in-out infinite;
+}
+@keyframes heartbeat{
+  0%,100%{transform:scale(1);}
+  14%{transform:scale(1.12);}
+  28%{transform:scale(1);}
+  42%{transform:scale(1.08);}
+  56%{transform:scale(1);}
+}
+.logo-wrap svg{
+  width:100px;height:100px;
+  filter:drop-shadow(0 4px 16px rgba(255,45,85,0.35));
+}
+
+.login-title{
+  font-family:'Playfair Display',serif;
+  font-size:46px;
+  color:var(--text);
+  letter-spacing:2px;
+  margin-bottom:6px;
+}
+.login-sub{
+  font-size:14px;color:var(--text2);margin-bottom:36px;letter-spacing:.04em;
+}
+
+/* PASSWORD INPUT */
+.password-wrap{
+  width:100%;max-width:300px;
+  display:flex;flex-direction:column;align-items:center;gap:16px;
+}
+.password-field-wrap{
+  width:100%;position:relative;
+}
+.password-input{
+  width:100%;
+  padding:16px 50px 16px 20px;
+  border-radius:50px;
+  border:2px solid var(--pink-mid);
+  background:var(--white);
+  font-size:24px;
+  font-family:'DM Sans',sans-serif;
+  color:var(--text);
+  outline:none;
+  text-align:center;
+  letter-spacing:6px;
+  transition:border-color .2s, box-shadow .2s;
+  box-shadow:0 2px 16px rgba(255,45,85,0.08);
+}
+.password-input:focus{
+  border-color:var(--pink);
+  box-shadow:0 2px 20px rgba(255,45,85,0.18);
+}
+.password-input::placeholder{
+  font-size:14px;letter-spacing:.04em;color:var(--text3);
+}
+.toggle-eye{
+  position:absolute;right:18px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;
+  font-size:20px;color:var(--text3);
+  padding:4px;
+}
+.btn-valider{
+  width:100%;
+  padding:15px;
+  border-radius:50px;
+  border:none;
+  background:var(--pink);
+  color:var(--white);
+  font-size:16px;
+  font-weight:600;
+  font-family:'DM Sans',sans-serif;
+  cursor:pointer;
+  letter-spacing:.04em;
+  box-shadow:0 4px 20px rgba(255,45,85,0.35);
+  transition:all .15s;
+}
+.btn-valider:active{transform:scale(0.97);opacity:.9;}
+
+.login-error{
+  font-size:13px;color:var(--pink);margin-top:4px;
+  min-height:18px;text-align:center;
+  font-style:italic;
+}
+
+/* ── MAIN ── */
+#main-screen{
+  position:fixed;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--pink-bg);
+  padding:2rem 1.5rem;
+  opacity:0;pointer-events:none;
+  transition:opacity .6s ease .1s;
+  overflow:hidden;
+}
+#main-screen.visible{opacity:1;pointer-events:all;}
+
+.petals{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.petal{
+  position:absolute;font-size:18px;
+  animation:fall linear infinite;
+  opacity:.5;
+}
+@keyframes fall{
+  0%{transform:translateY(-30px) rotate(0deg);opacity:.6;}
+  100%{transform:translateY(110vh) rotate(360deg);opacity:0;}
+}
+
+.main-logo{
+  margin-bottom:16px;
+  animation:heartbeat 2s ease-in-out infinite;
+}
+.main-logo svg{
+  width:64px;height:64px;
+  filter:drop-shadow(0 4px 12px rgba(255,45,85,0.3));
+}
+
+.date-badge{
+  background:var(--white);
+  border:1px solid var(--pink-mid);
+  border-radius:20px;
+  padding:5px 14px;
+  font-size:12px;color:var(--text2);
+  margin-bottom:28px;
+  letter-spacing:.04em;
+}
+
+.message-card{
+  background:var(--white);
+  border-radius:24px;
+  padding:32px 28px;
+  text-align:center;
+  box-shadow:0 4px 32px rgba(255,45,85,0.12);
+  max-width:320px;
+  width:100%;
+  position:relative;
+  overflow:hidden;
+}
+.message-card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--pink),var(--pink-l));
+}
+.message-label{
+  font-size:10px;font-weight:500;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.1em;
+  margin-bottom:14px;
+}
+.message-text{
+  font-family:'Playfair Display',serif;
+  font-size:26px;
+  color:var(--text);
+  line-height:1.4;
+  font-style:italic;
+}
+.message-emoji{
+  font-size:32px;margin-top:16px;
+  animation:bounce .8s ease infinite alternate;
+}
+@keyframes bounce{from{transform:translateY(0);}to{transform:translateY(-6px);}}
+
+.main-footer{
+  margin-top:28px;font-size:13px;color:var(--text3);text-align:center;
+}
+.btn-lock{
+  margin-top:20px;
+  padding:8px 20px;border-radius:20px;
+  border:1px solid var(--pink-mid);
+  background:transparent;
+  font-size:12px;color:var(--text2);
+  cursor:pointer;font-family:'DM Sans',sans-serif;
+  transition:all .15s;
+}
+.btn-lock:hover{background:var(--pink-mid);}
+
+.trip-badge{
+  display:none;
+  background:linear-gradient(135deg,var(--pink) 0%,var(--pink-l) 100%);
+  color:var(--white);
+  border-radius:20px;
+  padding:5px 16px;
+  font-size:12px;font-weight:500;letter-spacing:.03em;
+  margin-top:-20px;margin-bottom:26px;
+  box-shadow:0 3px 12px rgba(255,45,85,0.28);
+}
+.trip-badge.on{display:block;}
+</style>
 </head>
 <body>
-  <header>
-    <h1>💌 Pepette</h1>
-    <p class="sub">Messages personnalisés · 1<sup>er</sup> septembre → 31 décembre</p>
-  </header>
 
-  <main>
-    <div class="today" id="today"></div>
+<!-- LOGIN -->
+<div id="login-screen">
+  <!-- LOGO COEUR SVG -->
+  <div class="logo-wrap">
+    <svg viewBox="0 0 100 90" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="hg" cx="50%" cy="40%" r="60%">
+          <stop offset="0%" stop-color="#ff6b81"/>
+          <stop offset="100%" stop-color="#ff2d55"/>
+        </radialGradient>
+      </defs>
+      <path d="M50 85 C50 85 5 55 5 28 C5 14 16 5 28 5 C37 5 45 10 50 18 C55 10 63 5 72 5 C84 5 95 14 95 28 C95 55 50 85 50 85Z"
+        fill="url(#hg)" stroke="#e0002a" stroke-width="1"/>
+      <path d="M25 28 C25 20 32 15 38 18" stroke="rgba(255,255,255,0.4)" stroke-width="3" stroke-linecap="round" fill="none"/>
+    </svg>
+  </div>
 
-    <div class="controls">
-      <input type="date" id="picker" />
-      <button id="btn-fr" class="on">Français</button>
-      <button id="btn-es">Español</button>
+  <div class="login-title">Pepette</div>
+  <div class="login-sub">Entre ton mot de passe</div>
+
+  <div class="password-wrap">
+    <div class="password-field-wrap">
+      <input type="password" id="password-input" class="password-input"
+        placeholder="Mot de passe..."
+        maxlength="20"
+        autocomplete="off"
+        autocorrect="off"
+        spellcheck="false"
+        onkeydown="if(event.key==='Enter') checkPassword()">
+      <button class="toggle-eye" onclick="toggleEye()" id="eye-btn">👁️</button>
     </div>
+    <button class="btn-valider" onclick="checkPassword()">Entrer ❤️</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
 
-    <div id="calendrier"></div>
-  </main>
+<!-- MAIN -->
+<div id="main-screen">
+  <div class="petals" id="petals"></div>
 
-  <script src="messages.js"></script>
-  <script>
-    const ANNEE = new Date().getFullYear();
-    const NOMS_MOIS = { 9: "Septembre", 10: "Octobre", 11: "Novembre", 12: "Décembre" };
-    let enEspagnol = false;
+  <div class="main-logo">
+    <svg viewBox="0 0 100 90" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="hg2" cx="50%" cy="40%" r="60%">
+          <stop offset="0%" stop-color="#ff6b81"/>
+          <stop offset="100%" stop-color="#ff2d55"/>
+        </radialGradient>
+      </defs>
+      <path d="M50 85 C50 85 5 55 5 28 C5 14 16 5 28 5 C37 5 45 10 50 18 C55 10 63 5 72 5 C84 5 95 14 95 28 C95 55 50 85 50 85Z"
+        fill="url(#hg2)" stroke="#e0002a" stroke-width="1"/>
+      <path d="M25 28 C25 20 32 15 38 18" stroke="rgba(255,255,255,0.4)" stroke-width="3" stroke-linecap="round" fill="none"/>
+    </svg>
+  </div>
 
-    function fmtLong(d) {
-      return d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
-    }
+  <div class="date-badge" id="date-badge"></div>
+  <div class="trip-badge" id="trip-badge"></div>
+  <div class="message-card">
+    <div class="message-label">Message du jour</div>
+    <div class="message-text" id="msg-text"></div>
+    <div class="message-emoji" id="msg-emoji"></div>
+  </div>
+  <div class="main-footer">Rien que pour toi 💕</div>
+  <button class="btn-lock" onclick="lock()">🔒 Verrouiller</button>
+</div>
 
-    function rendreJour(d) {
-      const m = messageDuJour(d, { espagnol: enEspagnol });
-      document.getElementById("today").innerHTML =
-        '<div class="date">' + fmtLong(d) + '</div>' +
-        '<p class="texte">' + m.texte + '</p>' +
-        (m.traduction ? '<div class="trad">' + m.traduction + '</div>' : '');
-    }
+<script>
+const PASSWORD = 'Loustic';
 
-    function rendreCalendrier() {
-      const html = [];
-      for (let mois = 9; mois <= 12; mois++) {
-        html.push('<div class="mois">' + NOMS_MOIS[mois] + '</div>');
-        const nbJours = new Date(ANNEE, mois, 0).getDate();
-        for (let jour = 1; jour <= nbJours; jour++) {
-          const d = new Date(ANNEE, mois - 1, jour);
-          const m = messageDuJour(d, { espagnol: enEspagnol });
-          html.push(
-            '<div class="ligne' + (m.type === "special" ? " special" : "") + '">' +
-              '<span class="j">' + String(jour).padStart(2, "0") + "/" + String(mois).padStart(2, "0") + '</span>' +
-              '<span class="t">' + m.texte +
-                (m.traduction ? "<small>" + m.traduction + "</small>" : "") +
-              '</span>' +
-            '</div>'
-          );
-        }
-      }
-      document.getElementById("calendrier").innerHTML = html.join("");
-    }
+// ── Sejour en Espagne : 3 septembre → retour fin decembre ──
+// Pour decaler le retour, change juste RETOUR ci-dessous (mois, jour).
+const DEPART = {mois:9,  jour:3};
+const RETOUR = {mois:12, jour:20};
 
-    function rafraichir() {
-      const v = document.getElementById("picker").value;
-      rendreJour(v ? new Date(v + "T12:00:00") : new Date());
-      rendreCalendrier();
-    }
+function joursEntre(a, b){
+  const j = 86400000;
+  return Math.round((Date.UTC(b.getFullYear(),b.getMonth(),b.getDate())
+                   - Date.UTC(a.getFullYear(),a.getMonth(),a.getDate())) / j);
+}
 
-    document.getElementById("picker").addEventListener("change", rafraichir);
-    document.getElementById("btn-fr").addEventListener("click", () => {
-      enEspagnol = false;
-      document.getElementById("btn-fr").classList.add("on");
-      document.getElementById("btn-es").classList.remove("on");
-      rafraichir();
-    });
-    document.getElementById("btn-es").addEventListener("click", () => {
-      enEspagnol = true;
-      document.getElementById("btn-es").classList.add("on");
-      document.getElementById("btn-fr").classList.remove("on");
-      rafraichir();
-    });
+// Renvoie le texte du bandeau, ou '' hors periode.
+function getTripBadge(now){
+  const an = now.getFullYear();
+  const depart = new Date(an, DEPART.mois-1, DEPART.jour);
+  const retour = new Date(an, RETOUR.mois-1, RETOUR.jour);
+  const avantDepart = joursEntre(now, depart);
+  const avantRetour = joursEntre(now, retour);
 
-    rafraichir();
-  </script>
+  if(avantDepart > 0 && avantDepart <= 14){
+    return avantDepart === 1 ? '🧳 Départ demain'
+                             : '🧳 Départ dans ' + avantDepart + ' jours';
+  }
+  if(avantRetour < 0 || avantDepart > 0) return '';
+  if(avantRetour === 0) return '❤️ Tu rentres aujourd\'hui !';
+  if(avantRetour === 1) return '✈️ Plus qu\'un jour';
+  const jourEspagne = joursEntre(depart, now) + 1;
+  return '🇪🇸 Jour ' + jourEspagne + ' · plus que ' + avantRetour + ' jours';
+}
+
+function toggleEye(){
+  const inp = document.getElementById('password-input');
+  const btn = document.getElementById('eye-btn');
+  if(inp.type === 'password'){ inp.type='text'; btn.textContent='🙈'; }
+  else { inp.type='password'; btn.textContent='👁️'; }
+}
+
+function checkPassword(){
+  const val = document.getElementById('password-input').value.trim();
+  const errEl = document.getElementById('login-error');
+  if(val.toLowerCase() === PASSWORD.toLowerCase()){
+    errEl.textContent = '';
+    showMain();
+  } else {
+    errEl.textContent = 'Essaie encore... 🥺';
+    document.getElementById('password-input').value = '';
+    setTimeout(()=>errEl.textContent='', 2000);
+  }
+}
+
+function showMain(){
+  document.getElementById('login-screen').classList.add('hidden');
+  const ms = document.getElementById('main-screen');
+  ms.classList.add('visible');
+  document.getElementById('date-badge').textContent = formatDate();
+  const badge = document.getElementById('trip-badge');
+  const txtBadge = getTripBadge(new Date());
+  badge.textContent = txtBadge;
+  badge.classList.toggle('on', !!txtBadge);
+  const msg = getTodayMessage();
+  document.getElementById('msg-text').textContent = msg.txt;
+  document.getElementById('msg-emoji').textContent = msg.e;
+  createPetals();
+}
+
+function lock(){
+  document.getElementById('password-input').value = '';
+  document.getElementById('password-input').type = 'password';
+  document.getElementById('eye-btn').textContent = '👁️';
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('main-screen').classList.remove('visible');
+  document.getElementById('login-error').textContent = '';
+}
+
+function formatDate(){
+  const now = new Date();
+  return now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+}
+
+function getTodayMessage(){
+  const now = new Date();
+  const mm = String(now.getMonth()+1).padStart(2,'0');
+  const dd = String(now.getDate()).padStart(2,'0');
+  const key = mm+'-'+dd;
+  const found = MESSAGES.find(m=>m.d===key);
+  if(found) return found;
+  const start = new Date(now.getFullYear(),0,0);
+  const dayOfYear = Math.floor((now - start) / 86400000);
+  return MESSAGES[dayOfYear % MESSAGES.length];
+}
+
+function createPetals(){
+  const container = document.getElementById('petals');
+  container.innerHTML='';
+  const emojis=['🌸','💕','✨','🌷','💗','🌹','💖'];
+  for(let i=0;i<16;i++){
+    const p=document.createElement('div');
+    p.className='petal';
+    p.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    p.style.left=Math.random()*100+'%';
+    p.style.fontSize=(12+Math.random()*12)+'px';
+    p.style.animationDuration=(6+Math.random()*8)+'s';
+    p.style.animationDelay=(-Math.random()*8)+'s';
+    container.appendChild(p);
+  }
+}
+
+const MESSAGES = [
+  // JANVIER
+  {d:'01-01', txt:'Bonne année Pepette !', e:'🎊'},
+  {d:'01-02', txt:'Tu es capable de tout', e:'💪'},
+  {d:'01-03', txt:'Pepette, tu brilles !', e:'✨'},
+  {d:'01-04', txt:'Tu es plus forte que tu crois', e:'🦁'},
+  {d:'01-05', txt:'Pepette, fonce !', e:'🚀'},
+  {d:'01-06', txt:'Tu es mon rayon de soleil', e:'☀️'},
+  {d:'01-07', txt:'Je t\'aime infiniment', e:'♾️'},
+  {d:'01-08', txt:'Pepette, tu es unique', e:'💎'},
+  {d:'01-09', txt:'Chaque jour tu t\'améliores', e:'📈'},
+  {d:'01-10', txt:'Tu es ma plus belle chance', e:'🍀'},
+  {d:'01-11', txt:'Pepette, crois en toi', e:'⭐'},
+  {d:'01-12', txt:'Boxter pense à toi aussi', e:'🐕'},
+  {d:'01-13', txt:'Tu illumines tout autour de toi', e:'💡'},
+  {d:'01-14', txt:'Pepette, tu es ma fierté', e:'🏆'},
+  {d:'01-15', txt:'Rien ne t\'arrête quand tu veux', e:'🔥'},
+  {d:'01-16', txt:'Tu es belle dedans et dehors', e:'🌸'},
+  {d:'01-17', txt:'Pepette, continue comme ça !', e:'👏'},
+  {d:'01-18', txt:'Tu es irremplaçable', e:'💝'},
+  {d:'01-19', txt:'Ta force m\'épate chaque jour', e:'💪'},
+  {d:'01-20', txt:'Pepette, tu es mon bonheur', e:'😍'},
+  {d:'01-21', txt:'Souviens-toi de Barcelone', e:'🌊'},
+  {d:'01-22', txt:'Tu es ma vie entière', e:'❤️'},
+  {d:'01-23', txt:'Pepette, garde la tête haute', e:'👑'},
+  {d:'01-24', txt:'Tu es courageuse et forte', e:'🦸‍♀️'},
+  {d:'01-25', txt:'Je suis fier de toi', e:'🌟'},
+  {d:'01-26', txt:'Pepette, tu gères tout !', e:'💼'},
+  {d:'01-27', txt:'Tu es mon étoile du matin', e:'🌠'},
+  {d:'01-28', txt:'Chaque obstacle te rend plus forte', e:'⚡'},
+  {d:'01-29', txt:'Pepette, tu es magnifique', e:'🥰'},
+  {d:'01-30', txt:'Tu es ma priorité absolue', e:'💫'},
+  {d:'01-31', txt:'Avec toi tout est possible', e:'🌈'},
+  // FEVRIER
+  {d:'02-01', txt:'Pepette, un mois de plus ensemble', e:'🎉'},
+  {d:'02-02', txt:'Tu es ma douceur quotidienne', e:'🍯'},
+  {d:'02-03', txt:'Boxter est chanceux de t\'avoir', e:'🐕'},
+  {d:'02-04', txt:'Tu es mon équilibre parfait', e:'⚖️'},
+  {d:'02-05', txt:'Pepette, tu vas tout déchirer', e:'💥'},
+  {d:'02-06', txt:'Tu es plus forte que tes doutes', e:'🧠'},
+  {d:'02-07', txt:'Je t\'aime comme tu es', e:'🤍'},
+  {d:'02-08', txt:'Pepette, quelle chance j\'ai !', e:'🍀'},
+  {d:'02-09', txt:'Tu es ma belle aventure', e:'🗺️'},
+  {d:'02-10', txt:'Souviens-toi de Londres avec toi', e:'🎡'},
+  {d:'02-11', txt:'Pepette, tu es exceptionnelle', e:'🌟'},
+  {d:'02-12', txt:'Tu mérites tout le bonheur du monde', e:'🌍'},
+  {d:'02-13', txt:'Demain c\'est la Saint-Valentin !', e:'💝'},
+  {d:'02-14', txt:'Joyeuse Saint-Valentin Pepette !', e:'💘'},
+  {d:'02-15', txt:'Tu es mon coup de foudre', e:'⚡'},
+  {d:'02-16', txt:'Pepette, lâche-toi !', e:'🦋'},
+  {d:'02-17', txt:'Tu es ma sérénité', e:'🕊️'},
+  {d:'02-18', txt:'Chaque effort compte Pepette', e:'🏃‍♀️'},
+  {d:'02-19', txt:'Tu es ma plus belle histoire', e:'📖'},
+  {d:'02-20', txt:'Pepette, tu rayonnes', e:'☀️'},
+  {d:'02-21', txt:'La SPA avec Carole, quel souvenir', e:'🐾'},
+  {d:'02-22', txt:'Tu es mon étoile filante', e:'💫'},
+  {d:'02-23', txt:'Pepette, ne doute jamais de toi', e:'🦁'},
+  {d:'02-24', txt:'Tu es ma plus belle aventure', e:'✈️'},
+  {d:'02-25', txt:'Boxter t\'aime lui aussi', e:'🐶'},
+  {d:'02-26', txt:'Pepette, tu es incroyable', e:'🤩'},
+  {d:'02-27', txt:'Tu es mon chez-moi', e:'🏡'},
+  {d:'02-28', txt:'Pepette, toujours et encore', e:'♾️'},
+  {d:'02-29', txt:'Jour rare pour une femme rare', e:'🌟'},
+  // MARS
+  {d:'03-01', txt:'Pepette, le printemps arrive !', e:'🌸'},
+  {d:'03-02', txt:'Tu es ma douceur préférée', e:'🍯'},
+  {d:'03-03', txt:'Sois fière de toi Pepette', e:'🏆'},
+  {d:'03-04', txt:'Tu es courageuse chaque matin', e:'☀️'},
+  {d:'03-05', txt:'Pepette, tu es ma force', e:'💪'},
+  {d:'03-06', txt:'Souviens-toi de Cadaqués', e:'🌊'},
+  {d:'03-07', txt:'Tu es ma complicité adorée', e:'😉'},
+  {d:'03-08', txt:'Pepette, femme incroyable !', e:'👑'},
+  {d:'03-09', txt:'Ton sourire change tout', e:'😍'},
+  {d:'03-10', txt:'Tu es mon ancre dans la tempête', e:'⚓'},
+  {d:'03-11', txt:'Pepette, fonce sans hésiter', e:'🚀'},
+  {d:'03-12', txt:'Tu es ma belle surprise chaque jour', e:'🎁'},
+  {d:'03-13', txt:'Rien ne te résiste Pepette', e:'💥'},
+  {d:'03-14', txt:'Tu es ma douce vie', e:'🌿'},
+  {d:'03-15', txt:'Pepette, ensemble jusqu\'au bout', e:'🤝'},
+  {d:'03-16', txt:'Tu es mon bonheur simple', e:'🍃'},
+  {d:'03-17', txt:'Boxter te fait un bisou', e:'🐕'},
+  {d:'03-18', txt:'Pepette, tu es ma paix', e:'🕊️'},
+  {d:'03-19', txt:'Tu mérites tout ce qui est beau', e:'🌺'},
+  {d:'03-20', txt:'Premier printemps, belle Pepette', e:'🌞'},
+  {d:'03-21', txt:'Tu es ma renaissance chaque jour', e:'🦋'},
+  {d:'03-22', txt:'Pepette, tu es mon tout', e:'❤️'},
+  {d:'03-23', txt:'Séville avec toi, quel souvenir', e:'💃'},
+  {d:'03-24', txt:'Chaque nuit je pense à toi', e:'🌙'},
+  {d:'03-25', txt:'Pepette, tu es mon éclat de rire', e:'😂'},
+  {d:'03-26', txt:'Tu es ma plus belle victoire', e:'🏆'},
+  {d:'03-27', txt:'Pepette, toute ma tendresse', e:'🤍'},
+  {d:'03-28', txt:'Tu es mon envie de chaque matin', e:'☀️'},
+  {d:'03-29', txt:'Ne te sous-estime jamais Pepette', e:'⭐'},
+  {d:'03-30', txt:'Tu es mon rêve devenu réel', e:'🌙'},
+  {d:'03-31', txt:'Pepette, tu es ma fierté', e:'🌟'},
+  // AVRIL
+  {d:'04-01', txt:'Pepette, tu es mon poisson préféré', e:'🐟'},
+  {d:'04-02', txt:'Tu es forte Pepette, vraiment', e:'💪'},
+  {d:'04-03', txt:'Tu es ma belle étoile', e:'⭐'},
+  {d:'04-04', txt:'Pepette, mon cœur est plein de toi', e:'💓'},
+  {d:'04-05', txt:'Tu es ma joie de vivre', e:'🎊'},
+  {d:'04-06', txt:'Chamonix avec toi, inoubliable', e:'🏔️'},
+  {d:'04-07', txt:'Pepette, tu es ma chère moitié', e:'🔮'},
+  {d:'04-08', txt:'Tu es capable de montagnes', e:'⛰️'},
+  {d:'04-09', txt:'Pepette, tu vas y arriver', e:'🎯'},
+  {d:'04-10', txt:'Fière de tout ce que tu accomplis', e:'🦁'},
+  {d:'04-11', txt:'Tu es mon univers entier', e:'🌠'},
+  {d:'04-12', txt:'Pepette, chaque jour tu progresses', e:'📈'},
+  {d:'04-13', txt:'Tu es ma raison d\'être', e:'🌟'},
+  {d:'04-14', txt:'Boxter est ton plus grand fan', e:'🐶'},
+  {d:'04-15', txt:'Pepette, tu es mon trésor', e:'💎'},
+  {d:'04-16', txt:'Toujours dans mon cœur Pepette', e:'💞'},
+  {d:'04-17', txt:'Tu es ma douceur du soir', e:'🌙'},
+  {d:'04-18', txt:'Pepette, tu es trop drôle !', e:'😂'},
+  {d:'04-19', txt:'Tu es ma belle surprise', e:'🎁'},
+  {d:'04-20', txt:'Joyeuses Pâques Pepette !', e:'🐣'},
+  {d:'04-21', txt:'La Grande Motte avec toi, que du bonheur', e:'🏖️'},
+  {d:'04-22', txt:'Rien de plus précieux que toi', e:'💎'},
+  {d:'04-23', txt:'Pepette, tu es ma mélodie', e:'🎶'},
+  {d:'04-24', txt:'Mon cœur t\'appartient', e:'💝'},
+  {d:'04-25', txt:'Tu es ma plus belle chance', e:'🍀'},
+  {d:'04-26', txt:'Pepette, ensemble on est si bien', e:'🌈'},
+  {d:'04-27', txt:'Tu es mon coucher de soleil', e:'🌅'},
+  {d:'04-28', txt:'Pepette, ton sourire vaut tout', e:'😊'},
+  {d:'04-29', txt:'Tu es ma douce moitié', e:'🥰'},
+  {d:'04-30', txt:'Avec toi la vie est belle Pepette', e:'🌺'},
+  // MAI
+  {d:'05-01', txt:'Muguet et amour pour toi Pepette', e:'🌼'},
+  {d:'05-02', txt:'Tu es mon bouquet de fleurs', e:'💐'},
+  {d:'05-03', txt:'Pepette, rien ne compte plus que toi', e:'💫'},
+  {d:'05-04', txt:'Tu es ma force tranquille', e:'🌊'},
+  {d:'05-05', txt:'Pepette, tu fleuris chaque jour', e:'🌷'},
+  {d:'05-06', txt:'Tu es ma belle promesse', e:'🌤️'},
+  {d:'05-07', txt:'Souviens-toi de la SPA avec Carole', e:'🐾'},
+  {d:'05-08', txt:'Pepette, tu es mon héroïne', e:'🦸‍♀️'},
+  {d:'05-09', txt:'Ton cœur est immense Pepette', e:'💞'},
+  {d:'05-10', txt:'Tu es ma plus belle saison', e:'🌸'},
+  {d:'05-11', txt:'Pepette, rien n\'est impossible', e:'🚀'},
+  {d:'05-12', txt:'Ton regard qui sourit, j\'adore', e:'😊'},
+  {d:'05-13', txt:'Pepette, tu es parfaite', e:'✨'},
+  {d:'05-14', txt:'Bonne fête des mères Pepette', e:'🌹'},
+  {d:'05-15', txt:'Tu es ma belle féerie', e:'🧚'},
+  {d:'05-16', txt:'Pepette, ensemble jusqu\'à l\'infini', e:'♾️'},
+  {d:'05-17', txt:'Boxter t\'attend avec impatience', e:'🐕'},
+  {d:'05-18', txt:'Pepette, ton sourire change tout', e:'😍'},
+  {d:'05-19', txt:'Tu es ma douce lumière', e:'🌟'},
+  {d:'05-20', txt:'Pepette, je suis là toujours', e:'💝'},
+  {d:'05-21', txt:'Barcelona, tu t\'en souviens Pepette ?', e:'🌊'},
+  {d:'05-22', txt:'Chaque jour tu m\'épates', e:'🤩'},
+  {d:'05-23', txt:'Pepette, tu es ma belle surprise', e:'🎁'},
+  {d:'05-24', txt:'Tu es capable de tout surmonter', e:'🦁'},
+  {d:'05-25', txt:'Pepette, tu es mon éclat de bonheur', e:'💛'},
+  {d:'05-26', txt:'Rien que pour tes beaux yeux Pepette', e:'👁️'},
+  {d:'05-27', txt:'Tu es mon câlin préféré', e:'🤗'},
+  {d:'05-28', txt:'Pepette, mon plus beau rêve c\'est toi', e:'🌙'},
+  {d:'05-29', txt:'Tu es ma paix, mon amour', e:'🕊️'},
+  {d:'05-30', txt:'Pepette, ensemble c\'est toujours mieux', e:'💑'},
+  {d:'05-31', txt:'Un nouveau mois avec toi Pepette', e:'🌻'},
+  // JUIN
+  {d:'06-01', txt:'Pepette, l\'été arrive bientôt !', e:'🌞'},
+  {d:'06-02', txt:'Tu es ma fraîcheur préférée', e:'🍃'},
+  {d:'06-03', txt:'Pepette, tu es un feu d\'amour', e:'🔥'},
+  {d:'06-04', txt:'Tu es mon rayon de soleil quotidien', e:'☀️'},
+  {d:'06-05', txt:'Boxter aboie de joie pour toi', e:'🐶'},
+  {d:'06-06', txt:'Pepette, tu es ma belle aventure', e:'🗺️'},
+  {d:'06-07', txt:'La Grande Motte cet été Pepette !', e:'🏖️'},
+  {d:'06-08', txt:'Tu es mon horizon bleu', e:'🌊'},
+  {d:'06-09', txt:'Pepette, tu es irremplaçable', e:'💎'},
+  {d:'06-10', txt:'Tu es mon air de vacances', e:'✈️'},
+  {d:'06-11', txt:'Pepette, ton courage m\'inspire', e:'🦁'},
+  {d:'06-12', txt:'Tu es ma belle saison préférée', e:'🌸'},
+  {d:'06-13', txt:'Pepette, rien que toi dans mes pensées', e:'💭'},
+  {d:'06-14', txt:'Tu es mon bonheur de juin', e:'🌺'},
+  {d:'06-15', txt:'Pepette, tu es une femme formidable', e:'👑'},
+  {d:'06-16', txt:'Chaque matin avec toi est un cadeau', e:'🎁'},
+  {d:'06-17', txt:'Pepette, tu mérites le meilleur', e:'⭐'},
+  {d:'06-18', txt:'Tu es tout ce qu\'il me faut', e:'💝'},
+  {d:'06-19', txt:'Pepette, lâche-toi et souris', e:'😄'},
+  {d:'06-20', txt:'Chaque heure avec toi est précieuse', e:'⏱️'},
+  {d:'06-21', txt:'Premier jour d\'été Pepette !', e:'🌞'},
+  {d:'06-22', txt:'Tu es ma belle simplicité', e:'🌿'},
+  {d:'06-23', txt:'Pepette, tu es ma chaleur estivale', e:'☀️'},
+  {d:'06-24', txt:'Tu es mon élan de bonheur', e:'💫'},
+  {d:'06-25', txt:'Pepette, Séville c\'était magique', e:'💃'},
+  {d:'06-26', txt:'Tu es ma belle complicité', e:'😉'},
+  {d:'06-27', txt:'Pepette, tu chantes dans mon cœur', e:'🎵'},
+  {d:'06-28', txt:'Tu es mon grand soleil', e:'🌻'},
+  {d:'06-29', txt:'Pepette, chaque jour est une fête', e:'🎊'},
+  {d:'06-30', txt:'Pepette, mon amour c\'est toi', e:'❤️'},
+  // JUILLET
+  {d:'07-01', txt:'Pepette, tu es mon feu d\'artifice', e:'🎆'},
+  {d:'07-02', txt:'Tu es l\'amour qui brille', e:'✨'},
+  {d:'07-03', txt:'Pepette, la plage t\'attend', e:'🏖️'},
+  {d:'07-04', txt:'Tu es mon plus grand amour', e:'💞'},
+  {d:'07-05', txt:'Pepette, soleil de juillet !', e:'☀️'},
+  {d:'07-06', txt:'Boxter court sur la plage pour toi', e:'🐕'},
+  {d:'07-07', txt:'Pepette, tu es ma belle étoile filante', e:'💫'},
+  {d:'07-08', txt:'La Grande Motte, toi, le bonheur', e:'🏖️'},
+  {d:'07-09', txt:'Pepette, ton sourire éclaire tout', e:'😊'},
+  {d:'07-10', txt:'Tu grandis et tu t\'épanouis', e:'🌱'},
+  {d:'07-11', txt:'Pepette, je suis si fier de toi', e:'🥰'},
+  {d:'07-12', txt:'Ensemble sous les étoiles d\'été', e:'🌟'},
+  {d:'07-13', txt:'Pepette, vive nous !', e:'🎉'},
+  {d:'07-14', txt:'Joyeux 14 juillet Pepette !', e:'🇫🇷'},
+  {d:'07-15', txt:'Tu es mon feu de joie', e:'🔥'},
+  {d:'07-16', txt:'Pepette, aussi grande que l\'été', e:'🌊'},
+  {d:'07-17', txt:'Tu es ma belle pause estivale', e:'🍦'},
+  {d:'07-18', txt:'Pepette, ton sourire vaut de l\'or', e:'😊'},
+  {d:'07-19', txt:'Coucher de soleil avec toi Pepette', e:'🌅'},
+  {d:'07-20', txt:'Tu es mon cœur qui bat', e:'💓'},
+  {d:'07-21', txt:'Pepette, souviens-toi de Chamonix', e:'🏔️'},
+  {d:'07-22', txt:'Rien ne nous sépare Pepette', e:'🔗'},
+  {d:'07-23', txt:'Tu es ma vague de bonheur', e:'🌊'},
+  {d:'07-24', txt:'Pepette, tu es au chaud dans mon cœur', e:'☀️'},
+  {d:'07-25', txt:'Beau milieu d\'été avec toi', e:'🌻'},
+  {d:'07-26', txt:'Pepette, tu es ma vie', e:'🤗'},
+  {d:'07-27', txt:'Tu es ma belle parenthèse de bonheur', e:'🌸'},
+  {d:'07-28', txt:'Pepette, sans nuage notre amour', e:'☁️'},
+  {d:'07-29', txt:'Tu surmontes tout Pepette', e:'🏄'},
+  {d:'07-30', txt:'Pepette, notre amour est plus fort que tout', e:'💪'},
+  {d:'07-31', txt:'Tu es ma belle fin juillet Pepette', e:'🌟'},
+  // AOUT
+  {d:'08-01', txt:'Pepette, août commence avec toi', e:'🌊'},
+  {d:'08-02', txt:'Tu es ma belle vague d\'amour', e:'🌊'},
+  {d:'08-03', txt:'Pepette, tes mots me font du bien', e:'💌'},
+  {d:'08-04', txt:'Boxter bronze aussi pour toi', e:'🐶'},
+  {d:'08-05', txt:'Pepette, ton cœur est en fête', e:'🎉'},
+  {d:'08-06', txt:'Tu es ma belle chaleur d\'août', e:'🔥'},
+  {d:'08-07', txt:'Pepette, ensemble jusqu\'à l\'horizon', e:'🌅'},
+  {d:'08-08', txt:'Tu es mon beau bonheur d\'été', e:'😍'},
+  {d:'08-09', txt:'Pepette, rien n\'est plus beau que toi', e:'💎'},
+  {d:'08-10', txt:'Cadaqués avec toi, le paradis', e:'🌊'},
+  {d:'08-11', txt:'Pepette, tu brilles toujours', e:'✨'},
+  {d:'08-12', txt:'Tu es mon étoile du soir préférée', e:'⭐'},
+  {d:'08-13', txt:'Pepette, rien ne peut t\'arrêter', e:'🔗'},
+  {d:'08-14', txt:'Tu es ma belle soirée d\'été', e:'🌙'},
+  {d:'08-15', txt:'Pepette, chaque instant est précieux', e:'🌱'},
+  {d:'08-16', txt:'Tu es ma belle douceur d\'août', e:'😴'},
+  {d:'08-17', txt:'Pepette, tu es mon plus grand cadeau', e:'💍'},
+  {d:'08-18', txt:'Tu es mon beau paysage préféré', e:'🌄'},
+  {d:'08-19', txt:'Pepette, mon cœur brille pour toi', e:'💛'},
+  {d:'08-20', txt:'Tu es ma douce et forte moitié', e:'🥰'},
+  {d:'08-21', txt:'Pepette, toujours et encore je t\'aime', e:'♾️'},
+  {d:'08-22', txt:'Tu es mon éclat de joie quotidien', e:'💫'},
+  {d:'08-23', txt:'Pepette, rien ne vaut un câlin de toi', e:'🤗'},
+  {d:'08-24', txt:'La Grande Motte reste dans mon cœur', e:'🏖️'},
+  {d:'08-25', txt:'Pepette, tu résistes à tout', e:'💪'},
+  {d:'08-26', txt:'Tu es ma belle lumière du soir', e:'🕯️'},
+  {d:'08-27', txt:'Pepette, rien ne te remplace', e:'💝'},
+  {d:'08-28', txt:'Tu es mon beau soleil couchant', e:'🌅'},
+  {d:'08-29', txt:'Pepette, je t\'aime pour toujours', e:'❤️'},
+  {d:'08-30', txt:'Tu es ma belle récompense de vie', e:'🏆'},
+  {d:'08-31', txt:'Dernier jour d\'été Pepette', e:'🍂'},
+  // SEPTEMBRE — depart pour l'Espagne le 3
+  {d:'09-01', txt:'Plus que 2 jours Pepette, courage', e:'🧳'},
+  {d:'09-02', txt:'Dernière soirée avant l\'envol', e:'🌙'},
+  {d:'09-03', txt:'¡Buen viaje mi amour ! Je t\'aime', e:'✈️'},
+  {d:'09-04', txt:'Premier réveil espagnol Pepette', e:'🌞'},
+  {d:'09-05', txt:'Buenos días mi amor', e:'☀️'},
+  {d:'09-06', txt:'Marche sans but, la ville sera à toi', e:'🚶‍♀️'},
+  {d:'09-07', txt:'Une semaine, et tu tiens déjà', e:'💪'},
+  {d:'09-08', txt:'Boxter demande où tu es', e:'🐕'},
+  {d:'09-09', txt:'Te echo de menos, Pepette', e:'🧡'},
+  {d:'09-10', txt:'Une semaine en Espagne déjà !', e:'🇪🇸'},
+  {d:'09-11', txt:'Parle espagnol, même mal', e:'🗣️'},
+  {d:'09-12', txt:'Tu es courageuse, ne l\'oublie pas', e:'🦁'},
+  {d:'09-13', txt:'Barcelone, tu y repenses là-bas ?', e:'🌊'},
+  {d:'09-14', txt:'Poco a poco, Pepette', e:'🌱'},
+  {d:'09-15', txt:'Ton sourire traverse les kilomètres', e:'😍'},
+  {d:'09-16', txt:'Deux semaines, tu gères tout', e:'🏆'},
+  {d:'09-17', txt:'Dis oui aux plans, même fatiguée', e:'🎉'},
+  {d:'09-18', txt:'Je suis fier de toi, vraiment', e:'🌟'},
+  {d:'09-19', txt:'Estoy muy orgulloso de ti', e:'💫'},
+  {d:'09-20', txt:'Mange bien là-bas Pepette', e:'🍽️'},
+  {d:'09-21', txt:'On s\'appelle ce soir ?', e:'📱'},
+  {d:'09-22', txt:'Premier jour d\'automne, loin de toi', e:'🍂'},
+  {d:'09-23', txt:'Cadaqués nous attend encore', e:'🌊'},
+  {d:'09-24', txt:'Trois semaines, tu es incroyable', e:'✨'},
+  {d:'09-25', txt:'Tu me manques à chaque café', e:'☕'},
+  {d:'09-26', txt:'Un día menos, mi amor', e:'⏳'},
+  {d:'09-27', txt:'Envoie-moi une photo de ton ciel', e:'📸'},
+  {d:'09-28', txt:'Tu construis quelque chose de beau', e:'🌱'},
+  {d:'09-29', txt:'Boxter garde ta place au chaud', e:'🐶'},
+  {d:'09-30', txt:'Premier mois presque bouclé', e:'📅'},
+  // OCTOBRE — elle est en Espagne
+  {d:'10-01', txt:'Octobre, on continue Pepette', e:'🍁'},
+  {d:'10-02', txt:'Ta ville devient vraiment la tienne', e:'🏙️'},
+  {d:'10-03', txt:'Un mois en Espagne aujourd\'hui !', e:'🇪🇸'},
+  {d:'10-04', txt:'Ya queda menos, Pepette', e:'⏳'},
+  {d:'10-05', txt:'Tu es plus forte qu\'en septembre', e:'💪'},
+  {d:'10-06', txt:'Séville, on y retournera ensemble', e:'💃'},
+  {d:'10-07', txt:'Tu me manques dans les silences', e:'🌙'},
+  {d:'10-08', txt:'Sors ce week-end, profite à fond', e:'🎊'},
+  {d:'10-09', txt:'Eres mi lugar favorito', e:'❤️'},
+  {d:'10-10', txt:'Ici il pleut, chez toi il fait beau', e:'🌤️'},
+  {d:'10-11', txt:'Fier de la femme que tu es', e:'👑'},
+  {d:'10-12', txt:'Boxter dort sur ton pull', e:'🐕'},
+  {d:'10-13', txt:'Le mal du pays c\'est normal', e:'🤍'},
+  {d:'10-14', txt:'Appel vidéo ce soir Pepette ?', e:'📱'},
+  {d:'10-15', txt:'Mi día empieza cuando hablo contigo', e:'☀️'},
+  {d:'10-16', txt:'Chaque jour est un jour de moins', e:'📆'},
+  {d:'10-17', txt:'Tu es partout dans ma tête', e:'💭'},
+  {d:'10-18', txt:'Prends des photos même des trucs banals', e:'📷'},
+  {d:'10-19', txt:'Carole et la SPA pensent à toi', e:'🐾'},
+  {d:'10-20', txt:'Respira, todo va a salir bien', e:'🕊️'},
+  {d:'10-21', txt:'Tu tiens bon, et ça se voit', e:'🦁'},
+  {d:'10-22', txt:'Londres reste gravé, l\'Espagne aussi', e:'🎡'},
+  {d:'10-23', txt:'Ton courage m\'épate encore', e:'🤩'},
+  {d:'10-24', txt:'Couvre-toi, il fait plus frais', e:'🧣'},
+  {d:'10-25', txt:'Cuídate mucho allí, mi amor', e:'🤗'},
+  {d:'10-26', txt:'Rien ne remplace tes câlins', e:'🫂'},
+  {d:'10-27', txt:'Tu es ma constante Pepette', e:'🧭'},
+  {d:'10-28', txt:'Bientôt la moitié du chemin', e:'⛰️'},
+  {d:'10-29', txt:'Un chocolat chaud pour deux', e:'☕'},
+  {d:'10-30', txt:'Sueña con cosas bonitas', e:'🌙'},
+  {d:'10-31', txt:'Joyeux Halloween Pepette !', e:'🎃'},
+  // NOVEMBRE — le mois le plus long
+  {d:'11-01', txt:'Todos los Santos, repose-toi bien', e:'🕊️'},
+  {d:'11-02', txt:'Novembre passera vite, promis', e:'🍂'},
+  {d:'11-03', txt:'Deux mois ! La moitié est faite', e:'🎉'},
+  {d:'11-04', txt:'La descente commence Pepette', e:'⛰️'},
+  {d:'11-05', txt:'Le gris ici, la lumière c\'est toi', e:'💡'},
+  {d:'11-06', txt:'Si c\'est dur aujourd\'hui, appelle', e:'📞'},
+  {d:'11-07', txt:'Eres más fuerte de lo que crees', e:'🦁'},
+  {d:'11-08', txt:'Bientôt les guirlandes Pepette', e:'✨'},
+  {d:'11-09', txt:'Boxter compte les jours lui aussi', e:'🐶'},
+  {d:'11-10', txt:'Tu es ma fierté quotidienne', e:'🏆'},
+  {d:'11-11', txt:'Jour férié ici, je pense à toi', e:'🕊️'},
+  {d:'11-12', txt:'Chamonix cet hiver, promis ?', e:'🏔️'},
+  {d:'11-13', txt:'Un abrazo enorme desde aquí', e:'🤗'},
+  {d:'11-14', txt:'Ne te compare à personne Pepette', e:'⭐'},
+  {d:'11-15', txt:'Ta place t\'attend au chaud', e:'🏡'},
+  {d:'11-16', txt:'Novembre est long, toi tu es forte', e:'💪'},
+  {d:'11-17', txt:'Ton rire est ce qui me manque le plus', e:'😂'},
+  {d:'11-18', txt:'Buenas noches, mi amor', e:'🌙'},
+  {d:'11-19', txt:'Encore un mois et tu es là', e:'📆'},
+  {d:'11-20', txt:'Tu as tenu le plus dur Pepette', e:'🦸‍♀️'},
+  {d:'11-21', txt:'Prépare-toi à tout me raconter', e:'📖'},
+  {d:'11-22', txt:'Tu es mon chez-moi, où que tu sois', e:'🏠'},
+  {d:'11-23', txt:'Barcelone, notre plus beau souvenir', e:'🌊'},
+  {d:'11-24', txt:'Te quiero, Pepette', e:'❤️'},
+  {d:'11-25', txt:'Décembre est juste derrière la porte', e:'🚪'},
+  {d:'11-26', txt:'Commence à dire au revoir doucement', e:'🇪🇸'},
+  {d:'11-27', txt:'Je suis reconnaissant de t\'avoir', e:'🙏'},
+  {d:'11-28', txt:'Soupe, plaid, et un appel avec toi', e:'🍲'},
+  {d:'11-29', txt:'Ramène-moi plein d\'histoires', e:'💌'},
+  {d:'11-30', txt:'Dernier jour de novembre, enfin !', e:'🎊'},
+  // DECEMBRE — le retour
+  {d:'12-01', txt:'Décembre ! Le mois de ton retour', e:'🎄'},
+  {d:'12-02', txt:'Ya casi estás en casa', e:'🏡'},
+  {d:'12-03', txt:'Trois mois, quelle aventure Pepette', e:'🇪🇸'},
+  {d:'12-04', txt:'Les guirlandes sont pour toi', e:'✨'},
+  {d:'12-05', txt:'Bientôt plus d\'écran entre nous', e:'📱'},
+  {d:'12-06', txt:'Día de la Constitución, profite !', e:'🇪🇸'},
+  {d:'12-07', txt:'Ta valise, pense à commencer', e:'🧳'},
+  {d:'12-08', txt:'Inmaculada, encore un jour férié', e:'⛪'},
+  {d:'12-09', txt:'Boxter va devenir fou de joie', e:'🐕'},
+  {d:'12-10', txt:'Dernière ligne droite Pepette', e:'🏁'},
+  {d:'12-11', txt:'Profite de tes derniers moments', e:'🌅'},
+  {d:'12-12', txt:'Chaque heure compte maintenant', e:'⏱️'},
+  {d:'12-13', txt:'Vuelve pronto, mi amor', e:'✈️'},
+  {d:'12-14', txt:'Tu laisses un bout de toi là-bas', e:'🧡'},
+  {d:'12-15', txt:'Plus que quelques jours !', e:'🎉'},
+  {d:'12-16', txt:'J\'ai du mal à tenir en place', e:'😅'},
+  {d:'12-17', txt:'Ta place est prête à la maison', e:'🏡'},
+  {d:'12-18', txt:'Bientôt, très bientôt Pepette', e:'⏳'},
+  {d:'12-19', txt:'Última noche española', e:'🌙'},
+  {d:'12-20', txt:'Tu rentres ! Je t\'attends Pepette', e:'✈️'},
+  {d:'12-21', txt:'Premier réveil ensemble, enfin', e:'☕'},
+  {d:'12-22', txt:'Je ne te lâche plus Pepette', e:'🫂'},
+  {d:'12-23', txt:'Raconte-moi tout, j\'ai le temps', e:'📖'},
+  {d:'12-24', txt:'Joyeuse veille de Noël Pepette !', e:'🎄'},
+  {d:'12-25', txt:'Joyeux Noël, tu es mon cadeau', e:'🎁'},
+  {d:'12-26', txt:'Quatre mois, et te voilà enfin', e:'❤️'},
+  {d:'12-27', txt:'La semaine entre Noël rien que nous', e:'⭐'},
+  {d:'12-28', txt:'Quelle année Pepette, quelle année', e:'🌟'},
+  {d:'12-29', txt:'On a réussi, toi et moi', e:'🏆'},
+  {d:'12-30', txt:'Derniers jours de l\'année, ensemble', e:'🎆'},
+  {d:'12-31', txt:'Bonne année Pepette, à nous deux !', e:'🥂'},
+];
+</script>
 </body>
 </html>
