@@ -295,7 +295,8 @@ const PASSWORD = 'Loustic';
 // ── Sejour en Espagne : 3 septembre → retour fin decembre ──
 // Pour decaler le retour, change juste RETOUR ci-dessous (mois, jour).
 const DEPART = {mois:9,  jour:3};
-const RETOUR = {mois:12, jour:20};
+// Fin d'affichage du bandeau (aucune date de retour n'est annoncee a Pepette).
+const FIN_BADGE = {mois:12, jour:31};
 
 function joursEntre(a, b){
   const j = 86400000;
@@ -307,19 +308,16 @@ function joursEntre(a, b){
 function getTripBadge(now){
   const an = now.getFullYear();
   const depart = new Date(an, DEPART.mois-1, DEPART.jour);
-  const retour = new Date(an, RETOUR.mois-1, RETOUR.jour);
+  const fin    = new Date(an, FIN_BADGE.mois-1, FIN_BADGE.jour);
   const avantDepart = joursEntre(now, depart);
-  const avantRetour = joursEntre(now, retour);
 
-  if(avantDepart > 0 && avantDepart <= 14){
+  if(avantDepart > 0){
+    if(avantDepart > 14) return '';
     return avantDepart === 1 ? '🧳 Départ demain'
                              : '🧳 Départ dans ' + avantDepart + ' jours';
   }
-  if(avantRetour < 0 || avantDepart > 0) return '';
-  if(avantRetour === 0) return '❤️ Tu rentres aujourd\'hui !';
-  if(avantRetour === 1) return '✈️ Plus qu\'un jour';
-  const jourEspagne = joursEntre(depart, now) + 1;
-  return '🇪🇸 Jour ' + jourEspagne + ' · plus que ' + avantRetour + ' jours';
+  if(joursEntre(now, fin) < 0) return '';
+  return '🇪🇸 Jour ' + (joursEntre(depart, now) + 1) + ' en Espagne';
 }
 
 function toggleEye(){
@@ -659,7 +657,7 @@ const MESSAGES = [
   {d:'09-04', txt:'Premier réveil espagnol Pepette', e:'🌞'},
   {d:'09-05', txt:'Buenos días mi amor', e:'☀️'},
   {d:'09-06', txt:'Marche sans but, la ville sera à toi', e:'🚶‍♀️'},
-  {d:'09-07', txt:'Une semaine, et tu tiens déjà', e:'💪'},
+  {d:'09-07', txt:'Bon 1er jour Pepette, tu vas gérer !', e:'🎒'},
   {d:'09-08', txt:'Boxter demande où tu es', e:'🐕'},
   {d:'09-09', txt:'Te echo de menos, Pepette', e:'🧡'},
   {d:'09-10', txt:'Une semaine en Espagne déjà !', e:'🇪🇸'},
@@ -672,7 +670,7 @@ const MESSAGES = [
   {d:'09-17', txt:'Dis oui aux plans, même fatiguée', e:'🎉'},
   {d:'09-18', txt:'Je suis fier de toi, vraiment', e:'🌟'},
   {d:'09-19', txt:'Estoy muy orgulloso de ti', e:'💫'},
-  {d:'09-20', txt:'Mange bien là-bas Pepette', e:'🍽️'},
+  {d:'09-20', txt:'Ton sourire me manque déjà trop', e:'😍'},
   {d:'09-21', txt:'On s\'appelle ce soir ?', e:'📱'},
   {d:'09-22', txt:'Premier jour d\'automne, loin de toi', e:'🍂'},
   {d:'09-23', txt:'Cadaqués nous attend encore', e:'🌊'},
@@ -711,15 +709,15 @@ const MESSAGES = [
   {d:'10-25', txt:'Cuídate mucho allí, mi amor', e:'🤗'},
   {d:'10-26', txt:'Rien ne remplace tes câlins', e:'🫂'},
   {d:'10-27', txt:'Tu es ma constante Pepette', e:'🧭'},
-  {d:'10-28', txt:'Bientôt la moitié du chemin', e:'⛰️'},
+  {d:'10-28', txt:'Tu avances, je le vois d\'ici', e:'⛰️'},
   {d:'10-29', txt:'Un chocolat chaud pour deux', e:'☕'},
   {d:'10-30', txt:'Sueña con cosas bonitas', e:'🌙'},
   {d:'10-31', txt:'Joyeux Halloween Pepette !', e:'🎃'},
   // NOVEMBRE — le mois le plus long
   {d:'11-01', txt:'Todos los Santos, repose-toi bien', e:'🕊️'},
   {d:'11-02', txt:'Novembre passera vite, promis', e:'🍂'},
-  {d:'11-03', txt:'Deux mois ! La moitié est faite', e:'🎉'},
-  {d:'11-04', txt:'La descente commence Pepette', e:'⛰️'},
+  {d:'11-03', txt:'Deux mois déjà, tu es incroyable', e:'🎉'},
+  {d:'11-04', txt:'Tu es plus solide chaque semaine', e:'💪'},
   {d:'11-05', txt:'Le gris ici, la lumière c\'est toi', e:'💡'},
   {d:'11-06', txt:'Si c\'est dur aujourd\'hui, appelle', e:'📞'},
   {d:'11-07', txt:'Eres más fuerte de lo que crees', e:'🦁'},
@@ -734,49 +732,49 @@ const MESSAGES = [
   {d:'11-16', txt:'Novembre est long, toi tu es forte', e:'💪'},
   {d:'11-17', txt:'Ton rire est ce qui me manque le plus', e:'😂'},
   {d:'11-18', txt:'Buenas noches, mi amor', e:'🌙'},
-  {d:'11-19', txt:'Encore un mois et tu es là', e:'📆'},
+  {d:'11-19', txt:'Tu me rends fier chaque jour', e:'🌟'},
   {d:'11-20', txt:'Tu as tenu le plus dur Pepette', e:'🦸‍♀️'},
   {d:'11-21', txt:'Prépare-toi à tout me raconter', e:'📖'},
   {d:'11-22', txt:'Tu es mon chez-moi, où que tu sois', e:'🏠'},
   {d:'11-23', txt:'Barcelone, notre plus beau souvenir', e:'🌊'},
   {d:'11-24', txt:'Te quiero, Pepette', e:'❤️'},
   {d:'11-25', txt:'Décembre est juste derrière la porte', e:'🚪'},
-  {d:'11-26', txt:'Commence à dire au revoir doucement', e:'🇪🇸'},
+  {d:'11-26', txt:'Profite de chaque jour là-bas', e:'🇪🇸'},
   {d:'11-27', txt:'Je suis reconnaissant de t\'avoir', e:'🙏'},
   {d:'11-28', txt:'Soupe, plaid, et un appel avec toi', e:'🍲'},
-  {d:'11-29', txt:'Ramène-moi plein d\'histoires', e:'💌'},
+  {d:'11-29', txt:'Garde-moi plein d\'histoires', e:'💌'},
   {d:'11-30', txt:'Dernier jour de novembre, enfin !', e:'🎊'},
   // DECEMBRE — le retour
-  {d:'12-01', txt:'Décembre ! Le mois de ton retour', e:'🎄'},
-  {d:'12-02', txt:'Ya casi estás en casa', e:'🏡'},
+  {d:'12-01', txt:'Décembre commence Pepette', e:'🎄'},
+  {d:'12-02', txt:'Ya casi es Navidad, mi amor', e:'🎄'},
   {d:'12-03', txt:'Trois mois, quelle aventure Pepette', e:'🇪🇸'},
   {d:'12-04', txt:'Les guirlandes sont pour toi', e:'✨'},
-  {d:'12-05', txt:'Bientôt plus d\'écran entre nous', e:'📱'},
+  {d:'12-05', txt:'Tu brilles plus que les guirlandes', e:'💡'},
   {d:'12-06', txt:'Día de la Constitución, profite !', e:'🇪🇸'},
-  {d:'12-07', txt:'Ta valise, pense à commencer', e:'🧳'},
+  {d:'12-07', txt:'Un chocolat chaud à ta santé', e:'☕'},
   {d:'12-08', txt:'Inmaculada, encore un jour férié', e:'⛪'},
-  {d:'12-09', txt:'Boxter va devenir fou de joie', e:'🐕'},
-  {d:'12-10', txt:'Dernière ligne droite Pepette', e:'🏁'},
-  {d:'12-11', txt:'Profite de tes derniers moments', e:'🌅'},
-  {d:'12-12', txt:'Chaque heure compte maintenant', e:'⏱️'},
-  {d:'12-13', txt:'Vuelve pronto, mi amor', e:'✈️'},
-  {d:'12-14', txt:'Tu laisses un bout de toi là-bas', e:'🧡'},
-  {d:'12-15', txt:'Plus que quelques jours !', e:'🎉'},
-  {d:'12-16', txt:'J\'ai du mal à tenir en place', e:'😅'},
-  {d:'12-17', txt:'Ta place est prête à la maison', e:'🏡'},
-  {d:'12-18', txt:'Bientôt, très bientôt Pepette', e:'⏳'},
-  {d:'12-19', txt:'Última noche española', e:'🌙'},
-  {d:'12-20', txt:'Tu rentres ! Je t\'attends Pepette', e:'✈️'},
-  {d:'12-21', txt:'Premier réveil ensemble, enfin', e:'☕'},
-  {d:'12-22', txt:'Je ne te lâche plus Pepette', e:'🫂'},
-  {d:'12-23', txt:'Raconte-moi tout, j\'ai le temps', e:'📖'},
+  {d:'12-09', txt:'Boxter dort déjà sous le sapin', e:'🐕'},
+  {d:'12-10', txt:'Chamonix et la neige, tu te rappelles ?', e:'🏔️'},
+  {d:'12-11', txt:'Tu es ma lumière d\'hiver', e:'✨'},
+  {d:'12-12', txt:'Feliz diciembre, mi amor', e:'🎄'},
+  {d:'12-13', txt:'Ton rire vaut tous les cadeaux', e:'🎁'},
+  {d:'12-14', txt:'Je pense à toi tout le temps', e:'💭'},
+  {d:'12-15', txt:'Fier de toi du premier au dernier jour', e:'🏆'},
+  {d:'12-16', txt:'Prends bien soin de toi Pepette', e:'🤍'},
+  {d:'12-17', txt:'Tu es mon plus beau cadeau', e:'🎁'},
+  {d:'12-18', txt:'Abrígate bien, mi amor', e:'🧣'},
+  {d:'12-19', txt:'Une pensée pour toi ce soir', e:'🌙'},
+  {d:'12-20', txt:'Tu me manques, tout simplement', e:'🧡'},
+  {d:'12-21', txt:'Plus longue nuit, tu la réchauffes', e:'🕯️'},
+  {d:'12-22', txt:'Noël approche Pepette', e:'🎄'},
+  {d:'12-23', txt:'Ton sourire, mon vrai Noël', e:'😍'},
   {d:'12-24', txt:'Joyeuse veille de Noël Pepette !', e:'🎄'},
-  {d:'12-25', txt:'Joyeux Noël, tu es mon cadeau', e:'🎁'},
-  {d:'12-26', txt:'Quatre mois, et te voilà enfin', e:'❤️'},
-  {d:'12-27', txt:'La semaine entre Noël rien que nous', e:'⭐'},
+  {d:'12-25', txt:'Feliz Navidad, mi amor', e:'🎁'},
+  {d:'12-26', txt:'J\'espère que tu as bien fêté ça', e:'🎊'},
+  {d:'12-27', txt:'La semaine entre Noël, la plus douce', e:'⭐'},
   {d:'12-28', txt:'Quelle année Pepette, quelle année', e:'🌟'},
-  {d:'12-29', txt:'On a réussi, toi et moi', e:'🏆'},
-  {d:'12-30', txt:'Derniers jours de l\'année, ensemble', e:'🎆'},
+  {d:'12-29', txt:'Fier de tout ce que tu as fait', e:'🏆'},
+  {d:'12-30', txt:'Derniers jours de l\'année', e:'🎆'},
   {d:'12-31', txt:'Bonne année Pepette, à nous deux !', e:'🥂'},
 ];
 </script>
