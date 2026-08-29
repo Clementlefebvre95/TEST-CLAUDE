@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Pepette — messages</title>
+  <style>
+    :root { --bg:#fdf6f4; --card:#fff; --ink:#3b2f2c; --soft:#8b7a74; --accent:#e0607a; --line:#f0e2de; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+           background:var(--bg); color:var(--ink); line-height:1.55; }
+    header { padding:24px 20px 8px; text-align:center; }
+    h1 { margin:0 0 4px; font-size:1.5rem; }
+    .sub { color:var(--soft); font-size:.9rem; margin:0; }
+    main { max-width:640px; margin:0 auto; padding:16px 16px 48px; }
+    .today { background:var(--card); border-radius:18px; padding:22px; text-align:center;
+             box-shadow:0 6px 20px rgba(190,140,140,.14); margin-bottom:20px; }
+    .today .date { color:var(--soft); font-size:.82rem; text-transform:uppercase; letter-spacing:.06em; }
+    .today .texte { font-size:1.15rem; margin:12px 0 0; }
+    .today .trad { color:var(--soft); font-size:.9rem; font-style:italic; margin-top:8px; }
+    .controls { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:20px; }
+    button, select, input[type=date] {
+      font:inherit; padding:8px 14px; border-radius:999px; border:1px solid var(--line);
+      background:var(--card); color:var(--ink); cursor:pointer; }
+    button.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .mois { margin:26px 0 10px; font-size:1rem; color:var(--accent); text-transform:uppercase;
+            letter-spacing:.08em; }
+    .ligne { display:flex; gap:12px; padding:10px 12px; background:var(--card);
+             border-radius:12px; margin-bottom:6px; align-items:baseline; }
+    .ligne .j { flex:0 0 46px; color:var(--soft); font-size:.8rem; font-variant-numeric:tabular-nums; }
+    .ligne .t { flex:1; font-size:.95rem; }
+    .ligne .t small { display:block; color:var(--soft); font-style:italic; }
+    .ligne.special { border-left:3px solid var(--accent); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>💌 Pepette</h1>
+    <p class="sub">Messages personnalisés · 1<sup>er</sup> septembre → 31 décembre</p>
+  </header>
+
+  <main>
+    <div class="today" id="today"></div>
+
+    <div class="controls">
+      <input type="date" id="picker" />
+      <button id="btn-fr" class="on">Français</button>
+      <button id="btn-es">Español</button>
+    </div>
+
+    <div id="calendrier"></div>
+  </main>
+
+  <script src="messages.js"></script>
+  <script>
+    const ANNEE = new Date().getFullYear();
+    const NOMS_MOIS = { 9: "Septembre", 10: "Octobre", 11: "Novembre", 12: "Décembre" };
+    let enEspagnol = false;
+
+    function fmtLong(d) {
+      return d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+    }
+
+    function rendreJour(d) {
+      const m = messageDuJour(d, { espagnol: enEspagnol });
+      document.getElementById("today").innerHTML =
+        '<div class="date">' + fmtLong(d) + '</div>' +
+        '<p class="texte">' + m.texte + '</p>' +
+        (m.traduction ? '<div class="trad">' + m.traduction + '</div>' : '');
+    }
+
+    function rendreCalendrier() {
+      const html = [];
+      for (let mois = 9; mois <= 12; mois++) {
+        html.push('<div class="mois">' + NOMS_MOIS[mois] + '</div>');
+        const nbJours = new Date(ANNEE, mois, 0).getDate();
+        for (let jour = 1; jour <= nbJours; jour++) {
+          const d = new Date(ANNEE, mois - 1, jour);
+          const m = messageDuJour(d, { espagnol: enEspagnol });
+          html.push(
+            '<div class="ligne' + (m.type === "special" ? " special" : "") + '">' +
+              '<span class="j">' + String(jour).padStart(2, "0") + "/" + String(mois).padStart(2, "0") + '</span>' +
+              '<span class="t">' + m.texte +
+                (m.traduction ? "<small>" + m.traduction + "</small>" : "") +
+              '</span>' +
+            '</div>'
+          );
+        }
+      }
+      document.getElementById("calendrier").innerHTML = html.join("");
+    }
+
+    function rafraichir() {
+      const v = document.getElementById("picker").value;
+      rendreJour(v ? new Date(v + "T12:00:00") : new Date());
+      rendreCalendrier();
+    }
+
+    document.getElementById("picker").addEventListener("change", rafraichir);
+    document.getElementById("btn-fr").addEventListener("click", () => {
+      enEspagnol = false;
+      document.getElementById("btn-fr").classList.add("on");
+      document.getElementById("btn-es").classList.remove("on");
+      rafraichir();
+    });
+    document.getElementById("btn-es").addEventListener("click", () => {
+      enEspagnol = true;
+      document.getElementById("btn-es").classList.add("on");
+      document.getElementById("btn-fr").classList.remove("on");
+      rafraichir();
+    });
+
+    rafraichir();
+  </script>
+</body>
+</html>
