@@ -342,8 +342,20 @@ function checkPassword(){
 
 function showMain(){
   document.getElementById('login-screen').classList.add('hidden');
-  const ms = document.getElementById('main-screen');
-  ms.classList.add('visible');
+  document.getElementById('main-screen').classList.add('visible');
+  rafraichirMessage();
+  createPetals();
+}
+
+// Le message est recalcule quand l'app revient au premier plan,
+// sinon un PWA laisse ouvert la nuit afficherait encore le message de la veille.
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState !== 'visible') return;
+  if(!document.getElementById('main-screen').classList.contains('visible')) return;
+  rafraichirMessage();
+});
+
+function rafraichirMessage(){
   document.getElementById('date-badge').textContent = formatDate();
   const badge = document.getElementById('trip-badge');
   const txtBadge = getTripBadge(new Date());
@@ -352,7 +364,6 @@ function showMain(){
   const msg = getTodayMessage();
   document.getElementById('msg-text').textContent = msg.txt;
   document.getElementById('msg-emoji').textContent = msg.e;
-  createPetals();
 }
 
 function lock(){
