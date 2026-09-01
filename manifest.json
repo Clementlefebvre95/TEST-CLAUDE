@@ -4,8 +4,8 @@
   "description": "Mon carnet de recettes personnel, classé par catégories",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#fbf7f0",
-  "theme_color": "#8c5a2b",
+  "background_color": "#fdf0f4",
+  "theme_color": "#c0466f",
   "orientation": "portrait",
   "icons": [
     {

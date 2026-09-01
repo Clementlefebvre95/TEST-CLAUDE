@@ -10,16 +10,16 @@
    ============================================================ */
 
 :root {
-  --bg: #fbf7f0;
+  --bg: #fdf0f4;
   --paper: #ffffff;
-  --ink: #2f2721;
-  --ink-soft: #7a6a5c;
-  --line: #e7ddcf;
-  --accent: #8c5a2b;
-  --accent-soft: #f3e6d6;
-  --danger: #b23c2e;
+  --ink: #3a2b31;
+  --ink-soft: #8b6a76;
+  --line: #f3dbe3;
+  --accent: #c0466f;
+  --accent-soft: #fce6ee;
+  --danger: #b3352c;
   --radius: 14px;
-  --shadow: 0 2px 10px rgba(80, 60, 40, .07);
+  --shadow: 0 2px 10px rgba(150, 70, 100, .08);
 }
 
 * { box-sizing: border-box; }
@@ -30,7 +30,6 @@ body {
   color: var(--ink);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.55;
-  padding-bottom: 70px;
 }
 
 h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; }
@@ -268,26 +267,11 @@ main { max-width: 720px; margin: 0 auto; padding: 16px 14px 24px; }
 .btn.tiny { padding: 7px 12px; font-size: .82rem; font-weight: 500; }
 .btn:active { transform: scale(.97); }
 
-/* ---------- Pied de page ---------- */
-.footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  padding: 10px;
-  padding-bottom: max(10px, env(safe-area-inset-bottom));
-  background: var(--paper);
-  border-top: 1px solid var(--line);
-}
-
 /* ---------- Toast ---------- */
 .toast {
   position: fixed;
   left: 50%;
-  bottom: 80px;
+  bottom: 28px;
   transform: translateX(-50%) translateY(20px);
   background: var(--ink);
   color: #fff;
@@ -350,9 +334,32 @@ main { max-width: 720px; margin: 0 auto; padding: 16px 14px 24px; }
   font-size: .88em;
 }
 
+/* ---------- Bouton retour ---------- */
+.icon-btn.invisible { visibility: hidden; }
+#btn-back { font-size: 1.6rem; line-height: 0; padding-bottom: 4px; }
+
+/* ---------- Accès aux réglages, en bas du sommaire ---------- */
+.link-btn {
+  display: block;
+  width: 100%;
+  margin-top: 28px;
+  padding: 12px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: transparent;
+  font: inherit;
+  font-size: .88rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.link-btn:active { transform: scale(.99); }
+
+.card + .card { margin-top: 14px; }
+.card-title { margin: 0 0 6px; font-size: 1.1rem; }
+
 </style>
   
-  <meta name="theme-color" content="#8c5a2b" />
+  <meta name="theme-color" content="#c0466f" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Mes Recettes" />
   
@@ -361,7 +368,7 @@ main { max-width: 720px; margin: 0 auto; padding: 16px 14px 24px; }
 <body>
 
   <header class="topbar">
-    <button id="btn-home" class="icon-btn" title="Sommaire">📖</button>
+    <button id="btn-back" class="icon-btn" title="Retour">‹</button>
     <h1 id="page-title">Mon Livre de Recettes</h1>
     <button id="btn-new" class="icon-btn primary" title="Nouvelle recette">＋</button>
   </header>
@@ -382,7 +389,9 @@ main { max-width: 720px; margin: 0 auto; padding: 16px 14px 24px; }
         <h2 class="section-title">Sommaire</h2>
         <div id="category-grid" class="category-grid"></div>
 
-        <div id="recent-block" class="recent-block"></div>
+        <div id="summary-empty"></div>
+
+        <button type="button" id="btn-settings" class="link-btn">⚙️ Réglages, sauvegarde et synchro</button>
       </div>
     </section>
 
@@ -397,9 +406,22 @@ main { max-width: 720px; margin: 0 auto; padding: 16px 14px 24px; }
       <article id="recipe-detail" class="recipe-detail"></article>
     </section>
 
-    <!-- ========== SYNCHRONISATION ========== -->
-    <section id="view-sync" class="view">
+    <!-- ========== REGLAGES ========== -->
+    <section id="view-settings" class="view">
       <div class="card">
+        <h2 class="card-title">Sauvegarde manuelle</h2>
+        <p class="hint">
+          Télécharge un fichier avec toutes tes recettes, ou restaure-le sur un autre appareil.
+        </p>
+        <div class="form-actions">
+          <button type="button" id="btn-export" class="btn">⬇️ Sauvegarder</button>
+          <button type="button" id="btn-import" class="btn ghost">⬆️ Restaurer</button>
+          <input type="file" id="import-file" accept="application/json" hidden />
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Synchronisation automatique</h2>
         <div id="sync-status" class="sync-status"></div>
 
         <div id="sync-on" class="hidden">
@@ -494,13 +516,6 @@ main { max-width: 720px; margin: 0 auto; padding: 16px 14px 24px; }
 
   </main>
 
-  <footer class="footer">
-    <button id="btn-export" class="btn tiny ghost">⬇️ Sauvegarder mes recettes</button>
-    <button id="btn-import" class="btn tiny ghost">⬆️ Restaurer</button>
-    <button id="btn-sync-view" class="btn tiny ghost">☁️ Synchro</button>
-    <input type="file" id="import-file" accept="application/json" hidden />
-  </footer>
-
   <div id="toast" class="toast"></div>
 
   <script>
@@ -520,11 +535,11 @@ const GIST_FILE = 'mes-recettes.json';
 
 const CATEGORIES = [
   { id: 'aperitif', name: 'Apéritif', emoji: '🥂' },
-  { id: 'entree',   name: 'Entrée',   emoji: '🥗' },
-  { id: 'plat',     name: 'Plat',     emoji: '🍲' },
-  { id: 'dessert',  name: 'Dessert',  emoji: '🍰' },
+  { id: 'entree',   name: 'Entrée',   emoji: '🥒' },
+  { id: 'plat',     name: 'Plat',     emoji: '🥩' },
+  { id: 'dessert',  name: 'Dessert',  emoji: '🍫' },
   { id: 'sauce',    name: 'Sauce',    emoji: '🥣' },
-  { id: 'boisson',  name: 'Boisson',  emoji: '🍹' },
+  { id: 'boisson',  name: 'Boisson',  emoji: '🥤' },
 ];
 
 const catById = id => CATEGORIES.find(c => c.id === id) || CATEGORIES[2];
@@ -584,37 +599,78 @@ function toast(message) {
 }
 
 // ---------- Navigation ----------
+// Une pile mémorise les écrans traversés : le bouton « ‹ » en haut à gauche
+// ramène à l'écran précédent (une recette renvoie donc vers sa catégorie).
 let currentCategory = null;
 let currentRecipeId = null;
+let screen = { name: 'home' };
+let backStack = [];
 
 function showView(name, title) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   $('#view-' + name).classList.add('active');
   $('#page-title').textContent = title;
+  $('#btn-back').classList.toggle('invisible', backStack.length === 0);
   window.scrollTo(0, 0);
 }
 
+function drawScreen(s) {
+  if (s.name === 'home') {
+    currentCategory = null;
+    currentRecipeId = null;
+    $('#search').value = '';
+    $('#search-results').classList.add('hidden');
+    $('#summary').classList.remove('hidden');
+    renderSummary();
+    return showView('home', 'Mon Livre de Recettes');
+  }
+  if (s.name === 'category') {
+    currentCategory = s.catId;
+    currentRecipeId = null;
+    renderCategory(s.catId);
+    return showView('category', catById(s.catId).name);
+  }
+  if (s.name === 'recipe') {
+    currentRecipeId = s.recipeId;
+    renderRecipe(s.recipeId);
+    const r = recipes.find(x => x.id === s.recipeId);
+    return showView('recipe', r ? r.title : 'Recette');
+  }
+  if (s.name === 'settings') {
+    renderSettingsView();
+    return showView('settings', 'Réglages');
+  }
+  if (s.name === 'edit') {
+    return showView('edit', s.title || 'Recette');
+  }
+}
+
+function goTo(next, { replace = false } = {}) {
+  if (!replace) backStack.push(screen);
+  screen = next;
+  drawScreen(screen);
+}
+
+function goBack() {
+  screen = backStack.pop() || { name: 'home' };
+  drawScreen(screen);
+}
+
 function goHome() {
-  currentCategory = null;
-  currentRecipeId = null;
-  $('#search').value = '';
-  $('#search-results').classList.add('hidden');
-  $('#summary').classList.remove('hidden');
-  renderSummary();
-  showView('home', 'Mon Livre de Recettes');
+  backStack = [];
+  goTo({ name: 'home' }, { replace: true });
 }
 
 function goCategory(catId) {
-  currentCategory = catId;
-  renderCategory(catId);
-  showView('category', catById(catId).name);
+  goTo({ name: 'category', catId });
 }
 
-function goRecipe(id) {
-  currentRecipeId = id;
-  renderRecipe(id);
-  const r = recipes.find(x => x.id === id);
-  showView('recipe', r ? r.title : 'Recette');
+// Après un enregistrement, la fiche remplace l'écran d'édition au lieu de
+// s'empiler : le retour ramène alors à la liste, pas au formulaire.
+function goRecipe(id, options = {}) {
+  const top = backStack[backStack.length - 1];
+  if (options.replace && top && top.name === 'recipe' && top.recipeId === id) backStack.pop();
+  goTo({ name: 'recipe', recipeId: id }, options);
 }
 
 // ---------- Sommaire ----------
@@ -635,20 +691,11 @@ function renderSummary() {
     btn.addEventListener('click', () => goCategory(btn.dataset.cat));
   });
 
-  // Dernières recettes ajoutées
-  const block = $('#recent-block');
-  if (!recipes.length) {
-    block.innerHTML = `
-      <div class="empty">
-        Ton livre est encore vide.<br />
-        Appuie sur <strong>＋</strong> en haut à droite pour écrire ta première recette.
-      </div>`;
-    return;
-  }
-  const recent = [...recipes].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)).slice(0, 5);
-  block.innerHTML = `<h2 class="section-title">Dernières recettes</h2>
-    <div class="recipe-list">${recent.map(rowHtml).join('')}</div>`;
-  bindRows(block);
+  $('#summary-empty').innerHTML = recipes.length ? '' : `
+    <div class="empty">
+      Ton livre est encore vide.<br />
+      Appuie sur <strong>＋</strong> en haut à droite pour écrire ta première recette.
+    </div>`;
 }
 
 // ---------- Ligne de recette ----------
@@ -744,7 +791,7 @@ function openEditor(id) {
   $('#f-ingredients').value = r ? (r.ingredients || []).join('\n') : '';
   $('#f-steps').value = r ? (r.steps || []).join('\n') : '';
   $('#f-notes').value = r ? (r.notes || '') : '';
-  showView('edit', r ? 'Modifier la recette' : 'Nouvelle recette');
+  goTo({ name: 'edit', title: r ? 'Modifier la recette' : 'Nouvelle recette' });
 }
 
 $('#recipe-form').addEventListener('submit', e => {
@@ -772,15 +819,11 @@ $('#recipe-form').addEventListener('submit', e => {
   }
   saveRecipes(recipes);
   toast('Recette enregistrée ✅');
-  goRecipe(id || data.id);
+  goRecipe(id || data.id, { replace: true });
   scheduleSync();
 });
 
-$('#btn-cancel').addEventListener('click', () => {
-  if (currentRecipeId) goRecipe(currentRecipeId);
-  else if (currentCategory) goCategory(currentCategory);
-  else goHome();
-});
+$('#btn-cancel').addEventListener('click', goBack);
 
 function deleteRecipe(id) {
   const r = recipes.find(x => x.id === id);
@@ -792,8 +835,7 @@ function deleteRecipe(id) {
   saveDeleted(deletedAt);
   toast('Recette supprimée');
   scheduleSync();
-  if (currentCategory) goCategory(currentCategory);
-  else goHome();
+  goBack();
 }
 
 // ---------- Recherche ----------
@@ -862,7 +904,7 @@ $('#import-file').addEventListener('change', e => {
 });
 
 // ---------- Boutons de la barre ----------
-$('#btn-home').addEventListener('click', goHome);
+$('#btn-back').addEventListener('click', goBack);
 $('#btn-new').addEventListener('click', () => {
   currentRecipeId = null;
   openEditor(null);
@@ -981,7 +1023,7 @@ function httpMessage(status) {
 async function syncNow({ silent = false } = {}) {
   if (!sync.enabled || syncing) return;
   syncing = true;
-  renderSyncView();
+  renderSettingsView();
   try {
     if (!sync.gistId) sync.gistId = await findGist();
 
@@ -1010,7 +1052,7 @@ async function syncNow({ silent = false } = {}) {
   } finally {
     syncing = false;
     renderSyncBanner();
-    renderSyncView();
+    renderSettingsView();
   }
 }
 
@@ -1022,9 +1064,9 @@ function scheduleSync() {
 }
 
 function refreshCurrentView() {
-  if ($('#view-recipe').classList.contains('active') && currentRecipeId) renderRecipe(currentRecipeId);
-  else if ($('#view-category').classList.contains('active') && currentCategory) renderCategory(currentCategory);
-  else renderSummary();
+  if (screen.name === 'recipe' && currentRecipeId) renderRecipe(currentRecipeId);
+  else if (screen.name === 'category' && currentCategory) renderCategory(currentCategory);
+  else if (screen.name === 'home') renderSummary();
 }
 
 // ---------- Affichage de l'état ----------
@@ -1044,13 +1086,13 @@ function renderSyncBanner() {
     banner.innerHTML = `<span>⚠️ Synchronisation en panne : ${escapeHtml(sync.error)}</span>
       <button type="button" id="banner-fix">Réparer</button>`;
     banner.classList.remove('hidden');
-    $('#banner-fix').addEventListener('click', showSyncView);
+    $('#banner-fix').addEventListener('click', showSettings);
   } else {
     banner.classList.add('hidden');
   }
 }
 
-function renderSyncView() {
+function renderSettingsView() {
   const status = $('#sync-status');
   status.classList.toggle('error', Boolean(sync.error));
   $('#sync-on').classList.toggle('hidden', !sync.enabled);
@@ -1085,16 +1127,13 @@ function renderSyncView() {
     : '';
 }
 
-function showSyncView() {
-  renderSyncView();
-  showView('sync', 'Synchronisation');
+function showSettings() {
+  activationError = '';
+  goTo({ name: 'settings' });
 }
 
 // ---------- Boutons de la vue synchro ----------
-$('#btn-sync-view').addEventListener('click', () => {
-  activationError = '';
-  showSyncView();
-});
+$('#btn-settings').addEventListener('click', showSettings);
 
 $('#btn-sync-on').addEventListener('click', async () => {
   const token = $('#f-token').value.trim();
@@ -1109,7 +1148,7 @@ $('#btn-sync-on').addEventListener('click', async () => {
     sync.token = '';     // clé invalide : inutile de la conserver
     sync.error = '';
     $('#f-token').value = token;
-    renderSyncView();
+    renderSettingsView();
   }
 });
 
@@ -1119,7 +1158,7 @@ $('#btn-sync-off').addEventListener('click', () => {
   if (!confirm('Désactiver la synchronisation ? Tes recettes restent sur cet appareil et en ligne.')) return;
   sync.token = '';
   sync.error = '';
-  renderSyncView();
+  renderSettingsView();
   renderSyncBanner();
   toast('Synchronisation désactivée');
 });
@@ -1132,7 +1171,7 @@ document.addEventListener('visibilitychange', () => {
 // ---------- Démarrage ----------
 fillCategorySelect();
 goHome();
-renderSyncView();
+renderSettingsView();
 renderSyncBanner();
 if (sync.enabled) syncNow({ silent: true });
 

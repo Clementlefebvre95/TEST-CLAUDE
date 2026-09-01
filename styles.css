@@ -3,16 +3,16 @@
    ============================================================ */
 
 :root {
-  --bg: #fbf7f0;
+  --bg: #fdf0f4;
   --paper: #ffffff;
-  --ink: #2f2721;
-  --ink-soft: #7a6a5c;
-  --line: #e7ddcf;
-  --accent: #8c5a2b;
-  --accent-soft: #f3e6d6;
-  --danger: #b23c2e;
+  --ink: #3a2b31;
+  --ink-soft: #8b6a76;
+  --line: #f3dbe3;
+  --accent: #c0466f;
+  --accent-soft: #fce6ee;
+  --danger: #b3352c;
   --radius: 14px;
-  --shadow: 0 2px 10px rgba(80, 60, 40, .07);
+  --shadow: 0 2px 10px rgba(150, 70, 100, .08);
 }
 
 * { box-sizing: border-box; }
@@ -23,7 +23,6 @@ body {
   color: var(--ink);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.55;
-  padding-bottom: 70px;
 }
 
 h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; }
@@ -261,26 +260,11 @@ main { max-width: 720px; margin: 0 auto; padding: 16px 14px 24px; }
 .btn.tiny { padding: 7px 12px; font-size: .82rem; font-weight: 500; }
 .btn:active { transform: scale(.97); }
 
-/* ---------- Pied de page ---------- */
-.footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  padding: 10px;
-  padding-bottom: max(10px, env(safe-area-inset-bottom));
-  background: var(--paper);
-  border-top: 1px solid var(--line);
-}
-
 /* ---------- Toast ---------- */
 .toast {
   position: fixed;
   left: 50%;
-  bottom: 80px;
+  bottom: 28px;
   transform: translateX(-50%) translateY(20px);
   background: var(--ink);
   color: #fff;
@@ -342,3 +326,26 @@ main { max-width: 720px; margin: 0 auto; padding: 16px 14px 24px; }
   border-radius: 4px;
   font-size: .88em;
 }
+
+/* ---------- Bouton retour ---------- */
+.icon-btn.invisible { visibility: hidden; }
+#btn-back { font-size: 1.6rem; line-height: 0; padding-bottom: 4px; }
+
+/* ---------- Accès aux réglages, en bas du sommaire ---------- */
+.link-btn {
+  display: block;
+  width: 100%;
+  margin-top: 28px;
+  padding: 12px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: transparent;
+  font: inherit;
+  font-size: .88rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.link-btn:active { transform: scale(.99); }
+
+.card + .card { margin-top: 14px; }
+.card-title { margin: 0 0 6px; font-size: 1.1rem; }

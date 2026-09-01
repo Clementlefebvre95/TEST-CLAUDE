@@ -6,7 +6,7 @@
   <title>Mon Livre de Recettes</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#8c5a2b" />
+  <meta name="theme-color" content="#c0466f" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Mes Recettes" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
@@ -15,7 +15,7 @@
 <body>
 
   <header class="topbar">
-    <button id="btn-home" class="icon-btn" title="Sommaire">📖</button>
+    <button id="btn-back" class="icon-btn" title="Retour">‹</button>
     <h1 id="page-title">Mon Livre de Recettes</h1>
     <button id="btn-new" class="icon-btn primary" title="Nouvelle recette">＋</button>
   </header>
@@ -36,7 +36,9 @@
         <h2 class="section-title">Sommaire</h2>
         <div id="category-grid" class="category-grid"></div>
 
-        <div id="recent-block" class="recent-block"></div>
+        <div id="summary-empty"></div>
+
+        <button type="button" id="btn-settings" class="link-btn">⚙️ Réglages, sauvegarde et synchro</button>
       </div>
     </section>
 
@@ -51,9 +53,22 @@
       <article id="recipe-detail" class="recipe-detail"></article>
     </section>
 
-    <!-- ========== SYNCHRONISATION ========== -->
-    <section id="view-sync" class="view">
+    <!-- ========== REGLAGES ========== -->
+    <section id="view-settings" class="view">
       <div class="card">
+        <h2 class="card-title">Sauvegarde manuelle</h2>
+        <p class="hint">
+          Télécharge un fichier avec toutes tes recettes, ou restaure-le sur un autre appareil.
+        </p>
+        <div class="form-actions">
+          <button type="button" id="btn-export" class="btn">⬇️ Sauvegarder</button>
+          <button type="button" id="btn-import" class="btn ghost">⬆️ Restaurer</button>
+          <input type="file" id="import-file" accept="application/json" hidden />
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Synchronisation automatique</h2>
         <div id="sync-status" class="sync-status"></div>
 
         <div id="sync-on" class="hidden">
@@ -147,13 +162,6 @@
     </section>
 
   </main>
-
-  <footer class="footer">
-    <button id="btn-export" class="btn tiny ghost">⬇️ Sauvegarder mes recettes</button>
-    <button id="btn-import" class="btn tiny ghost">⬆️ Restaurer</button>
-    <button id="btn-sync-view" class="btn tiny ghost">☁️ Synchro</button>
-    <input type="file" id="import-file" accept="application/json" hidden />
-  </footer>
 
   <div id="toast" class="toast"></div>
 

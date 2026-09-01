@@ -10,7 +10,9 @@ Ouvre `index.html` dans ton navigateur (double-clic sur le fichier suffit).
 - **Sommaire** : les 6 catégories — Apéritif, Entrée, Plat, Dessert, Sauce, Boisson.
 - **＋** en haut à droite : écrire une nouvelle recette
   (titre, catégorie, temps, portions, ingrédients, préparation, notes).
-- **📖** en haut à gauche : revenir au sommaire.
+- **‹** en haut à gauche : revenir à l'écran précédent (une recette ramène à sa
+  catégorie). Le bouton disparaît sur le sommaire.
+- **⚙️ Réglages** en bas du sommaire : sauvegarde, restauration et synchro.
 - **Recherche** : cherche dans les titres, les ingrédients et les notes.
 - **Modifier / Supprimer** : depuis la fiche d'une recette.
 
@@ -57,7 +59,7 @@ emplacement (**⬆️ Restaurer**).
 ## Sauvegarde
 
 Les recettes sont stockées dans le `localStorage` du navigateur.
-En bas de l'écran :
+Dans **⚙️ Réglages** (en bas du sommaire) :
 
 - **⬇️ Sauvegarder mes recettes** exporte un fichier `.json`.
 - **⬆️ Restaurer** réimporte ce fichier (les recettes déjà présentes ne sont pas dupliquées).
@@ -66,8 +68,8 @@ Pense à exporter de temps en temps : vider les données du navigateur efface le
 
 ## Synchronisation entre appareils (optionnel)
 
-Par défaut les recettes vivent dans le navigateur de l'appareil. Le bouton
-**☁️ Synchro** en bas permet de les conserver dans un **gist privé** de ton compte
+Par défaut les recettes vivent dans le navigateur de l'appareil. La section
+**Synchronisation automatique** des réglages permet de les conserver dans un **gist privé** de ton compte
 GitHub : elles se retrouvent alors sur tous tes appareils et survivent à un
 changement de téléphone.
 
@@ -75,7 +77,7 @@ Mise en route (une fois) :
 
 1. Crée une clé sur <https://github.com/settings/tokens/new> — expiration
    « No expiration », et coche **uniquement** la case `gist`.
-2. Dans l'app : **☁️ Synchro** → colle la clé → **Activer la synchronisation**.
+2. Dans l'app : **⚙️ Réglages** → colle la clé → **Activer la synchronisation**.
 
 Sur un nouvel appareil, tu colles la même clé : l'app retrouve la sauvegarde
 existante et rapatrie tes recettes.

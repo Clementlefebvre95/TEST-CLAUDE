@@ -14,11 +14,11 @@ const GIST_FILE = 'mes-recettes.json';
 
 const CATEGORIES = [
   { id: 'aperitif', name: 'Apéritif', emoji: '🥂' },
-  { id: 'entree',   name: 'Entrée',   emoji: '🥗' },
-  { id: 'plat',     name: 'Plat',     emoji: '🍲' },
-  { id: 'dessert',  name: 'Dessert',  emoji: '🍰' },
+  { id: 'entree',   name: 'Entrée',   emoji: '🥒' },
+  { id: 'plat',     name: 'Plat',     emoji: '🥩' },
+  { id: 'dessert',  name: 'Dessert',  emoji: '🍫' },
   { id: 'sauce',    name: 'Sauce',    emoji: '🥣' },
-  { id: 'boisson',  name: 'Boisson',  emoji: '🍹' },
+  { id: 'boisson',  name: 'Boisson',  emoji: '🥤' },
 ];
 
 const catById = id => CATEGORIES.find(c => c.id === id) || CATEGORIES[2];
@@ -78,37 +78,78 @@ function toast(message) {
 }
 
 // ---------- Navigation ----------
+// Une pile mémorise les écrans traversés : le bouton « ‹ » en haut à gauche
+// ramène à l'écran précédent (une recette renvoie donc vers sa catégorie).
 let currentCategory = null;
 let currentRecipeId = null;
+let screen = { name: 'home' };
+let backStack = [];
 
 function showView(name, title) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   $('#view-' + name).classList.add('active');
   $('#page-title').textContent = title;
+  $('#btn-back').classList.toggle('invisible', backStack.length === 0);
   window.scrollTo(0, 0);
 }
 
+function drawScreen(s) {
+  if (s.name === 'home') {
+    currentCategory = null;
+    currentRecipeId = null;
+    $('#search').value = '';
+    $('#search-results').classList.add('hidden');
+    $('#summary').classList.remove('hidden');
+    renderSummary();
+    return showView('home', 'Mon Livre de Recettes');
+  }
+  if (s.name === 'category') {
+    currentCategory = s.catId;
+    currentRecipeId = null;
+    renderCategory(s.catId);
+    return showView('category', catById(s.catId).name);
+  }
+  if (s.name === 'recipe') {
+    currentRecipeId = s.recipeId;
+    renderRecipe(s.recipeId);
+    const r = recipes.find(x => x.id === s.recipeId);
+    return showView('recipe', r ? r.title : 'Recette');
+  }
+  if (s.name === 'settings') {
+    renderSettingsView();
+    return showView('settings', 'Réglages');
+  }
+  if (s.name === 'edit') {
+    return showView('edit', s.title || 'Recette');
+  }
+}
+
+function goTo(next, { replace = false } = {}) {
+  if (!replace) backStack.push(screen);
+  screen = next;
+  drawScreen(screen);
+}
+
+function goBack() {
+  screen = backStack.pop() || { name: 'home' };
+  drawScreen(screen);
+}
+
 function goHome() {
-  currentCategory = null;
-  currentRecipeId = null;
-  $('#search').value = '';
-  $('#search-results').classList.add('hidden');
-  $('#summary').classList.remove('hidden');
-  renderSummary();
-  showView('home', 'Mon Livre de Recettes');
+  backStack = [];
+  goTo({ name: 'home' }, { replace: true });
 }
 
 function goCategory(catId) {
-  currentCategory = catId;
-  renderCategory(catId);
-  showView('category', catById(catId).name);
+  goTo({ name: 'category', catId });
 }
 
-function goRecipe(id) {
-  currentRecipeId = id;
-  renderRecipe(id);
-  const r = recipes.find(x => x.id === id);
-  showView('recipe', r ? r.title : 'Recette');
+// Après un enregistrement, la fiche remplace l'écran d'édition au lieu de
+// s'empiler : le retour ramène alors à la liste, pas au formulaire.
+function goRecipe(id, options = {}) {
+  const top = backStack[backStack.length - 1];
+  if (options.replace && top && top.name === 'recipe' && top.recipeId === id) backStack.pop();
+  goTo({ name: 'recipe', recipeId: id }, options);
 }
 
 // ---------- Sommaire ----------
@@ -129,20 +170,11 @@ function renderSummary() {
     btn.addEventListener('click', () => goCategory(btn.dataset.cat));
   });
 
-  // Dernières recettes ajoutées
-  const block = $('#recent-block');
-  if (!recipes.length) {
-    block.innerHTML = `
-      <div class="empty">
-        Ton livre est encore vide.<br />
-        Appuie sur <strong>＋</strong> en haut à droite pour écrire ta première recette.
-      </div>`;
-    return;
-  }
-  const recent = [...recipes].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)).slice(0, 5);
-  block.innerHTML = `<h2 class="section-title">Dernières recettes</h2>
-    <div class="recipe-list">${recent.map(rowHtml).join('')}</div>`;
-  bindRows(block);
+  $('#summary-empty').innerHTML = recipes.length ? '' : `
+    <div class="empty">
+      Ton livre est encore vide.<br />
+      Appuie sur <strong>＋</strong> en haut à droite pour écrire ta première recette.
+    </div>`;
 }
 
 // ---------- Ligne de recette ----------
@@ -238,7 +270,7 @@ function openEditor(id) {
   $('#f-ingredients').value = r ? (r.ingredients || []).join('\n') : '';
   $('#f-steps').value = r ? (r.steps || []).join('\n') : '';
   $('#f-notes').value = r ? (r.notes || '') : '';
-  showView('edit', r ? 'Modifier la recette' : 'Nouvelle recette');
+  goTo({ name: 'edit', title: r ? 'Modifier la recette' : 'Nouvelle recette' });
 }
 
 $('#recipe-form').addEventListener('submit', e => {
@@ -266,15 +298,11 @@ $('#recipe-form').addEventListener('submit', e => {
   }
   saveRecipes(recipes);
   toast('Recette enregistrée ✅');
-  goRecipe(id || data.id);
+  goRecipe(id || data.id, { replace: true });
   scheduleSync();
 });
 
-$('#btn-cancel').addEventListener('click', () => {
-  if (currentRecipeId) goRecipe(currentRecipeId);
-  else if (currentCategory) goCategory(currentCategory);
-  else goHome();
-});
+$('#btn-cancel').addEventListener('click', goBack);
 
 function deleteRecipe(id) {
   const r = recipes.find(x => x.id === id);
@@ -286,8 +314,7 @@ function deleteRecipe(id) {
   saveDeleted(deletedAt);
   toast('Recette supprimée');
   scheduleSync();
-  if (currentCategory) goCategory(currentCategory);
-  else goHome();
+  goBack();
 }
 
 // ---------- Recherche ----------
@@ -356,7 +383,7 @@ $('#import-file').addEventListener('change', e => {
 });
 
 // ---------- Boutons de la barre ----------
-$('#btn-home').addEventListener('click', goHome);
+$('#btn-back').addEventListener('click', goBack);
 $('#btn-new').addEventListener('click', () => {
   currentRecipeId = null;
   openEditor(null);
@@ -475,7 +502,7 @@ function httpMessage(status) {
 async function syncNow({ silent = false } = {}) {
   if (!sync.enabled || syncing) return;
   syncing = true;
-  renderSyncView();
+  renderSettingsView();
   try {
     if (!sync.gistId) sync.gistId = await findGist();
 
@@ -504,7 +531,7 @@ async function syncNow({ silent = false } = {}) {
   } finally {
     syncing = false;
     renderSyncBanner();
-    renderSyncView();
+    renderSettingsView();
   }
 }
 
@@ -516,9 +543,9 @@ function scheduleSync() {
 }
 
 function refreshCurrentView() {
-  if ($('#view-recipe').classList.contains('active') && currentRecipeId) renderRecipe(currentRecipeId);
-  else if ($('#view-category').classList.contains('active') && currentCategory) renderCategory(currentCategory);
-  else renderSummary();
+  if (screen.name === 'recipe' && currentRecipeId) renderRecipe(currentRecipeId);
+  else if (screen.name === 'category' && currentCategory) renderCategory(currentCategory);
+  else if (screen.name === 'home') renderSummary();
 }
 
 // ---------- Affichage de l'état ----------
@@ -538,13 +565,13 @@ function renderSyncBanner() {
     banner.innerHTML = `<span>⚠️ Synchronisation en panne : ${escapeHtml(sync.error)}</span>
       <button type="button" id="banner-fix">Réparer</button>`;
     banner.classList.remove('hidden');
-    $('#banner-fix').addEventListener('click', showSyncView);
+    $('#banner-fix').addEventListener('click', showSettings);
   } else {
     banner.classList.add('hidden');
   }
 }
 
-function renderSyncView() {
+function renderSettingsView() {
   const status = $('#sync-status');
   status.classList.toggle('error', Boolean(sync.error));
   $('#sync-on').classList.toggle('hidden', !sync.enabled);
@@ -579,16 +606,13 @@ function renderSyncView() {
     : '';
 }
 
-function showSyncView() {
-  renderSyncView();
-  showView('sync', 'Synchronisation');
+function showSettings() {
+  activationError = '';
+  goTo({ name: 'settings' });
 }
 
 // ---------- Boutons de la vue synchro ----------
-$('#btn-sync-view').addEventListener('click', () => {
-  activationError = '';
-  showSyncView();
-});
+$('#btn-settings').addEventListener('click', showSettings);
 
 $('#btn-sync-on').addEventListener('click', async () => {
   const token = $('#f-token').value.trim();
@@ -603,7 +627,7 @@ $('#btn-sync-on').addEventListener('click', async () => {
     sync.token = '';     // clé invalide : inutile de la conserver
     sync.error = '';
     $('#f-token').value = token;
-    renderSyncView();
+    renderSettingsView();
   }
 });
 
@@ -613,7 +637,7 @@ $('#btn-sync-off').addEventListener('click', () => {
   if (!confirm('Désactiver la synchronisation ? Tes recettes restent sur cet appareil et en ligne.')) return;
   sync.token = '';
   sync.error = '';
-  renderSyncView();
+  renderSettingsView();
   renderSyncBanner();
   toast('Synchronisation désactivée');
 });
@@ -626,7 +650,7 @@ document.addEventListener('visibilitychange', () => {
 // ---------- Démarrage ----------
 fillCategorySelect();
 goHome();
-renderSyncView();
+renderSettingsView();
 renderSyncBanner();
 if (sync.enabled) syncNow({ silent: true });
 
