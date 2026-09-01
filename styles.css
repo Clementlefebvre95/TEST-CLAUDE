@@ -3,14 +3,13 @@
    ============================================================ */
 
 :root {
-  --bg: #fdf3f7;
-  --paper: #fffcfd;
-  --ink: #3d2f34;
-  --ink-soft: #937783;
-  --line: #f2dde5;
-  --accent: #a55c79;          /* rose poudré, assez foncé pour rester lisible */
-  --accent-tint: #e08aa6;     /* le rose de l'icône, pour les touches décoratives */
-  --accent-soft: #f9e6ed;
+  --bg: #fdf0f4;
+  --paper: #ffffff;
+  --ink: #3a2b31;
+  --ink-soft: #8b6a76;
+  --line: #f3dbe3;
+  --accent: #c0466f;
+  --accent-soft: #fce6ee;
   --danger: #b3352c;
   --radius: 14px;
   --shadow: 0 2px 10px rgba(150, 70, 100, .08);
@@ -121,7 +120,6 @@ main { max-width: 720px; margin: 0 auto; padding: 16px 14px 24px; }
 }
 .cat-card:active { transform: scale(.98); }
 .cat-card .emoji { font-size: 1.7rem; }
-.cat-card { border-top: 3px solid var(--accent-tint); }
 .cat-card .name { font-weight: 600; font-size: 1.02rem; }
 .cat-card .count { color: var(--ink-soft); font-size: .85rem; }
 
@@ -186,7 +184,6 @@ main { max-width: 720px; margin: 0 auto; padding: 16px 14px 24px; }
   font-weight: 600;
 }
 .recipe-detail h3 {
-  color: var(--accent);
   margin: 22px 0 8px;
   font-size: 1.05rem;
   border-bottom: 1px solid var(--line);
