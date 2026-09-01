@@ -13,7 +13,10 @@ Ouvre `index.html` dans ton navigateur (double-clic sur le fichier suffit).
 - **‹** en haut à gauche : revenir à l'écran précédent (une recette ramène à sa
   catégorie). Le bouton disparaît sur le sommaire.
 - **⚙️ Réglages** en bas du sommaire : sauvegarde, restauration et synchro.
-- **Recherche** : cherche dans les titres, les ingrédients et les notes.
+- **Recherche** : cherche dans les titres, les ingrédients, la catégorie et les
+  notes, sans tenir compte des accents ni de la casse (« pates » trouve
+  « Pâtes »). Les résultats sont classés : titres commençant par la recherche,
+  puis les autres titres, puis les ingrédients, la catégorie et les notes.
 - **Modifier / Supprimer** : depuis la fiche d'une recette.
 
 ## Mettre l'app sur ton ordinateur
@@ -108,4 +111,4 @@ Elle s'ouvre ensuite comme une vraie application, même sans connexion.
 | `index.html` | structure des écrans |
 | `styles.css` | mise en forme |
 | `app.js` | logique (stockage, navigation, recherche) |
-| `manifest.json`, `sw.js`, `icon.svg` | installation + mode hors ligne |
+| `manifest.json`, `sw.js`, `icon.svg`, `icon-*.png` | installation + mode hors ligne |

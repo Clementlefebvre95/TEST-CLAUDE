@@ -62,6 +62,17 @@ function escapeHtml(str) {
   })[ch]);
 }
 
+// Enlève les accents et la casse : « Pâtes » et « pates » deviennent identiques.
+function normalize(str) {
+  return String(str ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/œ/gi, 'oe')
+    .replace(/æ/gi, 'ae')
+    .toLowerCase()
+    .trim();
+}
+
 function toLines(text) {
   return String(text ?? '')
     .split('\n')
@@ -178,9 +189,9 @@ function renderSummary() {
 }
 
 // ---------- Ligne de recette ----------
-function rowHtml(r) {
+function rowHtml(r, where = '') {
   const cat = catById(r.category);
-  const meta = [cat.name, r.time, r.servings].filter(Boolean).join(' · ');
+  const meta = [cat.name, r.time, r.servings, where].filter(Boolean).join(' · ');
   return `
     <button class="recipe-row" data-id="${r.id}">
       <span class="dot">${cat.emoji}</span>
@@ -318,8 +329,26 @@ function deleteRecipe(id) {
 }
 
 // ---------- Recherche ----------
+// Les résultats sont classés : d'abord les titres qui commencent par la
+// recherche, puis les autres titres, puis les ingrédients, la catégorie et les
+// notes. À rang égal, ordre alphabétique.
+function scoreRecipe(r, q) {
+  const title = normalize(r.title);
+  if (title.startsWith(q)) return { rank: 0, where: '' };
+  if (new RegExp('\\b' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(title)) return { rank: 1, where: '' };
+  if (title.includes(q)) return { rank: 2, where: '' };
+
+  const ingredients = (r.ingredients || []).map(normalize);
+  if (ingredients.some(i => i.startsWith(q))) return { rank: 3, where: 'dans les ingrédients' };
+  if (ingredients.some(i => i.includes(q))) return { rank: 4, where: 'dans les ingrédients' };
+
+  if (normalize(catById(r.category).name).includes(q)) return { rank: 5, where: '' };
+  if (normalize(r.notes).includes(q)) return { rank: 6, where: 'dans les notes' };
+  return null;
+}
+
 $('#search').addEventListener('input', e => {
-  const q = e.target.value.trim().toLowerCase();
+  const q = normalize(e.target.value);
   const box = $('#search-results');
 
   if (!q) {
@@ -328,19 +357,17 @@ $('#search').addEventListener('input', e => {
     return;
   }
 
-  const found = recipes.filter(r => {
-    const haystack = [r.title, catById(r.category).name, ...(r.ingredients || []), r.notes]
-      .join(' ')
-      .toLowerCase();
-    return haystack.includes(q);
-  });
+  const found = recipes
+    .map(r => ({ recipe: r, ...(scoreRecipe(r, q) || {}) }))
+    .filter(x => x.rank !== undefined)
+    .sort((a, b) => a.rank - b.rank || a.recipe.title.localeCompare(b.recipe.title, 'fr'));
 
   $('#summary').classList.add('hidden');
   box.classList.remove('hidden');
   box.innerHTML = found.length
     ? `<h2 class="section-title">${found.length} résultat${found.length > 1 ? 's' : ''}</h2>
-       <div class="recipe-list">${found.map(rowHtml).join('')}</div>`
-    : `<div class="empty">Aucune recette ne correspond à « ${escapeHtml(q)} ».</div>`;
+       <div class="recipe-list">${found.map(x => rowHtml(x.recipe, x.where)).join('')}</div>`
+    : `<div class="empty">Aucune recette ne correspond à « ${escapeHtml(e.target.value.trim())} ».</div>`;
   bindRows(box);
 });
 

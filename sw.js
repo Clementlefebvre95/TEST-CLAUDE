@@ -1,6 +1,6 @@
 // Service worker — permet d'ouvrir le livre de recettes hors connexion.
-const CACHE = 'livre-recettes-v1';
-const ASSETS = ['./', './index.html', './styles.css', './app.js', './manifest.json', './icon.svg'];
+const CACHE = 'livre-recettes-v2';
+const ASSETS = ['./', './index.html', './styles.css', './app.js', './manifest.json', './icon.svg', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

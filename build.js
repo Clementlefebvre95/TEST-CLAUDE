@@ -10,8 +10,8 @@ const js = fs.readFileSync('app.js', 'utf8');
 const single = html
   .replace('<link rel="stylesheet" href="styles.css" />', `<style>\n${css}\n</style>`)
   .replace('<link rel="manifest" href="manifest.json" />', '')
-  .replace('<link rel="icon" href="icon.svg" type="image/svg+xml" />', '')
-  .replace('<link rel="apple-touch-icon" href="icon.svg" />', '')
+  // le fichier unique n'embarque aucune image : on retire tous les liens d'icône
+  .replace(/\s*<link rel="(icon|apple-touch-icon)"[^>]*>/g, '')
   .replace('<script src="app.js"></script>', `<script>\n${js}\n</script>`)
   // pas de service worker ni de manifeste dans la version fichier unique
   .replace(/\n?\s*if \('serviceWorker' in navigator\) \{[\s\S]*?\n\}/, '');
