@@ -1,563 +1,558 @@
 // ============================================================
-// Mon Carnet de Vocabulaire - vanilla JS, localStorage
-// Anglais / Espagnol : mots, leçon du jour, phrase du jour, révision
+// Mes Mots — vocabulaire anglais / espagnol
+// 3 pages : mes mots · le contenu du jour · la révision
+// Tout est enregistré dans le navigateur, et en ligne si possible.
 // ============================================================
 
-const LANGS = {
-  en: {
-    code: 'en',
-    nom: 'Anglais',
-    adjectif: 'anglais',
-    drapeau: '🇬🇧',
-    voix: 'en-GB',
-    lecons: LESSONS_EN,
-    phrases: SENTENCES_EN,
-  },
-  es: {
-    code: 'es',
-    nom: 'Espagnol',
-    adjectif: 'espagnol',
-    drapeau: '🇪🇸',
-    voix: 'es-ES',
-    lecons: LESSONS_ES,
-    phrases: SENTENCES_ES,
-  },
+const LANGUES = {
+  en: { nom: 'Anglais', adjectif: 'anglais', drapeau: '🇬🇧', voix: 'en-GB', lecons: LESSONS_EN, phrases: SENTENCES_EN },
+  es: { nom: 'Espagnol', adjectif: 'espagnol', drapeau: '🇪🇸', voix: 'es-ES', lecons: LESSONS_ES, phrases: SENTENCES_ES },
 };
 
-const STORE_KEYS = {
-  lang: 'voc_last_lang',        // la langue retrouvée à la reconnexion
-  words: lang => `voc_words_${lang}`,
-  stats: 'voc_stats',           // { streak, lastDay, jours: n }
+const CLES = {
+  langue: 'voc_last_lang',
+  mots: code => `voc_words_${code}`,
+  masque: 'voc_masque',
+  jeton: 'voc_gh_token',
+  gist: 'voc_gh_gist',
+  maj: 'voc_sync_last',
 };
 
-const MAX_BOX = 5;              // un mot est "maîtrisé" arrivé à la boîte 5
-const SESSION_SIZE = 20;
+const NIVEAU_MAX = 5;     // un mot atteint « maîtrisé » à la 5e réussite d'affilée
+const TAILLE_SERIE = 20;
 
-// ---------- Stockage ----------
+const $ = id => document.getElementById(id);
+
+// ---------- Stockage local ----------
 const store = {
-  get(key, fallback) {
-    try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
-    catch { return fallback; }
+  get(cle, defaut) {
+    try { return JSON.parse(localStorage.getItem(cle)) ?? defaut; }
+    catch { return defaut; }
   },
-  set(key, value) {
-    try { localStorage.setItem(key, JSON.stringify(value)); }
-    catch { /* quota plein ou mode privé : on ignore */ }
+  set(cle, valeur) {
+    try { localStorage.setItem(cle, JSON.stringify(valeur)); } catch {}
   },
-  remove(key) {
-    try { localStorage.removeItem(key); } catch {}
-  },
+  remove(cle) { try { localStorage.removeItem(cle); } catch {} },
 };
 
 // ---------- État ----------
-let currentLang = LANGS[store.get(STORE_KEYS.lang, 'en')] ? store.get(STORE_KEYS.lang, 'en') : 'en';
-let dayOffset = 0;              // 0 = aujourd'hui, -1 = hier, etc.
-let editingId = null;           // mot en cours de modification
-let session = { queue: [], index: 0, revealed: false, done: 0, bons: 0 };
+let langue = LANGUES[store.get(CLES.langue, 'en')] ? store.get(CLES.langue, 'en') : 'en';
+let masque = store.get(CLES.masque, false);
+let devoiles = new Set();           // mots révélés un par un quand tout est masqué
+let serie = { cartes: [], i: 0, vue: false, bons: 0 };
 
-const lang = () => LANGS[currentLang];
+const L = () => LANGUES[langue];
 
 // ---------- Utilitaires ----------
-const $ = id => document.getElementById(id);
-
-function escapeHtml(str) {
-  return String(str ?? '').replace(/[&<>"']/g, c => (
-    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
-  ));
+function html(texte) {
+  return String(texte ?? '').replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-function uid() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-}
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
-// Numéro de jour stable (minuit local), sert à faire tourner le contenu
-function dayNumber(offset = 0) {
-  const now = new Date();
-  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset);
-  // ms du minuit local ramenés en UTC : donne un entier qui augmente de 1 par jour
+// Entier qui augmente de 1 chaque jour : sert à faire tourner leçon et phrase
+function numeroDuJour() {
+  const n = new Date();
+  const d = new Date(n.getFullYear(), n.getMonth(), n.getDate());
   return Math.round((d.getTime() - d.getTimezoneOffset() * 60000) / 86400000);
 }
 
-function pickOfTheDay(list, offset, decalage) {
-  const n = dayNumber(offset) + decalage;
-  return list[((n % list.length) + list.length) % list.length];
+function duJour(liste, decalage) {
+  const n = numeroDuJour() + decalage;
+  return liste[((n % liste.length) + liste.length) % liste.length];
 }
 
-function formatDate(offset) {
-  const now = new Date();
-  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset);
-  const texte = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-  return texte.charAt(0).toUpperCase() + texte.slice(1);
-}
-
-// Premier clic : le bouton demande confirmation. Second clic : on exécute.
-function confirmerDeuxTemps(btn, texteConfirmation, action) {
-  if (btn.dataset.arme === '1') {
-    clearTimeout(btn._armeTimer);
-    btn.textContent = btn.dataset.texteInitial;
-    btn.dataset.arme = '';
-    btn.classList.remove('arme');
-    action();
-    return;
-  }
-  btn.dataset.texteInitial = btn.textContent;
-  btn.dataset.arme = '1';
-  btn.textContent = texteConfirmation;
-  btn.classList.add('arme');
-  btn._armeTimer = setTimeout(() => {
-    btn.textContent = btn.dataset.texteInitial;
-    btn.dataset.arme = '';
-    btn.classList.remove('arme');
-  }, 4000);
-}
-
-function flash(el, message, type = 'ok') {
-  el.textContent = message;
+function message(el, texte, type = 'ok') {
+  el.textContent = texte;
   el.className = `flash ${type}`;
   el.hidden = false;
-  clearTimeout(el._timer);
-  el._timer = setTimeout(() => { el.hidden = true; }, 2600);
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.hidden = true; }, 2600);
 }
 
-function speak(text) {
+function parler(texte) {
   if (!('speechSynthesis' in window)) return;
   try {
     speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = lang().voix;
+    const u = new SpeechSynthesisUtterance(texte);
+    u.lang = L().voix;
     u.rate = 0.9;
     speechSynthesis.speak(u);
-  } catch { /* voix indisponible : tant pis */ }
+  } catch {}
 }
 
-// ---------- Mots ----------
-function getWords(code = currentLang) {
-  const list = store.get(STORE_KEYS.words(code), []);
-  return Array.isArray(list) ? list : [];
-}
-
-function saveWords(list, code = currentLang) {
-  store.set(STORE_KEYS.words(code), list);
-  if (typeof scheduleSync === 'function') scheduleSync();
-}
-
-function addWord({ mot, trad, note }) {
-  const list = getWords();
-  const doublon = list.find(w => w.mot.toLowerCase().trim() === mot.toLowerCase().trim());
-  if (doublon) return { ok: false, raison: 'doublon' };
-
-  list.unshift({
-    id: uid(),
-    mot: mot.trim(),
-    trad: trad.trim(),
-    note: (note || '').trim(),
-    box: 1,
-    vus: 0,
-    bons: 0,
-    cree: Date.now(),
-    revu: null,
-  });
-  saveWords(list);
-  return { ok: true };
-}
-
-function updateWord(id, patch) {
-  const list = getWords();
-  const w = list.find(x => x.id === id);
-  if (!w) return;
-  Object.assign(w, patch);
-  saveWords(list);
-}
-
-function deleteWord(id) {
-  saveWords(getWords().filter(w => w.id !== id));
-}
-
-// ---------- Langue ----------
-function setLang(code) {
-  if (!LANGS[code]) return;
-  currentLang = code;
-  store.set(STORE_KEYS.lang, code);
-  document.body.dataset.lang = code;
-
-  document.querySelectorAll('.lang-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.lang === code);
-  });
-
-  $('quick-word').placeholder = `Mot en ${lang().adjectif}`;
-  $('word-label').textContent = `Mot en ${lang().adjectif}`;
-  $('list-title').textContent = `Mes mots — ${lang().nom}`;
-  cancelEdit();
-  renderAll();
-}
-
-function renderAll() {
-  renderToday();
-  renderWordList();
-  startSession();
-  renderStats();
-}
-
-// ---------- Vue Aujourd'hui ----------
-function renderToday() {
-  const L = lang();
-  const lecon = pickOfTheDay(L.lecons, dayOffset, currentLang === 'es' ? 7 : 0);
-  const phrase = pickOfTheDay(L.phrases, dayOffset, currentLang === 'es' ? 11 : 3);
-
-  $('day-label').textContent = dayOffset === 0
-    ? `Aujourd'hui — ${formatDate(0)}`
-    : formatDate(dayOffset);
-  $('day-next').disabled = dayOffset >= 0;
-  $('day-today').hidden = dayOffset === 0;
-
-  const tableau = lecon.tableau ? `
-    <div class="conj">
-      <p class="conj-title">${escapeHtml(lecon.tableau.titre)}</p>
-      <table>
-        ${lecon.tableau.lignes.map(([g, d]) => `
-          <tr><th>${escapeHtml(g)}</th><td>${escapeHtml(d)}</td></tr>`).join('')}
-      </table>
-    </div>` : '';
-
-  $('lesson-card').innerHTML = `
-    <div class="card-head">
-      <span class="badge">${L.drapeau} Leçon du jour</span>
-      <span class="tag">${escapeHtml(lecon.categorie)}</span>
-    </div>
-    <h2>${escapeHtml(lecon.titre)}</h2>
-    <p class="resume">${escapeHtml(lecon.resume)}</p>
-    <ul class="points">
-      ${lecon.points.map(p => `<li>${escapeHtml(p)}</li>`).join('')}
-    </ul>
-    ${tableau}
-    <div class="examples">
-      ${lecon.exemples.map(ex => `
-        <div class="example">
-          <p class="src">${escapeHtml(ex.src)}
-            <button class="mini speak-btn" data-speak="${escapeHtml(ex.src)}" title="Écouter">🔊</button>
-          </p>
-          <p class="fr">${escapeHtml(ex.fr)}</p>
-        </div>`).join('')}
-    </div>
-    ${lecon.astuce ? `<p class="astuce">💡 ${escapeHtml(lecon.astuce)}</p>` : ''}
-  `;
-
-  $('sentence-card').innerHTML = `
-    <div class="card-head">
-      <span class="badge">✍️ Phrase du jour</span>
-    </div>
-    <p class="big-sentence">${escapeHtml(phrase.src)}
-      <button class="mini speak-btn" data-speak="${escapeHtml(phrase.src)}" title="Écouter">🔊</button>
-    </p>
-    <button class="ghost reveal-btn" id="reveal-sentence">Afficher la traduction</button>
-    <div id="sentence-translation" hidden>
-      <p class="fr big">${escapeHtml(phrase.fr)}</p>
-      ${phrase.note ? `<p class="astuce">💡 ${escapeHtml(phrase.note)}</p>` : ''}
-    </div>
-    <div class="form-actions">
-      <button class="primary" id="add-sentence">➕ Ajouter cette phrase à mon carnet</button>
-    </div>
-    <p class="flash" id="sentence-flash" hidden></p>
-  `;
-
-  $('reveal-sentence').addEventListener('click', e => {
-    $('sentence-translation').hidden = false;
-    e.target.hidden = true;
-  });
-
-  $('add-sentence').addEventListener('click', () => {
-    const res = addWord({ mot: phrase.src, trad: phrase.fr, note: phrase.note || '' });
-    const el = $('sentence-flash');
-    if (res.ok) {
-      flash(el, 'Phrase ajoutée à ton carnet ✅');
-      renderWordList();
-      renderStats();
-    } else {
-      flash(el, 'Elle est déjà dans ton carnet.', 'warn');
-    }
-  });
-
-  document.querySelectorAll('#today .speak-btn').forEach(btn => {
-    btn.addEventListener('click', () => speak(btn.dataset.speak));
-  });
-}
-
-// ---------- Vue Vocabulaire ----------
-function renderWordList() {
-  const list = getWords();
-  const recherche = $('search-input').value.toLowerCase().trim();
-  const tri = $('sort-select').value;
-  const filtre = $('filter-select').value;
-
-  let visibles = list.filter(w => {
-    if (filtre === 'mastered' && w.box < MAX_BOX) return false;
-    if (filtre === 'learning' && w.box >= MAX_BOX) return false;
-    if (!recherche) return true;
-    return (w.mot + ' ' + w.trad + ' ' + (w.note || '')).toLowerCase().includes(recherche);
-  });
-
-  if (tri === 'alpha') {
-    visibles.sort((a, b) => a.mot.localeCompare(b.mot, 'fr', { sensitivity: 'base' }));
-  } else if (tri === 'weak') {
-    visibles.sort((a, b) => a.box - b.box || b.cree - a.cree);
-  } else {
-    visibles.sort((a, b) => b.cree - a.cree);
-  }
-
-  const maitrises = list.filter(w => w.box >= MAX_BOX).length;
-  $('word-counter').textContent = list.length
-    ? `${list.length} mot${list.length > 1 ? 's' : ''} · ${maitrises} maîtrisé${maitrises > 1 ? 's' : ''}`
-    : '';
-
-  $('word-empty').hidden = list.length !== 0;
-  $('word-list').innerHTML = visibles.map(w => `
-    <li class="word-item ${w.box >= MAX_BOX ? 'mastered' : ''}" data-id="${w.id}">
-      <div class="word-main">
-        <p class="word-src">${escapeHtml(w.mot)}
-          <button class="mini speak-btn" data-speak="${escapeHtml(w.mot)}" title="Écouter">🔊</button>
-        </p>
-        <p class="word-fr">${escapeHtml(w.trad)}</p>
-        ${w.note ? `<p class="word-note">${escapeHtml(w.note)}</p>` : ''}
-      </div>
-      <div class="word-side">
-        <span class="box-dots" title="Niveau ${w.box} sur ${MAX_BOX}">${
-          '●'.repeat(w.box) + '○'.repeat(MAX_BOX - w.box)
-        }</span>
-        <div class="word-actions">
-          <button class="mini" data-action="edit" title="Modifier">✏️</button>
-          <button class="mini" data-action="delete" title="Supprimer">🗑️</button>
-        </div>
-      </div>
-    </li>`).join('');
-
-  if (list.length && !visibles.length) {
-    $('word-list').innerHTML = '<li class="empty">Aucun mot ne correspond à cette recherche.</li>';
-  }
-}
-
-function startEdit(id) {
-  const w = getWords().find(x => x.id === id);
-  if (!w) return;
-  editingId = id;
-  $('word-input').value = w.mot;
-  $('trad-input').value = w.trad;
-  $('note-input').value = w.note || '';
-  $('word-submit').textContent = 'Enregistrer les modifications';
-  $('word-cancel').hidden = false;
-  $('word-input').focus();
-  $('word-input').scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
-
-function cancelEdit() {
-  editingId = null;
-  $('word-form').reset();
-  $('word-submit').textContent = 'Ajouter au carnet';
-  $('word-cancel').hidden = true;
-}
-
-// ---------- Vue Révision ----------
-function startSession() {
-  const list = getWords();
-  const dir = $('review-direction').value;
-
-  if (!list.length) {
-    $('flashcard').hidden = true;
-    $('review-empty').hidden = false;
-    $('review-empty').textContent = `Ajoute d'abord quelques mots en ${lang().adjectif} pour pouvoir réviser.`;
-    $('review-counter').textContent = '';
+// Premier clic : le bouton demande confirmation. Second clic : on exécute.
+function confirmer(btn, texte, action) {
+  if (btn.dataset.arme === '1') {
+    clearTimeout(btn._t);
+    btn.dataset.arme = '';
+    btn.classList.remove('arme');
+    btn.textContent = btn.dataset.avant;
+    action();
     return;
   }
-
-  // Priorité aux mots peu maîtrisés, puis aux moins récemment revus
-  const queue = [...list]
-    .sort((a, b) => a.box - b.box || (a.revu || 0) - (b.revu || 0))
-    .slice(0, SESSION_SIZE)
-    .sort(() => Math.random() - 0.5)
-    .map(w => ({
-      id: w.id,
-      sens: dir === 'mix' ? (Math.random() < 0.5 ? 'src2fr' : 'fr2src') : dir,
-    }));
-
-  session = { queue, index: 0, revealed: false, done: 0, bons: 0 };
-  $('review-empty').hidden = true;
-  $('flashcard').hidden = false;
-  renderCard();
+  btn.dataset.avant = btn.textContent;
+  btn.dataset.arme = '1';
+  btn.classList.add('arme');
+  btn.textContent = texte;
+  btn._t = setTimeout(() => {
+    btn.dataset.arme = '';
+    btn.classList.remove('arme');
+    btn.textContent = btn.dataset.avant;
+  }, 4000);
 }
 
-function renderCard() {
-  const total = session.queue.length;
+// ---------- Les mots ----------
+const lireMots = (code = langue) => {
+  const l = store.get(CLES.mots(code), []);
+  return Array.isArray(l) ? l : [];
+};
 
-  if (session.index >= total) {
-    $('flashcard').hidden = true;
-    $('review-empty').hidden = false;
-    $('review-empty').innerHTML = total
-      ? `🎉 Série terminée : ${session.bons} / ${total} de réussite.<br>Lance une nouvelle série quand tu veux.`
-      : '';
-    $('review-counter').textContent = '';
-    renderWordList();
-    renderStats();
-    return;
-  }
-
-  const item = session.queue[session.index];
-  const w = getWords().find(x => x.id === item.id);
-  if (!w) { session.index++; return renderCard(); }
-
-  const versFr = item.sens === 'src2fr';
-  $('flash-question').textContent = versFr ? w.mot : w.trad;
-  $('flash-answer-text').textContent = versFr ? w.trad : w.mot;
-  $('flash-note').textContent = w.note || '';
-  $('flash-note').hidden = !w.note;
-
-  $('flash-speak').hidden = !versFr;
-  $('flash-speak').onclick = () => speak(w.mot);
-
-  $('flash-answer').hidden = true;
-  $('flash-reveal').hidden = false;
-  $('grade-row').hidden = true;
-  session.revealed = false;
-
-  $('review-progress').textContent = `Carte ${session.index + 1} sur ${total}`;
-  $('review-counter').textContent = `${session.bons} bonne${session.bons > 1 ? 's' : ''} réponse${session.bons > 1 ? 's' : ''}`;
+function ecrireMots(liste, code = langue) {
+  store.set(CLES.mots(code), liste);
+  planifierSauvegarde();
 }
 
-function revealCard() {
-  session.revealed = true;
-  $('flash-answer').hidden = false;
-  $('flash-reveal').hidden = true;
-  $('grade-row').hidden = false;
-  const item = session.queue[session.index];
-  if (item.sens === 'fr2src') {
-    const w = getWords().find(x => x.id === item.id);
-    if (w) { $('flash-speak').hidden = false; $('flash-speak').onclick = () => speak(w.mot); }
-  }
+function ajouterMot(mot, trad, note = '') {
+  const liste = lireMots();
+  if (liste.some(m => m.mot.toLowerCase().trim() === mot.toLowerCase().trim())) return false;
+  liste.unshift({
+    id: uid(), mot: mot.trim(), trad: trad.trim(), note: note.trim(),
+    niveau: 1, vus: 0, bons: 0, cree: Date.now(), revu: null,
+  });
+  ecrireMots(liste);
+  return true;
 }
 
-function gradeCard(reussi) {
-  const item = session.queue[session.index];
-  const w = getWords().find(x => x.id === item.id);
-  if (w) {
-    updateWord(w.id, {
-      box: reussi ? Math.min(MAX_BOX, w.box + 1) : 1,
-      vus: (w.vus || 0) + 1,
-      bons: (w.bons || 0) + (reussi ? 1 : 0),
-      revu: Date.now(),
-    });
-  }
-  if (reussi) session.bons++;
-  session.done++;
-  session.index++;
-  renderCard();
+function majMot(id, champs) {
+  const liste = lireMots();
+  const m = liste.find(x => x.id === id);
+  if (!m) return;
+  Object.assign(m, champs);
+  ecrireMots(liste);
 }
 
-// ---------- Vue Réglages ----------
-function renderStats() {
-  const bloc = Object.values(LANGS).map(L => {
-    const list = getWords(L.code);
-    const maitrises = list.filter(w => w.box >= MAX_BOX).length;
-    const revisions = list.reduce((n, w) => n + (w.vus || 0), 0);
-    return `
-      <div class="stat">
-        <p class="stat-num">${list.length}</p>
-        <p class="stat-label">${L.drapeau} mots en ${L.adjectif}</p>
-        <p class="muted small">${maitrises} maîtrisé${maitrises > 1 ? 's' : ''} · ${revisions} révision${revisions > 1 ? 's' : ''}</p>
-      </div>`;
-  }).join('');
+const supprimerMot = id => ecrireMots(lireMots().filter(m => m.id !== id));
 
-  const s = store.get(STORE_KEYS.stats, { jours: 0, streak: 0 });
-  $('stats-grid').innerHTML = bloc + `
-    <div class="stat">
-      <p class="stat-num">${s.streak || 0}</p>
-      <p class="stat-label">🔥 jours d'affilée</p>
-      <p class="muted small">${s.jours || 0} jour${(s.jours || 0) > 1 ? 's' : ''} d'apprentissage au total</p>
-    </div>`;
-}
-
-function trackVisit() {
-  const today = dayNumber(0);
-  const s = store.get(STORE_KEYS.stats, { jours: 0, streak: 0, lastDay: null });
-  if (s.lastDay === today) return;
-  s.streak = s.lastDay === today - 1 ? (s.streak || 0) + 1 : 1;
-  s.jours = (s.jours || 0) + 1;
-  s.lastDay = today;
-  store.set(STORE_KEYS.stats, s);
-}
-
-function snapshot() {
+function normaliser(m) {
   return {
-    format: 'carnet-vocabulaire-v1',
-    exporte: new Date().toISOString(),
-    langue: currentLang,
-    mots: { en: getWords('en'), es: getWords('es') },
-    stats: store.get(STORE_KEYS.stats, {}),
+    id: m.id || uid(),
+    mot: String(m.mot).trim(),
+    trad: String(m.trad).trim(),
+    note: String(m.note || '').trim(),
+    niveau: Math.min(NIVEAU_MAX, Math.max(1, Number(m.niveau ?? m.box) || 1)),
+    vus: Number(m.vus) || 0,
+    bons: Number(m.bons) || 0,
+    cree: Number(m.cree) || Date.now(),
+    revu: Number(m.revu) || null,
   };
 }
 
-function normalizeWord(w) {
-  return {
-    id: w.id || uid(),
-    mot: String(w.mot).trim(),
-    trad: String(w.trad).trim(),
-    note: String(w.note || '').trim(),
-    box: Math.min(MAX_BOX, Math.max(1, Number(w.box) || 1)),
-    vus: Number(w.vus) || 0,
-    bons: Number(w.bons) || 0,
-    cree: Number(w.cree) || Date.now(),
-    revu: Number(w.revu) || null,
-  };
-}
-
-// Fusionne des mots venus d'ailleurs (fichier ou cloud) dans le carnet local.
-// Rien n'est jamais écrasé : on garde le meilleur niveau et le plus d'infos.
-function mergeWords(motsParLangue) {
-  let ajoutes = 0, fusionnes = 0;
+// Fusionne des mots venus d'ailleurs : rien n'est écrasé, on garde le meilleur niveau
+function fusionner(parLangue) {
+  let ajoutes = 0, majs = 0;
 
   ['en', 'es'].forEach(code => {
-    const entrants = Array.isArray(motsParLangue?.[code]) ? motsParLangue[code] : [];
+    const entrants = Array.isArray(parLangue?.[code]) ? parLangue[code] : [];
     if (!entrants.length) return;
 
-    const locaux = getWords(code);
-    const index = new Map(locaux.map(w => [w.mot.toLowerCase().trim(), w]));
+    const locaux = lireMots(code);
+    const index = new Map(locaux.map(m => [m.mot.toLowerCase().trim(), m]));
 
     entrants.forEach(brut => {
       if (!brut || !brut.mot || !brut.trad) return;
-      const w = normalizeWord(brut);
-      const existant = index.get(w.mot.toLowerCase());
-
-      if (!existant) {
-        locaux.push(w);
-        index.set(w.mot.toLowerCase(), w);
+      const m = normaliser(brut);
+      const deja = index.get(m.mot.toLowerCase());
+      if (!deja) {
+        locaux.push(m);
+        index.set(m.mot.toLowerCase(), m);
         ajoutes++;
       } else {
-        const avant = JSON.stringify(existant);
-        existant.box = Math.max(existant.box, w.box);
-        existant.vus = Math.max(existant.vus || 0, w.vus);
-        existant.bons = Math.max(existant.bons || 0, w.bons);
-        existant.cree = Math.min(existant.cree || Date.now(), w.cree);
-        existant.revu = Math.max(existant.revu || 0, w.revu || 0) || null;
-        if (!existant.note && w.note) existant.note = w.note;
-        if (JSON.stringify(existant) !== avant) fusionnes++;
+        const avant = JSON.stringify(deja);
+        deja.niveau = Math.max(deja.niveau, m.niveau);
+        deja.vus = Math.max(deja.vus || 0, m.vus);
+        deja.bons = Math.max(deja.bons || 0, m.bons);
+        deja.cree = Math.min(deja.cree || Date.now(), m.cree);
+        deja.revu = Math.max(deja.revu || 0, m.revu || 0) || null;
+        if (!deja.note && m.note) deja.note = m.note;
+        if (JSON.stringify(deja) !== avant) majs++;
       }
     });
 
-    saveWords(locaux, code);
+    store.set(CLES.mots(code), locaux);
   });
 
-  return { ajoutes, fusionnes };
+  return { ajoutes, majs };
 }
 
-async function exportData() {
-  const texte = JSON.stringify(snapshot(), null, 2);
-  const nom = `carnet-vocabulaire-${new Date().toISOString().slice(0, 10)}.json`;
+const contenu = () => ({
+  format: 'mes-mots-v1',
+  exporte: new Date().toISOString(),
+  mots: { en: lireMots('en'), es: lireMots('es') },
+});
 
-  // Dans un Artifact publié, seul le canal officiel peut remettre un fichier
-  const downloads = await capaciteClaude('downloads');
-  if (downloads) {
-    try {
-      await downloads.save({ filename: nom, data: texte });
-      flash($('settings-flash'), 'Carnet exporté ✅');
-    } catch {
-      flash($('settings-flash'), 'Export annulé.', 'warn');
+// ---------- Page 1 : mes mots ----------
+function afficherMots() {
+  const liste = lireMots();
+  const recherche = $('recherche').value.toLowerCase().trim();
+  const visibles = recherche
+    ? liste.filter(m => (m.mot + ' ' + m.trad + ' ' + m.note).toLowerCase().includes(recherche))
+    : liste;
+
+  const maitrises = liste.filter(m => m.niveau >= NIVEAU_MAX).length;
+  $('compteur').textContent = liste.length
+    ? `${liste.length} mot${liste.length > 1 ? 's' : ''}${maitrises ? ` · ${maitrises} maîtrisé${maitrises > 1 ? 's' : ''}` : ''}`
+    : '';
+  $('vide').hidden = liste.length > 0;
+
+  $('mots').innerHTML = visibles.map(m => {
+    const cache = masque && !devoiles.has(m.id);
+    const trad = cache
+      ? `<button class="masque" data-voir="${m.id}">• • •</button>`
+      : `<span>${html(m.trad)}</span>`;
+    return `
+      <li class="word-item ${m.niveau >= NIVEAU_MAX ? 'ok' : ''}" data-id="${m.id}">
+        <div class="word-info">
+          <div class="word-src">${html(m.mot)}</div>
+          <div class="word-fr">${trad}${m.note ? ` <em>— ${html(m.note)}</em>` : ''}</div>
+        </div>
+        <span class="level">${'●'.repeat(m.niveau)}${'○'.repeat(NIVEAU_MAX - m.niveau)}</span>
+        <button class="icon" data-dire="${html(m.mot)}" title="Écouter">🔊</button>
+        <button class="icon" data-suppr="1" title="Supprimer">🗑️</button>
+      </li>`;
+  }).join('');
+
+  if (liste.length && !visibles.length) {
+    $('mots').innerHTML = '<li class="empty">Aucun mot ne correspond.</li>';
+  }
+
+  $('toggle-trad').textContent = masque ? '👁️ Montrer les traductions' : '🙈 Cacher les traductions';
+  $('toggle-trad').classList.toggle('on', masque);
+}
+
+// ---------- Page 2 : le contenu du jour ----------
+function afficherJour() {
+  const lecon = duJour(L().lecons, langue === 'es' ? 7 : 0);
+  const phrase = duJour(L().phrases, langue === 'es' ? 11 : 3);
+
+  const date = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  $('date-jour').textContent = date.charAt(0).toUpperCase() + date.slice(1);
+
+  $('phrase').textContent = phrase.src;
+  $('phrase-fr').textContent = phrase.fr;
+  $('phrase-note').textContent = phrase.note ? `💡 ${phrase.note}` : '';
+  $('phrase-note').hidden = !phrase.note;
+  $('bloc-trad').hidden = true;
+  $('voir-trad').hidden = false;
+  $('ecouter-phrase').dataset.dire = phrase.src;
+  $('ajouter-phrase').dataset.mot = phrase.src;
+  $('ajouter-phrase').dataset.trad = phrase.fr;
+  $('ajouter-phrase').dataset.note = phrase.note || '';
+
+  $('lecon-cat').textContent = `${L().drapeau} ${lecon.categorie}`;
+  $('lecon-titre').textContent = lecon.titre;
+  $('lecon-resume').textContent = lecon.resume;
+
+  $('lecon-tableau').innerHTML = lecon.tableau ? `
+    <div class="conj">
+      <p class="conj-title">${html(lecon.tableau.titre)}</p>
+      <table>${lecon.tableau.lignes.map(([g, d]) =>
+        `<tr><th>${html(g)}</th><td>${html(d)}</td></tr>`).join('')}</table>
+    </div>` : '';
+
+  $('lecon-exemples').innerHTML = lecon.exemples.map(ex => `
+    <div class="example">
+      <p class="src">${html(ex.src)}
+        <button class="icon" data-dire="${html(ex.src)}" title="Écouter">🔊</button>
+      </p>
+      <p class="fr">${html(ex.fr)}</p>
+    </div>`).join('');
+
+  $('lecon-astuce').textContent = lecon.astuce ? `💡 ${lecon.astuce}` : '';
+  $('lecon-astuce').hidden = !lecon.astuce;
+  $('lecon-points').innerHTML = lecon.points.map(p => `<li>${html(p)}</li>`).join('');
+}
+
+// ---------- Page 3 : révision ----------
+function nouvelleSerie() {
+  const liste = lireMots();
+  const sens = $('sens').value;
+
+  if (!liste.length) {
+    $('carte').hidden = true;
+    $('revision-vide').hidden = false;
+    $('revision-vide').textContent = `Ajoute d'abord quelques mots en ${L().adjectif}.`;
+    $('score').textContent = '';
+    return;
+  }
+
+  const cartes = [...liste]
+    .sort((a, b) => a.niveau - b.niveau || (a.revu || 0) - (b.revu || 0))
+    .slice(0, TAILLE_SERIE)
+    .sort(() => Math.random() - 0.5)
+    .map(m => ({ id: m.id, sens: sens === 'mix' ? (Math.random() < 0.5 ? 'src2fr' : 'fr2src') : sens }));
+
+  serie = { cartes, i: 0, vue: false, bons: 0 };
+  $('revision-vide').hidden = true;
+  $('carte').hidden = false;
+  afficherCarte();
+}
+
+function afficherCarte() {
+  const total = serie.cartes.length;
+
+  if (serie.i >= total) {
+    $('carte').hidden = true;
+    $('revision-vide').hidden = false;
+    $('revision-vide').textContent = `🎉 Série terminée : ${serie.bons} / ${total}. Relance quand tu veux.`;
+    $('score').textContent = '';
+    afficherMots();
+    return;
+  }
+
+  const carte = serie.cartes[serie.i];
+  const m = lireMots().find(x => x.id === carte.id);
+  if (!m) { serie.i++; return afficherCarte(); }
+
+  const versFr = carte.sens === 'src2fr';
+  $('question').textContent = versFr ? m.mot : m.trad;
+  $('reponse-mot').textContent = versFr ? m.trad : m.mot;
+  $('reponse-note').textContent = m.note || '';
+  $('reponse-note').hidden = !m.note;
+  $('ecouter-mot').hidden = !versFr;
+  $('ecouter-mot').dataset.dire = m.mot;
+
+  $('reponse').hidden = true;
+  $('reveler').hidden = false;
+  $('grade').hidden = true;
+  serie.vue = false;
+
+  $('avancement').textContent = `Carte ${serie.i + 1} sur ${total}`;
+  $('score').textContent = serie.bons ? `${serie.bons} bonne${serie.bons > 1 ? 's' : ''}` : '';
+}
+
+function revelerCarte() {
+  serie.vue = true;
+  $('reponse').hidden = false;
+  $('reveler').hidden = true;
+  $('grade').hidden = false;
+  const carte = serie.cartes[serie.i];
+  const m = lireMots().find(x => x.id === carte.id);
+  if (m) { $('ecouter-mot').hidden = false; $('ecouter-mot').dataset.dire = m.mot; }
+}
+
+function noter(reussi) {
+  const carte = serie.cartes[serie.i];
+  const m = lireMots().find(x => x.id === carte.id);
+  if (m) {
+    majMot(m.id, {
+      niveau: reussi ? Math.min(NIVEAU_MAX, m.niveau + 1) : 1,
+      vus: (m.vus || 0) + 1,
+      bons: (m.bons || 0) + (reussi ? 1 : 0),
+      revu: Date.now(),
+    });
+  }
+  if (reussi) serie.bons++;
+  serie.i++;
+  afficherCarte();
+}
+
+// ============================================================
+// Sauvegarde en ligne
+// Deux coffres possibles, choisis automatiquement :
+//  - page publiée comme Artifact Claude : stockage rattaché au compte ;
+//  - page hébergée ailleurs : gist privé du compte GitHub.
+// ============================================================
+
+const FICHIER_GIST = 'mes-mots.json';
+const surClaude = Boolean(window.claude && typeof window.claude.use === 'function');
+
+let coffre = null;
+let coffreResolu = false;
+let minuterie = null;
+let enCours = false;
+
+async function capacite(nom) {
+  try {
+    if (!surClaude) return null;
+    return await window.claude.use(nom);
+  } catch { return null; }
+}
+
+// ---------- Coffre 1 : base de l'Artifact ----------
+function coffreClaude(db) {
+  return {
+    type: 'claude',
+    async pousser() {
+      const c = contenu();
+      await Promise.all(['en', 'es'].map(code =>
+        db.doc(`mots/${code}`).set({ mots: c.mots[code], maj: Date.now() })));
+      store.set(CLES.maj, Date.now());
+    },
+    async tirer() {
+      const snaps = await Promise.all(['en', 'es'].map(code => db.doc(`mots/${code}`).get()));
+      const mots = {};
+      let vide = true;
+      snaps.forEach((s, i) => {
+        const d = s.exists ? s.data() : null;
+        if (d && Array.isArray(d.mots)) { mots[['en', 'es'][i]] = d.mots; vide = false; }
+      });
+      if (vide) return { ajoutes: 0, majs: 0, vide: true };
+      const res = fusionner(mots);
+      store.set(CLES.maj, Date.now());
+      return res;
+    },
+  };
+}
+
+// ---------- Coffre 2 : gist privé GitHub ----------
+const jeton = () => store.get(CLES.jeton, '') || '';
+
+async function gh(chemin, options = {}) {
+  const res = await fetch(`https://api.github.com${chemin}`, {
+    ...options,
+    headers: {
+      Accept: 'application/vnd.github+json',
+      Authorization: `Bearer ${jeton()}`,
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+  });
+  if (!res.ok) throw Object.assign(new Error(`GitHub ${res.status}`), { status: res.status });
+  return res.json();
+}
+
+function coffreGitHub() {
+  const corps = () => ({
+    description: 'Mes Mots — sauvegarde automatique',
+    files: { [FICHIER_GIST]: { content: JSON.stringify(contenu(), null, 2) } },
+  });
+
+  // Retrouve la sauvegarde du compte à partir du seul jeton
+  const chercher = async () => {
+    const gists = await gh('/gists?per_page=100');
+    const trouve = (gists || []).find(g => g.files && g.files[FICHIER_GIST]);
+    return trouve ? trouve.id : '';
+  };
+
+  return {
+    type: 'github',
+    async pousser() {
+      let id = store.get(CLES.gist, '') || (await chercher());
+      try {
+        const res = id
+          ? await gh(`/gists/${id}`, { method: 'PATCH', body: JSON.stringify(corps()) })
+          : await gh('/gists', { method: 'POST', body: JSON.stringify({ ...corps(), public: false }) });
+        store.set(CLES.gist, res.id);
+      } catch (err) {
+        if (err.status !== 404) throw err;
+        const res = await gh('/gists', { method: 'POST', body: JSON.stringify({ ...corps(), public: false }) });
+        store.set(CLES.gist, res.id);
+      }
+      store.set(CLES.maj, Date.now());
+    },
+    async tirer() {
+      const id = store.get(CLES.gist, '') || (await chercher());
+      if (!id) return { ajoutes: 0, majs: 0, vide: true };
+      store.set(CLES.gist, id);
+      const g = await gh(`/gists/${id}`);
+      const f = g.files && g.files[FICHIER_GIST];
+      if (!f) return { ajoutes: 0, majs: 0, vide: true };
+      const texte = f.truncated ? await (await fetch(f.raw_url)).text() : f.content;
+      const res = fusionner(JSON.parse(texte).mots);
+      store.set(CLES.maj, Date.now());
+      return res;
+    },
+  };
+}
+
+function erreur(err) {
+  if (err && err.status === 401) return 'Jeton refusé par GitHub : vérifie qu\'il est copié en entier.';
+  if (err && err.status === 403) return 'GitHub a refusé : la case « gist » est-elle cochée sur le jeton ?';
+  return 'Sauvegarde en ligne impossible pour l\'instant. Tes mots restent sur cet appareil.';
+}
+
+function afficherSauvegarde(etat) {
+  const el = $('sauvegarde');
+  $('bloc-github').hidden = surClaude;
+  $('oublier-sync').hidden = !jeton();
+  $('activer-sync').textContent = jeton() ? 'Mettre à jour le jeton' : 'Activer';
+
+  if (etat) { el.textContent = etat; return; }
+
+  if (!coffre) {
+    el.textContent = surClaude && !coffreResolu
+      ? 'Connexion à ta sauvegarde...'
+      : 'Sauvegarde sur cet appareil seulement';
+    return;
+  }
+
+  const quand = store.get(CLES.maj, 0);
+  if (!quand) { el.textContent = '☁️ Sauvegarde en ligne activée'; return; }
+  const min = Math.round((Date.now() - quand) / 60000);
+  el.textContent = min < 1 ? '☁️ Sauvegardé à l\'instant' : `☁️ Sauvegardé il y a ${min} min`;
+}
+
+async function synchroniser({ silencieux = true } = {}) {
+  if (!coffre || enCours) return;
+  enCours = true;
+  afficherSauvegarde('Synchronisation...');
+  try {
+    const res = await coffre.tirer();
+    await coffre.pousser();
+    toutAfficher();
+    if (!silencieux) {
+      message($('foot-flash'), res.vide
+        ? 'Sauvegarde en ligne activée ✅'
+        : `Synchronisé ✅ (${res.ajoutes} mot(s) récupéré(s))`);
     }
+  } catch (err) {
+    if (!silencieux) message($('foot-flash'), erreur(err), 'warn');
+  } finally {
+    enCours = false;
+    afficherSauvegarde();
+  }
+}
+
+// Sauvegarde automatique, groupée, après chaque modification
+function planifierSauvegarde() {
+  if (!coffre) return;
+  clearTimeout(minuterie);
+  minuterie = setTimeout(async () => {
+    if (enCours) return;
+    enCours = true;
+    afficherSauvegarde('Sauvegarde...');
+    try { await coffre.pousser(); } catch {}
+    finally { enCours = false; afficherSauvegarde(); }
+  }, 2000);
+}
+
+async function initSauvegarde() {
+  if (!surClaude) {
+    coffreResolu = true;
+    if (jeton()) coffre = coffreGitHub();
+    afficherSauvegarde();
+    if (coffre) synchroniser();
+    return;
+  }
+  afficherSauvegarde();
+  const db = await capacite('db');
+  coffreResolu = true;
+  if (db) coffre = coffreClaude(db);
+  afficherSauvegarde();
+  if (coffre) synchroniser();
+}
+
+// ---------- Fichier ----------
+async function exporter() {
+  const texte = JSON.stringify(contenu(), null, 2);
+  const nom = `mes-mots-${new Date().toISOString().slice(0, 10)}.json`;
+
+  const downloads = await capacite('downloads');
+  if (downloads) {
+    try { await downloads.save({ filename: nom, data: texte }); message($('foot-flash'), 'Fichier enregistré ✅'); }
+    catch { message($('foot-flash'), 'Export annulé.', 'warn'); }
     return;
   }
 
@@ -567,444 +562,169 @@ async function exportData() {
   a.download = nom;
   a.click();
   URL.revokeObjectURL(url);
-  flash($('settings-flash'), 'Carnet exporté ✅');
+  message($('foot-flash'), 'Fichier enregistré ✅');
 }
 
-function importData(file) {
-  const reader = new FileReader();
-  reader.onload = () => {
+function importer(fichier) {
+  const lecteur = new FileReader();
+  lecteur.onload = () => {
     try {
-      const data = JSON.parse(reader.result);
+      const data = JSON.parse(lecteur.result);
       if (!data || !data.mots) throw new Error('format');
-      const { ajoutes, fusionnes } = mergeWords(data.mots);
-      flash($('settings-flash'), `${ajoutes} mot(s) importé(s), ${fusionnes} mis à jour ✅`);
-      renderAll();
-      scheduleSync();
+      const { ajoutes, majs } = fusionner(data.mots);
+      message($('foot-flash'), `${ajoutes} mot(s) importé(s), ${majs} mis à jour ✅`);
+      toutAfficher();
+      planifierSauvegarde();
     } catch {
-      flash($('settings-flash'), 'Fichier illisible ou format inattendu.', 'warn');
+      message($('foot-flash'), 'Fichier illisible.', 'warn');
     }
   };
-  reader.readAsText(file);
+  lecteur.readAsText(fichier);
 }
 
-// ============================================================
-// Sauvegarde en ligne
-// Deux coffres possibles, choisis automatiquement :
-//  - publiée comme Artifact Claude : stockage rattaché au compte Claude ;
-//  - hébergée ailleurs (GitHub Pages...) : gist privé du compte GitHub.
-// Dans les deux cas le carnet survit au changement de téléphone.
-// ============================================================
-
-const SYNC_KEYS = { token: 'voc_gh_token', gist: 'voc_gh_gist', last: 'voc_sync_last' };
-const GIST_FILE = 'carnet-vocabulaire.json';
-const GIST_DESC = 'Mon Carnet de Vocabulaire — sauvegarde automatique';
-
-let backend = null;          // { type, push(), pull() }
-let syncTimer = null;
-let syncEnCours = false;
-
-// La page tourne-t-elle dans un Artifact Claude ? (réponse immédiate)
-const surClaude = Boolean(window.claude && typeof window.claude.use === 'function');
-let coffreResolu = false;    // vrai une fois qu'on sait si la base Claude répond
-
-const syncActive = () => Boolean(backend);
-
-// Une capacité Claude n'existe que si la page tourne comme Artifact publié
-async function capaciteClaude(nom) {
-  try {
-    if (!window.claude || typeof window.claude.use !== 'function') return null;
-    return await window.claude.use(nom);
-  } catch { return null; }
+// ---------- Langue et rendu ----------
+function choisirLangue(code) {
+  if (!LANGUES[code]) return;
+  langue = code;
+  store.set(CLES.langue, code);
+  devoiles.clear();
+  document.querySelectorAll('#langues .chip').forEach(c =>
+    c.classList.toggle('active', c.dataset.lang === code));
+  $('mot').placeholder = `Mot en ${L().adjectif}`;
+  $('liste-titre').textContent = `Mes mots en ${L().adjectif}`;
+  toutAfficher();
 }
 
-// ---------- Coffre 1 : base de l'Artifact Claude ----------
-function backendClaude(db) {
-  const doc = code => db.doc(`carnet/${code}`);
-
-  return {
-    type: 'claude',
-    async push() {
-      const instant = snapshot();
-      await Promise.all(['en', 'es'].map(code =>
-        doc(code).set({ mots: instant.mots[code], maj: Date.now() })
-      ));
-      store.set(SYNC_KEYS.last, Date.now());
-      renderSyncUI();
-    },
-    async pull() {
-      const snaps = await Promise.all(['en', 'es'].map(code => doc(code).get()));
-      const mots = {};
-      let vide = true;
-      snaps.forEach((snap, i) => {
-        const code = ['en', 'es'][i];
-        const data = snap.exists ? snap.data() : null;
-        if (data && Array.isArray(data.mots)) { mots[code] = data.mots; vide = false; }
-      });
-      if (vide) return { ajoutes: 0, fusionnes: 0, vide: true };
-      const res = mergeWords(mots);
-      store.set(SYNC_KEYS.last, Date.now());
-      return res;
-    },
-  };
+function toutAfficher() {
+  afficherMots();
+  afficherJour();
+  nouvelleSerie();
 }
 
-// ---------- Coffre 2 : gist privé GitHub ----------
-const ghToken = () => store.get(SYNC_KEYS.token, '') || '';
-const ghGistId = () => store.get(SYNC_KEYS.gist, '') || '';
-
-async function gh(chemin, options = {}) {
-  const res = await fetch(`https://api.github.com${chemin}`, {
-    ...options,
-    headers: {
-      Accept: 'application/vnd.github+json',
-      Authorization: `Bearer ${ghToken()}`,
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    },
-  });
-  if (!res.ok) {
-    const err = new Error(`GitHub ${res.status}`);
-    err.status = res.status;
-    throw err;
-  }
-  return res.json();
-}
-
-// Retrouve la sauvegarde existante du compte à partir du seul jeton
-async function trouverGist() {
-  const gists = await gh('/gists?per_page=100');
-  const trouve = (gists || []).find(g => g.files && g.files[GIST_FILE]);
-  return trouve ? trouve.id : '';
-}
-
-async function lireGist(id) {
-  const g = await gh(`/gists/${id}`);
-  const fichier = g.files && g.files[GIST_FILE];
-  if (!fichier) throw Object.assign(new Error('fichier absent'), { status: 404 });
-  const contenu = fichier.truncated
-    ? await (await fetch(fichier.raw_url)).text()
-    : fichier.content;
-  return JSON.parse(contenu);
-}
-
-function backendGitHub() {
-  return {
-    type: 'github',
-    async push() {
-      const corps = {
-        description: GIST_DESC,
-        files: { [GIST_FILE]: { content: JSON.stringify(snapshot(), null, 2) } },
-      };
-      let id = ghGistId();
-      if (!id) {
-        id = await trouverGist();
-        if (id) store.set(SYNC_KEYS.gist, id);
-      }
-      try {
-        const res = id
-          ? await gh(`/gists/${id}`, { method: 'PATCH', body: JSON.stringify(corps) })
-          : await gh('/gists', { method: 'POST', body: JSON.stringify({ ...corps, public: false }) });
-        store.set(SYNC_KEYS.gist, res.id);
-      } catch (err) {
-        if (err.status !== 404) throw err;
-        store.remove(SYNC_KEYS.gist);        // sauvegarde supprimée : on en recrée une
-        const res = await gh('/gists', { method: 'POST', body: JSON.stringify({ ...corps, public: false }) });
-        store.set(SYNC_KEYS.gist, res.id);
-      }
-      store.set(SYNC_KEYS.last, Date.now());
-      renderSyncUI();
-    },
-    async pull() {
-      let id = ghGistId();
-      if (!id) {
-        id = await trouverGist();
-        if (!id) return { ajoutes: 0, fusionnes: 0, vide: true };
-        store.set(SYNC_KEYS.gist, id);
-      }
-      const data = await lireGist(id);
-      const res = mergeWords(data && data.mots);
-      store.set(SYNC_KEYS.last, Date.now());
-      return res;
-    },
-  };
-}
-
-function messageErreur(err) {
-  if (err && err.status === 401) return 'Jeton refusé par GitHub. Vérifie qu\'il est bien copié en entier.';
-  if (err && err.status === 403) return 'GitHub a refusé : le droit « gist » est-il bien coché sur le jeton ?';
-  if (err && err.status === 404) return 'Sauvegarde introuvable.';
-  return 'Sauvegarde impossible pour le moment. Le carnet reste sur cet appareil.';
-}
-
-const pushCloud = () => backend.push();
-const pullCloud = () => backend.pull();
-
-// Au démarrage et sur demande : on récupère le coffre, puis on y renvoie la fusion
-async function syncNow({ silencieux = true } = {}) {
-  if (!syncActive() || syncEnCours) return;
-  syncEnCours = true;
-  renderSyncUI('Synchronisation...');
-  try {
-    const res = await pullCloud();
-    await pushCloud();
-    renderAll();
-    if (!silencieux) {
-      flash($('sync-flash'), res.vide
-        ? 'Première sauvegarde enregistrée ✅'
-        : `Carnet synchronisé ✅ (${res.ajoutes} mot(s) récupéré(s))`);
-    }
-  } catch (err) {
-    if (!silencieux) flash($('sync-flash'), messageErreur(err), 'warn');
-  } finally {
-    syncEnCours = false;
-    renderSyncUI();
-  }
-}
-
-// Sauvegarde automatique, groupée, après chaque modification du carnet
-function scheduleSync() {
-  if (!syncActive()) return;
-  clearTimeout(syncTimer);
-  syncTimer = setTimeout(async () => {
-    if (syncEnCours) return;
-    syncEnCours = true;
-    renderSyncUI('Sauvegarde...');
-    try { await pushCloud(); }
-    catch { /* on réessaiera à la prochaine modification */ }
-    finally { syncEnCours = false; renderSyncUI(); }
-  }, 2000);
-}
-
-// Le formulaire GitHub ne sert que si la page n'est pas un Artifact Claude
-function renderSyncUI(etat) {
-  const statut = $('sync-status');
-
-  $('sync-github').hidden = surClaude;
-  $('sync-claude').hidden = !surClaude;
-  ['sync-push', 'sync-pull'].forEach(id => { $(id).hidden = !syncActive(); });
-  $('sync-forget').hidden = surClaude || !syncActive();
-  $('sync-save').hidden = surClaude;
-  $('sync-save').textContent = syncActive() ? 'Mettre à jour le jeton' : 'Activer la sauvegarde';
-  $('sync-gist').value = ghGistId();
-
-  if (surClaude) {
-    $('sync-claude-note').textContent = !coffreResolu
-      ? 'Connexion à ta sauvegarde en cours...'
-      : backend
-        ? 'Rien à configurer : ton carnet est enregistré en ligne après chaque ajout et te suit sur tous tes appareils. Ouvre simplement ce lien depuis ton nouveau téléphone.'
-        : 'Sauvegarde en ligne indisponible dans cette vue. Ton carnet reste sur cet appareil : pense à l\'exporter en fichier.';
-  }
-
-  if (etat) { statut.textContent = etat; return; }
-  if (!syncActive()) {
-    statut.textContent = surClaude && !coffreResolu ? 'Connexion...' : 'Non configurée';
-    return;
-  }
-
-  const last = store.get(SYNC_KEYS.last, 0);
-  if (!last) { statut.textContent = 'Activée — pas encore sauvegardée'; return; }
-
-  const minutes = Math.round((Date.now() - last) / 60000);
-  statut.textContent = minutes < 1
-    ? '✅ Sauvegardé à l\'instant'
-    : minutes < 60
-      ? `✅ Sauvegardé il y a ${minutes} min`
-      : `✅ Sauvegardé le ${new Date(last).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`;
-}
-
-// Choisit le coffre disponible : Claude d'abord, GitHub ensuite
-async function initCloud() {
-  if (!surClaude) {
-    coffreResolu = true;
-    if (ghToken()) backend = backendGitHub();
-    renderSyncUI();
-    if (syncActive()) syncNow();
-    return;
-  }
-
-  renderSyncUI();
-  const db = await capaciteClaude('db');
-  coffreResolu = true;
-  if (db) backend = backendClaude(db);
-  renderSyncUI();
-  if (syncActive()) syncNow();
-}
-
-
-// ---------- Écouteurs ----------
+// ---------- Interactions ----------
 document.querySelectorAll('.tab').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     btn.classList.add('active');
     $(btn.dataset.tab).classList.add('active');
-    if (btn.dataset.tab === 'words') renderWordList();
-    if (btn.dataset.tab === 'review') startSession();
-    if (btn.dataset.tab === 'settings') { renderStats(); renderSyncUI(); }
+    if (btn.dataset.tab === 'revision') nouvelleSerie();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 });
 
-document.querySelectorAll('.lang-btn').forEach(btn => {
-  btn.addEventListener('click', () => setLang(btn.dataset.lang));
+$('langues').addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (chip) choisirLangue(chip.dataset.lang);
 });
 
-$('day-prev').addEventListener('click', () => { dayOffset--; renderToday(); });
-$('day-next').addEventListener('click', () => { if (dayOffset < 0) { dayOffset++; renderToday(); } });
-$('day-today').addEventListener('click', () => { dayOffset = 0; renderToday(); });
-
-$('quick-form').addEventListener('submit', e => {
+$('add-form').addEventListener('submit', e => {
   e.preventDefault();
-  const mot = $('quick-word').value.trim();
-  const trad = $('quick-trad').value.trim();
+  const mot = $('mot').value.trim();
+  const trad = $('trad').value.trim();
   if (!mot || !trad) return;
-  const res = addWord({ mot, trad });
-  if (res.ok) {
-    flash($('quick-flash'), `« ${mot} » ajouté à ton carnet ✅`);
-    $('quick-form').reset();
-    $('quick-word').focus();
-    renderWordList();
-    renderStats();
+  if (ajouterMot(mot, trad)) {
+    message($('add-flash'), `« ${mot} » ajouté ✅`);
+    $('add-form').reset();
+    $('mot').focus();
+    afficherMots();
   } else {
-    flash($('quick-flash'), 'Ce mot est déjà dans ton carnet.', 'warn');
+    message($('add-flash'), 'Ce mot est déjà dans ta liste.', 'warn');
   }
 });
 
-$('word-form').addEventListener('submit', e => {
-  e.preventDefault();
-  const mot = $('word-input').value.trim();
-  const trad = $('trad-input').value.trim();
-  const note = $('note-input').value.trim();
-  if (!mot || !trad) return;
+$('recherche').addEventListener('input', afficherMots);
 
-  if (editingId) {
-    updateWord(editingId, { mot, trad, note });
-    cancelEdit();
+$('toggle-trad').addEventListener('click', () => {
+  masque = !masque;
+  devoiles.clear();
+  store.set(CLES.masque, masque);
+  afficherMots();
+});
+
+$('mots').addEventListener('click', e => {
+  const voir = e.target.closest('[data-voir]');
+  if (voir) { devoiles.add(voir.dataset.voir); return afficherMots(); }
+
+  const dire = e.target.closest('[data-dire]');
+  if (dire) return parler(dire.dataset.dire);
+
+  const suppr = e.target.closest('[data-suppr]');
+  if (suppr) {
+    const id = e.target.closest('.word-item').dataset.id;
+    confirmer(suppr, 'Supprimer ?', () => { supprimerMot(id); afficherMots(); });
+  }
+});
+
+$('voir-trad').addEventListener('click', e => {
+  $('bloc-trad').hidden = false;
+  e.target.hidden = true;
+});
+
+$('ecouter-phrase').addEventListener('click', e => parler(e.target.dataset.dire));
+
+$('ajouter-phrase').addEventListener('click', e => {
+  const b = e.target;
+  if (ajouterMot(b.dataset.mot, b.dataset.trad, b.dataset.note)) {
+    message($('phrase-flash'), 'Phrase ajoutée à tes mots ✅');
+    afficherMots();
   } else {
-    const res = addWord({ mot, trad, note });
-    if (!res.ok) {
-      flash($('word-flash'), 'Ce mot est déjà dans ton carnet pour cette langue.', 'warn');
-      return;
-    }
-    $('word-form').reset();
-    $('word-input').focus();
-  }
-  renderWordList();
-  renderStats();
-});
-
-$('word-cancel').addEventListener('click', cancelEdit);
-
-$('word-list').addEventListener('click', e => {
-  const speakBtn = e.target.closest('.speak-btn');
-  if (speakBtn) return speak(speakBtn.dataset.speak);
-
-  const btn = e.target.closest('button[data-action]');
-  if (!btn) return;
-  const id = e.target.closest('.word-item').dataset.id;
-
-  if (btn.dataset.action === 'edit') startEdit(id);
-  if (btn.dataset.action === 'delete') {
-    confirmerDeuxTemps(btn, 'Supprimer ?', () => {
-      deleteWord(id);
-      if (editingId === id) cancelEdit();
-      renderWordList();
-      renderStats();
-    });
+    message($('phrase-flash'), 'Elle est déjà dans ta liste.', 'warn');
   }
 });
 
-$('search-input').addEventListener('input', renderWordList);
-$('sort-select').addEventListener('change', renderWordList);
-$('filter-select').addEventListener('change', renderWordList);
+$('lecon-exemples').addEventListener('click', e => {
+  const dire = e.target.closest('[data-dire]');
+  if (dire) parler(dire.dataset.dire);
+});
 
-$('flash-reveal').addEventListener('click', revealCard);
-$('flash-known').addEventListener('click', () => gradeCard(true));
-$('flash-again').addEventListener('click', () => gradeCard(false));
-$('review-restart').addEventListener('click', startSession);
-$('review-direction').addEventListener('change', startSession);
+$('reveler').addEventListener('click', revelerCarte);
+$('su').addEventListener('click', () => noter(true));
+$('rate').addEventListener('click', () => noter(false));
+$('rejouer').addEventListener('click', nouvelleSerie);
+$('sens').addEventListener('change', nouvelleSerie);
+$('ecouter-mot').addEventListener('click', e => parler(e.target.dataset.dire));
 
 document.addEventListener('keydown', e => {
-  if (!$('review').classList.contains('active') || $('flashcard').hidden) return;
+  if (!$('revision').classList.contains('active') || $('carte').hidden) return;
   if (e.target.matches('input, select, textarea')) return;
-  if (e.code === 'Space') { e.preventDefault(); if (!session.revealed) revealCard(); }
-  if (session.revealed && (e.key === '1' || e.key === 'ArrowLeft')) gradeCard(false);
-  if (session.revealed && (e.key === '2' || e.key === 'ArrowRight')) gradeCard(true);
+  if (e.code === 'Space' && !serie.vue) { e.preventDefault(); revelerCarte(); }
+  else if (serie.vue && (e.key === '1' || e.key === 'ArrowLeft')) noter(false);
+  else if (serie.vue && (e.key === '2' || e.key === 'ArrowRight')) noter(true);
 });
 
-$('sync-save').addEventListener('click', async () => {
-  const token = $('sync-token').value.trim();
-  const gist = $('sync-gist').value.trim();
-  if (!token) {
-    flash($('sync-flash'), 'Colle d\'abord ton jeton GitHub.', 'warn');
-    return;
-  }
-  store.set(SYNC_KEYS.token, token);
-  if (gist) store.set(SYNC_KEYS.gist, gist);
-  $('sync-token').value = '';
-  backend = backendGitHub();
-  renderSyncUI();
-  await syncNow({ silencieux: false });
-});
-
-$('sync-push').addEventListener('click', async () => {
-  renderSyncUI('Sauvegarde...');
-  try {
-    await pushCloud();
-    flash($('sync-flash'), 'Carnet sauvegardé sur GitHub ✅');
-  } catch (err) {
-    flash($('sync-flash'), messageErreur(err), 'warn');
-  }
-  renderSyncUI();
-});
-
-$('sync-pull').addEventListener('click', async () => {
-  renderSyncUI('Récupération...');
-  try {
-    const res = await pullCloud();
-    renderAll();
-    flash($('sync-flash'), res.vide
-      ? 'Aucune sauvegarde trouvée sur ce compte GitHub.'
-      : `${res.ajoutes} mot(s) récupéré(s), ${res.fusionnes} mis à jour ✅`);
-  } catch (err) {
-    flash($('sync-flash'), messageErreur(err), 'warn');
-  }
-  renderSyncUI();
-});
-
-$('sync-forget').addEventListener('click', e => {
-  confirmerDeuxTemps(e.currentTarget, 'Confirmer l\'oubli ?', () => {
-    store.remove(SYNC_KEYS.token);
-    store.remove(SYNC_KEYS.last);
-    backend = null;
-    renderSyncUI();
-    flash($('sync-flash'), 'Jeton oublié sur cet appareil. La sauvegarde en ligne, elle, reste intacte.', 'warn');
-  });
-});
-
-$('export-btn').addEventListener('click', exportData);
-$('import-input').addEventListener('change', e => {
-  if (e.target.files[0]) importData(e.target.files[0]);
+$('exporter').addEventListener('click', exporter);
+$('importer').addEventListener('click', () => $('fichier').click());
+$('fichier').addEventListener('change', e => {
+  if (e.target.files[0]) importer(e.target.files[0]);
   e.target.value = '';
 });
 
-$('reset-btn').addEventListener('click', e => {
-  confirmerDeuxTemps(e.currentTarget, `Confirmer : tout effacer en ${lang().adjectif} ?`, () => {
-    store.remove(STORE_KEYS.words(currentLang));
-    scheduleSync();
-    renderAll();
-    flash($('settings-flash'), 'Carnet vidé.', 'warn');
+$('activer-sync').addEventListener('click', async () => {
+  const valeur = $('jeton').value.trim();
+  if (!valeur) return message($('foot-flash'), 'Colle d\'abord ton jeton GitHub.', 'warn');
+  store.set(CLES.jeton, valeur);
+  $('jeton').value = '';
+  coffre = coffreGitHub();
+  afficherSauvegarde();
+  await synchroniser({ silencieux: false });
+});
+
+$('oublier-sync').addEventListener('click', e => {
+  confirmer(e.currentTarget, 'Confirmer ?', () => {
+    store.remove(CLES.jeton);
+    store.remove(CLES.maj);
+    coffre = null;
+    afficherSauvegarde();
+    message($('foot-flash'), 'Jeton oublié. La sauvegarde en ligne reste intacte.', 'warn');
   });
 });
 
 // ---------- Démarrage ----------
-trackVisit();
-setLang(currentLang);   // restaure la dernière langue utilisée
-initCloud();            // branche la sauvegarde en ligne disponible et récupère le carnet
+choisirLangue(langue);
+initSauvegarde();
 
 // Uniquement pour la version installable (celle qui embarque un manifeste)
 if ('serviceWorker' in navigator && document.querySelector('link[rel="manifest"]')) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
-  });
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 }

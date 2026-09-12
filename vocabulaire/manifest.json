@@ -1,18 +1,13 @@
 {
-  "name": "Mon Carnet de Vocabulaire",
-  "short_name": "Vocabulaire",
-  "description": "Carnet de vocabulaire anglais et espagnol avec leçon et phrase du jour",
+  "name": "Mes Mots",
+  "short_name": "Mes Mots",
+  "description": "Vocabulaire anglais et espagnol, avec la leçon et la phrase du jour",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f6f7f5",
-  "theme_color": "#2f6f5e",
+  "background_color": "#faf7f2",
+  "theme_color": "#e85d3a",
   "orientation": "portrait",
   "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]
 }

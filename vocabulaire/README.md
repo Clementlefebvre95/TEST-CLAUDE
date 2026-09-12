@@ -1,76 +1,66 @@
-# 📒 Mon Carnet de Vocabulaire
+# 📖 Mes Mots
 
-Application web (PWA) pour apprendre l'anglais et l'espagnol : on y note son vocabulaire au fil
-de l'eau, et chaque jour l'app propose une leçon de grammaire et une phrase traduite.
+Application de vocabulaire anglais 🇬🇧 et espagnol 🇪🇸, en trois pages.
 
-## Ce que fait l'app
+## Les trois pages
 
-- **Deux langues** : anglais 🇬🇧 et espagnol 🇪🇸, chacune avec son propre carnet.
-  La dernière langue utilisée est retrouvée automatiquement à l'ouverture suivante.
-- **Leçon du jour** : une leçon différente chaque jour par langue (conjugaison, grammaire,
-  vocabulaire) avec tableau de conjugaison, exemples traduits et astuce. 34 leçons par langue.
-- **Phrase du jour** : une phrase authentique, sa traduction à dévoiler et une note d'usage.
-  50 phrases par langue. Un bouton l'ajoute directement au carnet.
-- **Carnet de vocabulaire** : ajout rapide, note ou exemple facultatif, recherche, tri, filtre,
-  modification, suppression.
-- **Révision** : cartes mémo avec système de boîtes (5 niveaux). Un mot réussi monte d'un niveau,
-  un mot raté repart à 1 ; arrivé au niveau 5, il est marqué « maîtrisé ». Sens de révision au
-  choix, raccourcis clavier (espace = révéler, 1 = à revoir, 2 = je savais).
-- **Prononciation** : bouton 🔊 sur les mots et les phrases (synthèse vocale du navigateur).
-- **Hors ligne** : installable sur l'écran d'accueil et utilisable sans connexion.
+1. **Mes mots** — la liste de la langue choisie. Ajout en deux champs, recherche, et un bouton
+   *Cacher les traductions* pour se tester : chaque ligne masquée se révèle d'un clic, une par une.
+   Les points à droite montrent le niveau du mot (5 niveaux, ✓ quand il est maîtrisé).
+2. **Du jour** — la phrase du jour (traduction masquée jusqu'au clic, note d'usage, ajout direct à
+   la liste) puis la leçon du jour : résumé, tableau de conjugaison, exemples traduits, astuce,
+   et le détail replié pour ceux qui veulent aller plus loin.
+   34 leçons et 50 phrases par langue, une nouvelle chaque jour.
+3. **Révision** — cartes mémo tirées en priorité parmi les mots les moins sûrs. Un mot réussi monte
+   d'un niveau, un mot raté repart à zéro. Sens au choix ; au clavier : espace révèle, 1 = à revoir,
+   2 = je savais.
 
-## Deux façons d'ouvrir l'app
+La langue choisie est retenue : à la réouverture, on retrouve celle de la dernière fois.
 
-- **Publiée comme Artifact Claude** (`artifact.html`) : hébergée sur claude.ai, accessible depuis
-  n'importe quel appareil connecté au compte. La sauvegarde y est automatique (voir plus bas).
-- **Hébergée en statique** (`index.html`, par exemple GitHub Pages) : installable sur l'écran
-  d'accueil et utilisable hors ligne, avec la sauvegarde GitHub en option.
+## Où tourne l'app
 
-`artifact.html` est le corps de `index.html` sans l'enveloppe `<html>/<head>/<body>`, que la
-plateforme Artifact fournit elle-même. Après une modification de `index.html`, le régénérer :
+- **Artifact Claude** (`artifact.html`) : hébergée sur claude.ai, rien à installer, sauvegarde
+  automatique sur le compte — les mots suivent d'un appareil à l'autre.
+- **Site statique** (`index.html`, par exemple GitHub Pages) : installable sur l'écran d'accueil et
+  utilisable hors ligne.
+
+`artifact.html` est le corps de `index.html` sans l'enveloppe `<html>/<head>/<body>`, fournie par la
+plateforme. Après modification de `index.html`, le régénérer :
 
 ```bash
-python3 -c "src=open('index.html').read(); corps=src[src.index('>',src.index('<body'))+1:src.index('</body>')]; open('artifact.html','w').write('<title>Mon Carnet de Vocabulaire</title>\n<link rel=\"stylesheet\" href=\"styles.css\" />\n'+corps.strip()+'\n')"
+python3 -c "src=open('index.html').read(); corps=src[src.index('>',src.index('<body'))+1:src.index('</body>')]; open('artifact.html','w').write('<title>Mes Mots</title>\n<link rel=\"stylesheet\" href=\"styles.css\" />\n'+corps.strip()+'\n')"
 ```
 
 ## Sauvegarde
 
-Les données vivent dans le navigateur (`localStorage`), donc **sur ce téléphone uniquement**.
-L'app choisit toute seule le coffre disponible pour les en sortir :
+Les mots vivent dans le navigateur (`localStorage`). Pour qu'ils survivent à un changement de
+téléphone, l'app choisit toute seule le coffre disponible :
 
-0. **Base de l'Artifact Claude** — si la page tourne comme Artifact publié, rien à configurer :
-   le carnet est écrit dans le stockage de l'artifact après chaque ajout et revient sur tout
-   appareil ouvrant le même lien.
-1. **Sauvegarde GitHub (automatique)** — pour la version hébergée ailleurs. Réglages → Sauvegarde en ligne.
-   Coller un jeton GitHub *classique* portant la seule autorisation `gist`
-   ([créer le jeton](https://github.com/settings/tokens/new?scopes=gist&description=Carnet%20de%20vocabulaire)).
-   Le carnet est alors écrit dans un gist **privé** du compte, mis à jour automatiquement après
-   chaque modification. Sur un nouvel appareil, il suffit de coller le même jeton : l'app retrouve
-   la sauvegarde toute seule et fusionne avec ce qui est déjà là (rien n'est écrasé, on garde le
-   meilleur niveau de chaque mot).
-   Le jeton ne quitte pas le navigateur et ne donne accès à aucun dépôt ; il est révocable sur GitHub.
-2. **Fichier de sauvegarde (manuel)** — Réglages → Sauvegarde par fichier.
-   Export en JSON, à ranger dans un cloud ou à s'envoyer par mail, puis réimport sur l'autre appareil.
+- **Sur Claude** : stockage de l'artifact, aucune configuration.
+- **Ailleurs** : un jeton GitHub coché sur la seule case `gist`, à coller dans le pied de page. Les
+  mots partent dans un gist privé après chaque ajout ; le même jeton les récupère sur un autre
+  appareil. Rien n'est écrasé : à la fusion, chaque mot garde son meilleur niveau.
+- **Dans tous les cas** : export et import d'un fichier JSON depuis le pied de page.
 
 ## Lancer en local
 
 ```bash
-npx http-server -p 8080     # puis ouvrir http://localhost:8080/vocabulaire/
+npx http-server -p 8080     # puis http://localhost:8080/vocabulaire/
 ```
 
-Aucune dépendance, aucun build : HTML, CSS et JavaScript natifs.
+Ni dépendance ni build : HTML, CSS et JavaScript natifs.
 
 ## Fichiers
 
 | Fichier | Rôle |
 | --- | --- |
-| `index.html` | structure des 4 onglets |
-| `styles.css` | mise en forme, thème de couleur par langue |
-| `app.js` | logique : carnet, leçon du jour, révision, synchronisation |
-| `data-en.js` / `data-es.js` | contenu pédagogique (leçons et phrases) |
-| `sw.js`, `manifest.json`, `icon.svg` | installation et fonctionnement hors ligne |
+| `index.html` / `artifact.html` | les trois pages, pour chacun des deux hébergements |
+| `styles.css` | mise en forme (même identité visuelle que Mes Recettes) |
+| `app.js` | mots, contenu du jour, révision, sauvegarde |
+| `data-en.js` / `data-es.js` | leçons et phrases |
+| `sw.js`, `manifest.json`, `icon.svg` | installation et mode hors ligne |
 
 ## Ajouter du contenu
 
-Les leçons et les phrases sont de simples tableaux dans `data-en.js` et `data-es.js`.
-Ajouter une entrée suffit : la rotation quotidienne s'adapte à la longueur des tableaux.
+Les leçons et les phrases sont de simples tableaux dans `data-en.js` et `data-es.js` : ajouter une
+entrée suffit, la rotation quotidienne s'adapte à la longueur du tableau.

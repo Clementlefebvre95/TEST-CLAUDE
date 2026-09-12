@@ -1,4 +1,4 @@
-const CACHE_NAME = 'carnet-vocabulaire-v2';
+const CACHE_NAME = 'mes-mots-v1';
 const ASSETS = [
   './',
   './index.html',
