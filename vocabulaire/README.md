@@ -4,16 +4,24 @@ Application de vocabulaire anglais 🇬🇧 et espagnol 🇪🇸, en trois pages
 
 ## Les trois pages
 
-1. **Mes mots** — la liste de la langue choisie. Ajout en deux champs, recherche, et un bouton
-   *Cacher les traductions* pour se tester : chaque ligne masquée se révèle d'un clic, une par une.
-   Les points à droite montrent le niveau du mot (5 niveaux, ✓ quand il est maîtrisé).
+1. **Mes mots** — la liste de la langue choisie. Ajout en deux champs et bouton
+   *masquer les traductions* pour se tester : chaque ligne masquée se révèle d'un clic, une par une.
+   La recherche n'apparaît qu'au-delà de huit mots. Un point vert marque les mots sus.
+   Toucher un mot le fait prononcer.
 2. **Du jour** — la phrase du jour (traduction masquée jusqu'au clic, note d'usage, ajout direct à
    la liste) puis la leçon du jour : résumé, tableau de conjugaison, exemples traduits, astuce,
-   et le détail replié pour ceux qui veulent aller plus loin.
+   et le détail replié pour ceux qui veulent aller plus loin. Toucher la phrase la fait prononcer.
    34 leçons et 50 phrases par langue, une nouvelle chaque jour.
 3. **Révision** — cartes mémo tirées en priorité parmi les mots les moins sûrs. Un mot réussi monte
-   d'un niveau, un mot raté repart à zéro. Sens au choix ; au clavier : espace révèle, 1 = à revoir,
-   2 = je savais.
+   d'un niveau, un mot raté repart à zéro. Le sens de la question se change d'un clic ; au clavier :
+   espace révèle, 1 = à revoir, 2 = je savais.
+
+## Parti pris visuel
+
+Papier chaud, encre sombre, une seule couleur d'accent, et aucune boîte : uniquement des filets
+fins et du blanc. Les mots étrangers, les phrases et les questions sont composés en serif
+(Newsreader, repli Georgia) comme les entrées d'un dictionnaire ; l'interface, elle, reste dans la
+police système. Le thème sombre suit celui de l'appareil.
 
 La langue choisie est retenue : à la réouverture, on retrouve celle de la dernière fois.
 
@@ -55,7 +63,7 @@ Ni dépendance ni build : HTML, CSS et JavaScript natifs.
 | Fichier | Rôle |
 | --- | --- |
 | `index.html` / `artifact.html` | les trois pages, pour chacun des deux hébergements |
-| `styles.css` | mise en forme (même identité visuelle que Mes Recettes) |
+| `styles.css` | mise en forme : papier chaud, un seul accent, aucune boîte |
 | `app.js` | mots, contenu du jour, révision, sauvegarde |
 | `data-en.js` / `data-es.js` | leçons et phrases |
 | `sw.js`, `manifest.json`, `icon.svg` | installation et mode hors ligne |

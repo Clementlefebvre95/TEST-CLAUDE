@@ -4,151 +4,133 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Mes Mots</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#e85d3a" />
+  <meta name="theme-color" content="#fbf9f6" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Mes Mots" />
   <link rel="apple-touch-icon" href="icon.svg" />
 </head>
 <body>
-  <header class="topbar">
-    <h1>📖 Mes Mots</h1>
-    <nav>
-      <button class="tab active" data-tab="liste">Mes mots</button>
-      <button class="tab" data-tab="jour">Du jour</button>
-      <button class="tab" data-tab="revision">Révision</button>
-    </nav>
+
+  <header class="tete">
+    <div class="tete-inner">
+      <div class="langues" id="langues">
+        <button class="langue" data-lang="en">Anglais</button>
+        <button class="langue" data-lang="es">Espagnol</button>
+      </div>
+      <div class="pages">
+        <button class="page-btn active" data-page="liste">Mes mots</button>
+        <button class="page-btn" data-page="jour">Du jour</button>
+        <button class="page-btn" data-page="revision">Révision</button>
+      </div>
+    </div>
   </header>
 
   <main>
-    <div class="chip-row" id="langues">
-      <button class="chip" data-lang="en">🇬🇧 Anglais</button>
-      <button class="chip" data-lang="es">🇪🇸 Espagnol</button>
-    </div>
 
-    <!-- ============ 1. MES MOTS ============ -->
-    <section id="liste" class="view active">
-      <div class="card">
-        <h2>Ajouter un mot</h2>
-        <form id="add-form" class="add-row">
-          <input type="text" id="mot" placeholder="Mot en anglais" autocomplete="off" required />
-          <input type="text" id="trad" placeholder="Traduction en français" autocomplete="off" required />
-          <button type="submit" class="primary">Ajouter</button>
-        </form>
-        <p class="flash" id="add-flash" hidden></p>
-      </div>
+    <!-- ========== 1. MES MOTS ========== -->
+    <section id="liste" class="vue active">
+      <form class="ajout" id="ajout">
+        <div class="duo">
+          <input type="text" id="mot" class="mot-serif" placeholder="Mot en anglais" autocomplete="off" required />
+          <input type="text" id="trad" placeholder="Sa traduction" autocomplete="off" required />
+        </div>
+        <button type="submit" class="plein">Ajouter</button>
+      </form>
+      <p class="message" id="ajout-message" hidden></p>
 
-      <div class="card">
-        <div class="section-head">
-          <h2 id="liste-titre">Mes mots</h2>
-          <span class="count" id="compteur"></span>
-        </div>
-        <div class="tools">
-          <input type="search" id="recherche" placeholder="🔍 Rechercher" autocomplete="off" />
-          <button class="secondary" id="toggle-trad">🙈 Cacher les traductions</button>
-        </div>
-        <ul class="word-list" id="mots"></ul>
-        <p class="empty" id="vide" hidden>Aucun mot pour l'instant. Ajoute le premier ci-dessus.</p>
+      <hr class="trait" />
+
+      <div class="liste-tete">
+        <span class="compte" id="compte"></span>
+        <button class="discret" id="bascule-trad">masquer les traductions</button>
       </div>
+      <input type="search" id="recherche" placeholder="Rechercher" autocomplete="off" hidden />
+      <ul class="mots" id="mots"></ul>
+      <p class="vide" id="vide" hidden>Rien encore. Ajoute ton premier mot ci-dessus.</p>
     </section>
 
-    <!-- ============ 2. DU JOUR ============ -->
-    <section id="jour" class="view">
-      <p class="day" id="date-jour"></p>
+    <!-- ========== 2. DU JOUR ========== -->
+    <section id="jour" class="vue">
+      <p class="date" id="date"></p>
 
-      <div class="card">
-        <div class="section-head">
-          <h2>✍️ La phrase du jour</h2>
-        </div>
-        <p class="phrase" id="phrase"></p>
-        <div class="add-row">
-          <button class="secondary" id="voir-trad">Voir la traduction</button>
-          <button class="secondary" id="ecouter-phrase">🔊 Écouter</button>
-          <button class="secondary" id="ajouter-phrase">➕ Ajouter à mes mots</button>
-        </div>
-        <div id="bloc-trad" hidden>
-          <p class="trad" id="phrase-fr"></p>
-          <p class="astuce" id="phrase-note"></p>
-        </div>
-        <p class="flash" id="phrase-flash" hidden></p>
+      <p class="label">La phrase du jour</p>
+      <p class="phrase" id="phrase" title="Toucher pour écouter"></p>
+      <div id="bloc-trad" hidden>
+        <p class="traduction" id="phrase-fr"></p>
+        <p class="note" id="phrase-note"></p>
       </div>
+      <div class="actions">
+        <button class="lien" id="voir-trad">Voir la traduction</button>
+        <button class="lien" id="ajouter-phrase">Ajouter à mes mots</button>
+      </div>
+      <p class="message" id="phrase-message" hidden></p>
 
-      <div class="card">
-        <span class="badge" id="lecon-cat"></span>
-        <h2 id="lecon-titre"></h2>
-        <p class="resume" id="lecon-resume"></p>
-        <div id="lecon-tableau"></div>
-        <div id="lecon-exemples"></div>
-        <p class="astuce" id="lecon-astuce"></p>
-        <details class="plus">
-          <summary>Voir le détail</summary>
-          <ul id="lecon-points"></ul>
-        </details>
-      </div>
+      <hr class="trait" />
+
+      <p class="label" id="lecon-cat"></p>
+      <h2 class="lecon-titre" id="lecon-titre"></h2>
+      <p class="resume" id="lecon-resume"></p>
+      <div id="lecon-conj"></div>
+      <div id="lecon-exemples"></div>
+      <p class="astuce" id="lecon-astuce"></p>
+      <details>
+        <summary>Voir le détail</summary>
+        <ul id="lecon-points"></ul>
+      </details>
     </section>
 
-    <!-- ============ 3. RÉVISION ============ -->
-    <section id="revision" class="view">
-      <div class="card">
-        <div class="section-head">
-          <h2>Révision</h2>
-          <span class="count" id="score"></span>
-        </div>
-        <div class="tools">
-          <select id="sens">
-            <option value="src2fr">Deviner le français</option>
-            <option value="fr2src">Deviner le mot étranger</option>
-            <option value="mix">Alterner</option>
-          </select>
-          <button class="secondary" id="rejouer">Nouvelle série</button>
-        </div>
-
-        <div class="flashcard" id="carte" hidden>
-          <p class="question" id="question"></p>
-          <button class="secondary" id="ecouter-mot" hidden>🔊 Écouter</button>
-          <div class="reponse" id="reponse" hidden>
-            <p class="mot" id="reponse-mot"></p>
-            <p class="note" id="reponse-note"></p>
-          </div>
-          <button class="primary" id="reveler">Voir la réponse</button>
-          <div class="grade" id="grade" hidden>
-            <button class="non" id="rate">😕 À revoir</button>
-            <button class="oui" id="su">😀 Je savais</button>
-          </div>
-          <p class="hint" id="avancement"></p>
-        </div>
-
-        <p class="empty" id="revision-vide" hidden></p>
+    <!-- ========== 3. RÉVISION ========== -->
+    <section id="revision" class="vue">
+      <div class="reglages-revision">
+        <span id="score"></span>
+        <button class="discret" id="sens">Deviner le français</button>
+        <button class="discret" id="rejouer">Nouvelle série</button>
       </div>
+
+      <div class="carte" id="carte" hidden>
+        <p class="question" id="question" title="Toucher pour écouter"></p>
+        <div class="reponse" id="reponse" hidden>
+          <p class="mot" id="reponse-mot"></p>
+          <p class="note" id="reponse-note"></p>
+        </div>
+        <button class="plein" id="reveler">Voir la réponse</button>
+        <div class="notes-carte" id="notes-carte" hidden>
+          <button class="contour" id="rate">À revoir</button>
+          <button class="plein" id="su">Je savais</button>
+        </div>
+        <p class="avancement" id="avancement"></p>
+      </div>
+
+      <p class="vide" id="revision-vide" hidden></p>
     </section>
+
   </main>
 
-  <footer class="foot">
-    <div class="foot-row">
-      <span id="sauvegarde">Sauvegarde locale</span>
-      <button id="exporter">Exporter mes mots</button>
-      <button id="importer">Importer un fichier</button>
+  <footer class="pied">
+    <div class="pied-ligne">
+      <span id="sauvegarde"></span>
+      <button class="discret" id="exporter">Exporter</button>
+      <button class="discret" id="importer">Importer</button>
       <input type="file" id="fichier" accept="application/json" hidden />
     </div>
-    <p class="flash" id="foot-flash" hidden></p>
+    <p class="message" id="pied-message" hidden></p>
 
     <details id="bloc-github">
-      <summary>Sauvegarder en ligne (changement de téléphone)</summary>
+      <summary>Sauvegarder en ligne</summary>
       <p>
-        Colle un jeton GitHub coché sur la seule case <code>gist</code>
-        (<a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=Mes%20Mots" target="_blank" rel="noopener">le créer ici</a>)
-        : tes mots sont alors enregistrés en ligne après chaque ajout, et le même jeton les récupère
-        sur n'importe quel autre téléphone.
+        Un jeton GitHub coché sur la seule case <code>gist</code>
+        (<a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=Mes%20Mots" target="_blank" rel="noopener">le créer</a>)
+        enregistre tes mots en ligne après chaque ajout. Le même jeton les récupère sur un autre téléphone.
       </p>
-      <label class="field">
-        <span>Jeton GitHub</span>
+      <div class="duo">
         <input type="password" id="jeton" placeholder="ghp_..." autocomplete="off" />
-      </label>
-      <div class="add-row">
-        <button class="secondary" id="activer-sync">Activer</button>
-        <button class="secondary" id="oublier-sync" hidden>Oublier ce jeton</button>
+        <button class="discret" id="activer-sync">Activer</button>
+        <button class="discret" id="oublier-sync" hidden>Oublier</button>
       </div>
     </details>
   </footer>
