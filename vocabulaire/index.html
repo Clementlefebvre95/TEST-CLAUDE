@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Mon Carnet de Vocabulaire</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#2f6f5e" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Vocabulaire" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+</head>
+<body data-lang="en">
+
+  <header class="topbar">
+    <div class="topbar-main">
+      <h1>📒 Mon Carnet</h1>
+      <div class="lang-switch" id="lang-switch">
+        <button class="lang-btn" data-lang="en"><span>🇬🇧</span> Anglais</button>
+        <button class="lang-btn" data-lang="es"><span>🇪🇸</span> Espagnol</button>
+      </div>
+    </div>
+    <nav>
+      <button class="tab active" data-tab="today">Aujourd'hui</button>
+      <button class="tab" data-tab="words">Vocabulaire</button>
+      <button class="tab" data-tab="review">Révision</button>
+      <button class="tab" data-tab="settings">Réglages</button>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ================= AUJOURD'HUI ================= -->
+    <section id="today" class="view active">
+
+      <div class="card quick-add">
+        <h2>Ajout rapide</h2>
+        <p class="muted small">Un mot croisé aujourd'hui ? Note-le tout de suite.</p>
+        <form id="quick-form" class="add-form">
+          <input type="text" id="quick-word" placeholder="Mot en anglais" autocomplete="off" required />
+          <input type="text" id="quick-trad" placeholder="Traduction en français" autocomplete="off" required />
+          <button type="submit" class="primary">Ajouter</button>
+        </form>
+        <p class="flash" id="quick-flash" hidden></p>
+      </div>
+
+      <div class="day-nav">
+        <button id="day-prev" class="ghost" title="Jour précédent">◀</button>
+        <span id="day-label">Aujourd'hui</span>
+        <button id="day-next" class="ghost" title="Jour suivant">▶</button>
+        <button id="day-today" class="ghost" hidden>Revenir à aujourd'hui</button>
+      </div>
+
+      <div class="card lesson" id="lesson-card">
+        <!-- rempli par app.js -->
+      </div>
+
+      <div class="card sentence" id="sentence-card">
+        <!-- rempli par app.js -->
+      </div>
+    </section>
+
+    <!-- ================= VOCABULAIRE ================= -->
+    <section id="words" class="view">
+      <div class="card">
+        <h2>Nouveau mot</h2>
+        <form id="word-form" class="add-form stacked">
+          <label class="field">
+            <span id="word-label">Mot en anglais</span>
+            <input type="text" id="word-input" autocomplete="off" required />
+          </label>
+          <label class="field">
+            <span>Traduction en français</span>
+            <input type="text" id="trad-input" autocomplete="off" required />
+          </label>
+          <label class="field">
+            <span>Note ou exemple (optionnel)</span>
+            <input type="text" id="note-input" autocomplete="off" placeholder="Ex. : phrase, genre, faux-ami..." />
+          </label>
+          <div class="form-actions">
+            <button type="submit" class="primary" id="word-submit">Ajouter au carnet</button>
+            <button type="button" class="ghost" id="word-cancel" hidden>Annuler</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="list-head">
+          <h2 id="list-title">Mes mots</h2>
+          <span class="counter" id="word-counter"></span>
+        </div>
+        <div class="list-tools">
+          <input type="search" id="search-input" placeholder="🔍 Rechercher un mot..." autocomplete="off" />
+          <select id="sort-select">
+            <option value="recent">Plus récents</option>
+            <option value="alpha">Alphabétique</option>
+            <option value="weak">À travailler d'abord</option>
+          </select>
+          <select id="filter-select">
+            <option value="all">Tous</option>
+            <option value="learning">En cours</option>
+            <option value="mastered">Maîtrisés</option>
+          </select>
+        </div>
+        <ul class="word-list" id="word-list"></ul>
+        <p class="empty" id="word-empty" hidden>Ton carnet est vide pour cette langue. Ajoute ton premier mot !</p>
+      </div>
+    </section>
+
+    <!-- ================= RÉVISION ================= -->
+    <section id="review" class="view">
+      <div class="card">
+        <div class="list-head">
+          <h2>Révision</h2>
+          <span class="counter" id="review-counter"></span>
+        </div>
+        <div class="list-tools">
+          <select id="review-direction">
+            <option value="src2fr">Langue étrangère → français</option>
+            <option value="fr2src">Français → langue étrangère</option>
+            <option value="mix">Alterner les deux</option>
+          </select>
+          <button class="ghost" id="review-restart">Nouvelle série</button>
+        </div>
+
+        <div class="flashcard" id="flashcard" hidden>
+          <p class="flash-question" id="flash-question"></p>
+          <button class="ghost speak" id="flash-speak" hidden>🔊 Écouter</button>
+          <div class="flash-answer" id="flash-answer" hidden>
+            <p class="answer-text" id="flash-answer-text"></p>
+            <p class="muted small" id="flash-note"></p>
+          </div>
+          <div class="flash-actions">
+            <button class="primary" id="flash-reveal">Voir la réponse</button>
+            <div class="grade-row" id="grade-row" hidden>
+              <button class="bad" id="flash-again">😕 À revoir</button>
+              <button class="good" id="flash-known">😀 Je savais</button>
+            </div>
+          </div>
+          <p class="muted small progress" id="review-progress"></p>
+        </div>
+
+        <p class="empty" id="review-empty" hidden></p>
+      </div>
+    </section>
+
+    <!-- ================= RÉGLAGES ================= -->
+    <section id="settings" class="view">
+      <div class="card">
+        <h2>Mes statistiques</h2>
+        <div class="stats-grid" id="stats-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="list-head">
+          <h2>☁️ Sauvegarde en ligne</h2>
+          <span class="counter" id="sync-status">Non configurée</span>
+        </div>
+        <p class="muted small">
+          Sans ça, ton carnet ne vit que dans ce navigateur : en changeant de téléphone, tu perds tout.
+          Avec un jeton GitHub, il est sauvegardé en ligne dans un fichier privé et revient tout seul
+          sur n'importe quel appareil.
+        </p>
+
+        <details class="howto">
+          <summary>Comment obtenir mon jeton ? (1 minute, une seule fois)</summary>
+          <ol>
+            <li>Ouvre <a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=Carnet%20de%20vocabulaire" target="_blank" rel="noopener">cette page GitHub</a> (tu es déjà connecté).</li>
+            <li>Vérifie que seule la case <strong>gist</strong> est cochée, choisis une expiration longue, puis clique sur <em>Generate token</em>.</li>
+            <li>Copie le jeton affiché (il commence par <code>ghp_</code>) et colle-le ci-dessous.</li>
+            <li>Sur ton prochain téléphone : colle le même jeton, et le carnet se recharge tout seul.</li>
+          </ol>
+          <p class="muted small">
+            Le jeton reste dans ce navigateur et ne sert qu'à écrire ta sauvegarde. Coché sur « gist » uniquement,
+            il ne donne accès à aucun de tes dépôts. Tu peux le révoquer à tout moment sur GitHub.
+          </p>
+        </details>
+
+        <label class="field">
+          <span>Jeton GitHub</span>
+          <input type="password" id="sync-token" placeholder="ghp_..." autocomplete="off" />
+        </label>
+        <label class="field">
+          <span>Code de sauvegarde (rempli automatiquement)</span>
+          <input type="text" id="sync-gist" placeholder="trouvé tout seul à la première sauvegarde" autocomplete="off" />
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" id="sync-save">Activer la sauvegarde</button>
+          <button class="ghost" id="sync-push" hidden>⬆️ Sauvegarder maintenant</button>
+          <button class="ghost" id="sync-pull" hidden>⬇️ Restaurer depuis le cloud</button>
+          <button class="ghost" id="sync-forget" hidden>Oublier ce jeton</button>
+        </div>
+        <p class="flash" id="sync-flash" hidden></p>
+      </div>
+
+      <div class="card">
+        <h2>Sauvegarde par fichier</h2>
+        <p class="muted small">Sans compte ni jeton : exporte un fichier, range-le dans ton Drive ou envoie-le-toi par mail, puis réimporte-le sur l'autre téléphone.</p>
+        <div class="form-actions">
+          <button class="primary" id="export-btn">⬇️ Exporter mon carnet</button>
+          <label class="ghost file-label">⬆️ Importer un fichier
+            <input type="file" id="import-input" accept="application/json" hidden />
+          </label>
+        </div>
+        <p class="flash" id="settings-flash" hidden></p>
+      </div>
+
+      <div class="card danger-zone">
+        <h2>Zone rouge</h2>
+        <p class="muted small">Efface tous les mots de la langue actuellement sélectionnée.</p>
+        <button class="danger" id="reset-btn">Vider le carnet de cette langue</button>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="data-en.js"></script>
+  <script src="data-es.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
