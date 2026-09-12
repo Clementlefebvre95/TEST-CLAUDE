@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Mes Mots</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#faf7f2" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Mes Mots" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+</head>
+<body>
+
+  <header class="tete">
+    <div class="tete-inner">
+      <div class="haut">
+        <div class="bascule" id="langues">
+          <button class="langue" data-lang="es">Espagnol</button>
+          <span class="separateur"></span>
+          <button class="langue" data-lang="en">Anglais</button>
+        </div>
+        <button class="points" id="ouvrir-panneau" title="Réglages" aria-label="Réglages">
+          <svg width="20" height="5" viewBox="0 0 20 5" fill="none" aria-hidden="true">
+            <circle cx="2.5" cy="2.5" r="1.9" fill="currentColor"></circle>
+            <circle cx="10" cy="2.5" r="1.9" fill="currentColor"></circle>
+            <circle cx="17.5" cy="2.5" r="1.9" fill="currentColor"></circle>
+          </svg>
+        </button>
+      </div>
+      <nav class="pages">
+        <button class="page-btn active" data-page="liste">Mes mots</button>
+        <button class="page-btn" data-page="jour">Du jour</button>
+        <button class="page-btn" data-page="revision">Révision</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ========== 1. MES MOTS ========== -->
+    <section id="liste" class="vue active">
+      <form class="ajout" id="ajout" hidden>
+        <div class="duo">
+          <input type="text" id="mot" placeholder="Mot en espagnol" autocomplete="off" required />
+          <input type="text" id="trad" placeholder="En français" autocomplete="off" required />
+        </div>
+        <button type="submit" class="valider">Ajouter</button>
+      </form>
+      <p class="message" id="ajout-message" hidden></p>
+
+      <input type="search" id="recherche" placeholder="Rechercher" autocomplete="off" hidden />
+      <div class="barre">
+        <button class="discret" id="bascule-trad" hidden>cacher les traductions</button>
+      </div>
+      <ul class="mots" id="mots"></ul>
+      <p class="vide" id="vide" hidden>Aucun mot pour l'instant.<br />Touche le + pour en ajouter un.</p>
+    </section>
+
+    <!-- ========== 2. DU JOUR ========== -->
+    <section id="jour" class="vue">
+      <p class="date" id="date"></p>
+
+      <p class="label">La phrase du jour</p>
+      <p class="phrase" id="phrase" title="Toucher pour écouter"></p>
+      <div id="bloc-trad" hidden>
+        <p class="phrase-fr" id="phrase-fr"></p>
+        <p class="astuce-phrase" id="phrase-note"></p>
+      </div>
+      <div class="actions">
+        <button class="pilule" id="voir-trad">Voir la traduction</button>
+        <button class="pilule" id="ajouter-phrase">Ajouter à mes mots</button>
+      </div>
+      <p class="message" id="phrase-message" hidden></p>
+
+      <div class="bloc">
+        <p class="label" id="lecon-cat"></p>
+        <h2 class="lecon-titre" id="lecon-titre"></h2>
+        <p class="resume" id="lecon-resume"></p>
+        <div id="lecon-conj"></div>
+        <div id="lecon-exemples"></div>
+        <p class="astuce" id="lecon-astuce"></p>
+        <details>
+          <summary>Voir le détail</summary>
+          <ul id="lecon-points"></ul>
+        </details>
+      </div>
+    </section>
+
+    <!-- ========== 3. RÉVISION ========== -->
+    <section id="revision" class="vue">
+      <div class="reglages">
+        <button class="discret" id="sens">Deviner le français</button>
+        <button class="discret" id="rejouer">Nouvelle série</button>
+      </div>
+
+      <div class="carte-revision" id="carte" hidden>
+        <p class="question" id="question" title="Toucher pour écouter"></p>
+        <div class="reponse" id="reponse" hidden>
+          <p class="mot-reponse" id="reponse-mot"></p>
+          <p class="note" id="reponse-note"></p>
+        </div>
+        <button class="valider" id="reveler">Voir la réponse</button>
+        <div class="boutons" id="notes-carte" hidden>
+          <button class="contour" id="rate">À revoir</button>
+          <button class="valider" id="su">Je savais</button>
+        </div>
+        <p class="avancement" id="avancement"></p>
+      </div>
+
+      <p class="vide" id="revision-vide" hidden></p>
+    </section>
+
+  </main>
+
+  <button class="plus" id="plus" title="Ajouter un mot" aria-label="Ajouter un mot">+</button>
+
+  <!-- ========== Panneau réglages ========== -->
+  <div class="voile" id="voile" hidden>
+    <div class="panneau" role="dialog" aria-label="Réglages">
+      <h2>Réglages</h2>
+      <p id="sauvegarde"></p>
+      <div class="rangee">
+        <button class="pilule" id="exporter">Exporter mes mots</button>
+        <button class="pilule" id="importer">Importer un fichier</button>
+        <input type="file" id="fichier" accept="application/json" hidden />
+      </div>
+      <p class="message" id="pied-message" hidden></p>
+
+      <details id="bloc-github">
+        <summary>Sauvegarder en ligne</summary>
+        <p>
+          Un jeton GitHub coché sur la seule case <code>gist</code>
+          (<a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=Mes%20Mots" target="_blank" rel="noopener">le créer</a>)
+          enregistre tes mots en ligne après chaque ajout. Le même jeton les récupère sur un autre téléphone.
+        </p>
+        <div class="duo">
+          <input type="password" id="jeton" placeholder="ghp_..." autocomplete="off" />
+        </div>
+        <div class="rangee">
+          <button class="pilule" id="activer-sync">Activer</button>
+          <button class="discret" id="oublier-sync" hidden>Oublier</button>
+        </div>
+      </details>
+
+      <div class="rangee">
+        <button class="valider" id="fermer-panneau">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="data-en.js"></script>
+  <script src="data-es.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
