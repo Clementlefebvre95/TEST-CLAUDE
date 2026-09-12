@@ -89,6 +89,27 @@ function formatDate(offset) {
   return texte.charAt(0).toUpperCase() + texte.slice(1);
 }
 
+// Premier clic : le bouton demande confirmation. Second clic : on exécute.
+function confirmerDeuxTemps(btn, texteConfirmation, action) {
+  if (btn.dataset.arme === '1') {
+    clearTimeout(btn._armeTimer);
+    btn.textContent = btn.dataset.texteInitial;
+    btn.dataset.arme = '';
+    btn.classList.remove('arme');
+    action();
+    return;
+  }
+  btn.dataset.texteInitial = btn.textContent;
+  btn.dataset.arme = '1';
+  btn.textContent = texteConfirmation;
+  btn.classList.add('arme');
+  btn._armeTimer = setTimeout(() => {
+    btn.textContent = btn.dataset.texteInitial;
+    btn.dataset.arme = '';
+    btn.classList.remove('arme');
+  }, 4000);
+}
+
 function flash(el, message, type = 'ok') {
   el.textContent = message;
   el.className = `flash ${type}`;
@@ -524,13 +545,26 @@ function mergeWords(motsParLangue) {
   return { ajoutes, fusionnes };
 }
 
-function exportData() {
-  const data = snapshot();
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
+async function exportData() {
+  const texte = JSON.stringify(snapshot(), null, 2);
+  const nom = `carnet-vocabulaire-${new Date().toISOString().slice(0, 10)}.json`;
+
+  // Dans un Artifact publié, seul le canal officiel peut remettre un fichier
+  const downloads = await capaciteClaude('downloads');
+  if (downloads) {
+    try {
+      await downloads.save({ filename: nom, data: texte });
+      flash($('settings-flash'), 'Carnet exporté ✅');
+    } catch {
+      flash($('settings-flash'), 'Export annulé.', 'warn');
+    }
+    return;
+  }
+
+  const url = URL.createObjectURL(new Blob([texte], { type: 'application/json' }));
   const a = document.createElement('a');
   a.href = url;
-  a.download = `carnet-vocabulaire-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = nom;
   a.click();
   URL.revokeObjectURL(url);
   flash($('settings-flash'), 'Carnet exporté ✅');
@@ -554,28 +588,76 @@ function importData(file) {
 }
 
 // ============================================================
-// Sauvegarde en ligne (GitHub Gist privé)
-// Le carnet est poussé dans un fichier JSON secret du compte GitHub :
-// il survit donc au changement de téléphone ou de navigateur.
+// Sauvegarde en ligne
+// Deux coffres possibles, choisis automatiquement :
+//  - publiée comme Artifact Claude : stockage rattaché au compte Claude ;
+//  - hébergée ailleurs (GitHub Pages...) : gist privé du compte GitHub.
+// Dans les deux cas le carnet survit au changement de téléphone.
 // ============================================================
 
 const SYNC_KEYS = { token: 'voc_gh_token', gist: 'voc_gh_gist', last: 'voc_sync_last' };
 const GIST_FILE = 'carnet-vocabulaire.json';
 const GIST_DESC = 'Mon Carnet de Vocabulaire — sauvegarde automatique';
 
+let backend = null;          // { type, push(), pull() }
 let syncTimer = null;
 let syncEnCours = false;
 
-const syncToken = () => store.get(SYNC_KEYS.token, '') || '';
-const syncGistId = () => store.get(SYNC_KEYS.gist, '') || '';
-const syncActive = () => Boolean(syncToken());
+// La page tourne-t-elle dans un Artifact Claude ? (réponse immédiate)
+const surClaude = Boolean(window.claude && typeof window.claude.use === 'function');
+let coffreResolu = false;    // vrai une fois qu'on sait si la base Claude répond
+
+const syncActive = () => Boolean(backend);
+
+// Une capacité Claude n'existe que si la page tourne comme Artifact publié
+async function capaciteClaude(nom) {
+  try {
+    if (!window.claude || typeof window.claude.use !== 'function') return null;
+    return await window.claude.use(nom);
+  } catch { return null; }
+}
+
+// ---------- Coffre 1 : base de l'Artifact Claude ----------
+function backendClaude(db) {
+  const doc = code => db.doc(`carnet/${code}`);
+
+  return {
+    type: 'claude',
+    async push() {
+      const instant = snapshot();
+      await Promise.all(['en', 'es'].map(code =>
+        doc(code).set({ mots: instant.mots[code], maj: Date.now() })
+      ));
+      store.set(SYNC_KEYS.last, Date.now());
+      renderSyncUI();
+    },
+    async pull() {
+      const snaps = await Promise.all(['en', 'es'].map(code => doc(code).get()));
+      const mots = {};
+      let vide = true;
+      snaps.forEach((snap, i) => {
+        const code = ['en', 'es'][i];
+        const data = snap.exists ? snap.data() : null;
+        if (data && Array.isArray(data.mots)) { mots[code] = data.mots; vide = false; }
+      });
+      if (vide) return { ajoutes: 0, fusionnes: 0, vide: true };
+      const res = mergeWords(mots);
+      store.set(SYNC_KEYS.last, Date.now());
+      return res;
+    },
+  };
+}
+
+// ---------- Coffre 2 : gist privé GitHub ----------
+const ghToken = () => store.get(SYNC_KEYS.token, '') || '';
+const ghGistId = () => store.get(SYNC_KEYS.gist, '') || '';
 
 async function gh(chemin, options = {}) {
   const res = await fetch(`https://api.github.com${chemin}`, {
     ...options,
     headers: {
       Accept: 'application/vnd.github+json',
-      Authorization: `Bearer ${syncToken()}`,
+      Authorization: `Bearer ${ghToken()}`,
       'Content-Type': 'application/json',
       ...(options.headers || {}),
     },
@@ -586,13 +668,6 @@ async function gh(chemin, options = {}) {
     throw err;
   }
   return res.json();
-}
-
-function messageErreur(err) {
-  if (err && err.status === 401) return 'Jeton refusé par GitHub. Vérifie qu\'il est bien copié en entier.';
-  if (err && err.status === 403) return 'GitHub a refusé : le droit « gist » est-il bien coché sur le jeton ?';
-  if (err && err.status === 404) return 'Sauvegarde introuvable sur GitHub.';
-  return 'Pas de connexion à GitHub pour le moment. Le carnet reste sur ce téléphone.';
 }
 
 // Retrouve la sauvegarde existante du compte à partir du seul jeton
@@ -612,51 +687,59 @@ async function lireGist(id) {
   return JSON.parse(contenu);
 }
 
-async function pushCloud() {
-  const corps = {
-    description: GIST_DESC,
-    files: { [GIST_FILE]: { content: JSON.stringify(snapshot(), null, 2) } },
+function backendGitHub() {
+  return {
+    type: 'github',
+    async push() {
+      const corps = {
+        description: GIST_DESC,
+        files: { [GIST_FILE]: { content: JSON.stringify(snapshot(), null, 2) } },
+      };
+      let id = ghGistId();
+      if (!id) {
+        id = await trouverGist();
+        if (id) store.set(SYNC_KEYS.gist, id);
+      }
+      try {
+        const res = id
+          ? await gh(`/gists/${id}`, { method: 'PATCH', body: JSON.stringify(corps) })
+          : await gh('/gists', { method: 'POST', body: JSON.stringify({ ...corps, public: false }) });
+        store.set(SYNC_KEYS.gist, res.id);
+      } catch (err) {
+        if (err.status !== 404) throw err;
+        store.remove(SYNC_KEYS.gist);        // sauvegarde supprimée : on en recrée une
+        const res = await gh('/gists', { method: 'POST', body: JSON.stringify({ ...corps, public: false }) });
+        store.set(SYNC_KEYS.gist, res.id);
+      }
+      store.set(SYNC_KEYS.last, Date.now());
+      renderSyncUI();
+    },
+    async pull() {
+      let id = ghGistId();
+      if (!id) {
+        id = await trouverGist();
+        if (!id) return { ajoutes: 0, fusionnes: 0, vide: true };
+        store.set(SYNC_KEYS.gist, id);
+      }
+      const data = await lireGist(id);
+      const res = mergeWords(data && data.mots);
+      store.set(SYNC_KEYS.last, Date.now());
+      return res;
+    },
   };
-  let id = syncGistId();
-
-  if (!id) {
-    id = await trouverGist();
-    if (id) store.set(SYNC_KEYS.gist, id);
-  }
-
-  try {
-    const res = id
-      ? await gh(`/gists/${id}`, { method: 'PATCH', body: JSON.stringify(corps) })
-      : await gh('/gists', { method: 'POST', body: JSON.stringify({ ...corps, public: false }) });
-    store.set(SYNC_KEYS.gist, res.id);
-  } catch (err) {
-    if (err.status === 404) {          // sauvegarde supprimée sur GitHub : on en recrée une
-      store.remove(SYNC_KEYS.gist);
-      const res = await gh('/gists', { method: 'POST', body: JSON.stringify({ ...corps, public: false }) });
-      store.set(SYNC_KEYS.gist, res.id);
-    } else {
-      throw err;
-    }
-  }
-
-  store.set(SYNC_KEYS.last, Date.now());
-  renderSyncUI();
 }
 
-async function pullCloud() {
-  let id = syncGistId();
-  if (!id) {
-    id = await trouverGist();
-    if (!id) return { ajoutes: 0, fusionnes: 0, vide: true };
-    store.set(SYNC_KEYS.gist, id);
-  }
-  const data = await lireGist(id);
-  const resultat = mergeWords(data && data.mots);
-  store.set(SYNC_KEYS.last, Date.now());
-  return resultat;
+function messageErreur(err) {
+  if (err && err.status === 401) return 'Jeton refusé par GitHub. Vérifie qu\'il est bien copié en entier.';
+  if (err && err.status === 403) return 'GitHub a refusé : le droit « gist » est-il bien coché sur le jeton ?';
+  if (err && err.status === 404) return 'Sauvegarde introuvable.';
+  return 'Sauvegarde impossible pour le moment. Le carnet reste sur cet appareil.';
 }
 
-// Au démarrage et sur demande : on récupère le cloud, puis on renvoie la fusion
+const pushCloud = () => backend.push();
+const pullCloud = () => backend.pull();
+
+// Au démarrage et sur demande : on récupère le coffre, puis on y renvoie la fusion
 async function syncNow({ silencieux = true } = {}) {
   if (!syncActive() || syncEnCours) return;
   syncEnCours = true;
@@ -667,7 +750,7 @@ async function syncNow({ silencieux = true } = {}) {
     renderAll();
     if (!silencieux) {
       flash($('sync-flash'), res.vide
-        ? 'Première sauvegarde envoyée sur GitHub ✅'
+        ? 'Première sauvegarde enregistrée ✅'
         : `Carnet synchronisé ✅ (${res.ajoutes} mot(s) récupéré(s))`);
     }
   } catch (err) {
@@ -692,16 +775,31 @@ function scheduleSync() {
   }, 2000);
 }
 
+// Le formulaire GitHub ne sert que si la page n'est pas un Artifact Claude
 function renderSyncUI(etat) {
   const statut = $('sync-status');
-  const actif = syncActive();
 
-  ['sync-push', 'sync-pull', 'sync-forget'].forEach(id => { $(id).hidden = !actif; });
-  $('sync-save').textContent = actif ? 'Mettre à jour le jeton' : 'Activer la sauvegarde';
-  $('sync-gist').value = syncGistId();
+  $('sync-github').hidden = surClaude;
+  $('sync-claude').hidden = !surClaude;
+  ['sync-push', 'sync-pull'].forEach(id => { $(id).hidden = !syncActive(); });
+  $('sync-forget').hidden = surClaude || !syncActive();
+  $('sync-save').hidden = surClaude;
+  $('sync-save').textContent = syncActive() ? 'Mettre à jour le jeton' : 'Activer la sauvegarde';
+  $('sync-gist').value = ghGistId();
+
+  if (surClaude) {
+    $('sync-claude-note').textContent = !coffreResolu
+      ? 'Connexion à ta sauvegarde en cours...'
+      : backend
+        ? 'Rien à configurer : ton carnet est enregistré en ligne après chaque ajout et te suit sur tous tes appareils. Ouvre simplement ce lien depuis ton nouveau téléphone.'
+        : 'Sauvegarde en ligne indisponible dans cette vue. Ton carnet reste sur cet appareil : pense à l\'exporter en fichier.';
+  }
 
   if (etat) { statut.textContent = etat; return; }
-  if (!actif) { statut.textContent = 'Non configurée'; return; }
+  if (!syncActive()) {
+    statut.textContent = surClaude && !coffreResolu ? 'Connexion...' : 'Non configurée';
+    return;
+  }
 
   const last = store.get(SYNC_KEYS.last, 0);
   if (!last) { statut.textContent = 'Activée — pas encore sauvegardée'; return; }
@@ -713,6 +811,25 @@ function renderSyncUI(etat) {
       ? `✅ Sauvegardé il y a ${minutes} min`
       : `✅ Sauvegardé le ${new Date(last).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`;
 }
+
+// Choisit le coffre disponible : Claude d'abord, GitHub ensuite
+async function initCloud() {
+  if (!surClaude) {
+    coffreResolu = true;
+    if (ghToken()) backend = backendGitHub();
+    renderSyncUI();
+    if (syncActive()) syncNow();
+    return;
+  }
+
+  renderSyncUI();
+  const db = await capaciteClaude('db');
+  coffreResolu = true;
+  if (db) backend = backendClaude(db);
+  renderSyncUI();
+  if (syncActive()) syncNow();
+}
+
 
 // ---------- Écouteurs ----------
 document.querySelectorAll('.tab').forEach(btn => {
@@ -766,7 +883,7 @@ $('word-form').addEventListener('submit', e => {
   } else {
     const res = addWord({ mot, trad, note });
     if (!res.ok) {
-      alert('Ce mot est déjà dans ton carnet pour cette langue.');
+      flash($('word-flash'), 'Ce mot est déjà dans ton carnet pour cette langue.', 'warn');
       return;
     }
     $('word-form').reset();
@@ -788,13 +905,12 @@ $('word-list').addEventListener('click', e => {
 
   if (btn.dataset.action === 'edit') startEdit(id);
   if (btn.dataset.action === 'delete') {
-    const w = getWords().find(x => x.id === id);
-    if (w && confirm(`Supprimer « ${w.mot} » ?`)) {
+    confirmerDeuxTemps(btn, 'Supprimer ?', () => {
       deleteWord(id);
       if (editingId === id) cancelEdit();
       renderWordList();
       renderStats();
-    }
+    });
   }
 });
 
@@ -826,6 +942,7 @@ $('sync-save').addEventListener('click', async () => {
   store.set(SYNC_KEYS.token, token);
   if (gist) store.set(SYNC_KEYS.gist, gist);
   $('sync-token').value = '';
+  backend = backendGitHub();
   renderSyncUI();
   await syncNow({ silencieux: false });
 });
@@ -855,12 +972,14 @@ $('sync-pull').addEventListener('click', async () => {
   renderSyncUI();
 });
 
-$('sync-forget').addEventListener('click', () => {
-  if (!confirm('Oublier le jeton sur cet appareil ? Ta sauvegarde GitHub, elle, reste en ligne.')) return;
-  store.remove(SYNC_KEYS.token);
-  store.remove(SYNC_KEYS.last);
-  renderSyncUI();
-  flash($('sync-flash'), 'Jeton oublié sur cet appareil.', 'warn');
+$('sync-forget').addEventListener('click', e => {
+  confirmerDeuxTemps(e.currentTarget, 'Confirmer l\'oubli ?', () => {
+    store.remove(SYNC_KEYS.token);
+    store.remove(SYNC_KEYS.last);
+    backend = null;
+    renderSyncUI();
+    flash($('sync-flash'), 'Jeton oublié sur cet appareil. La sauvegarde en ligne, elle, reste intacte.', 'warn');
+  });
 });
 
 $('export-btn').addEventListener('click', exportData);
@@ -869,21 +988,22 @@ $('import-input').addEventListener('change', e => {
   e.target.value = '';
 });
 
-$('reset-btn').addEventListener('click', () => {
-  if (confirm(`Effacer TOUS les mots en ${lang().adjectif} ? Cette action est définitive.`)) {
+$('reset-btn').addEventListener('click', e => {
+  confirmerDeuxTemps(e.currentTarget, `Confirmer : tout effacer en ${lang().adjectif} ?`, () => {
     store.remove(STORE_KEYS.words(currentLang));
+    scheduleSync();
     renderAll();
     flash($('settings-flash'), 'Carnet vidé.', 'warn');
-  }
+  });
 });
 
 // ---------- Démarrage ----------
 trackVisit();
 setLang(currentLang);   // restaure la dernière langue utilisée
-renderSyncUI();
-syncNow();              // récupère la sauvegarde en ligne si un jeton est configuré
+initCloud();            // branche la sauvegarde en ligne disponible et récupère le carnet
 
-if ('serviceWorker' in navigator) {
+// Uniquement pour la version installable (celle qui embarque un manifeste)
+if ('serviceWorker' in navigator && document.querySelector('link[rel="manifest"]')) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   });

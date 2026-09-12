@@ -19,12 +19,29 @@ de l'eau, et chaque jour l'app propose une leçon de grammaire et une phrase tra
 - **Prononciation** : bouton 🔊 sur les mots et les phrases (synthèse vocale du navigateur).
 - **Hors ligne** : installable sur l'écran d'accueil et utilisable sans connexion.
 
+## Deux façons d'ouvrir l'app
+
+- **Publiée comme Artifact Claude** (`artifact.html`) : hébergée sur claude.ai, accessible depuis
+  n'importe quel appareil connecté au compte. La sauvegarde y est automatique (voir plus bas).
+- **Hébergée en statique** (`index.html`, par exemple GitHub Pages) : installable sur l'écran
+  d'accueil et utilisable hors ligne, avec la sauvegarde GitHub en option.
+
+`artifact.html` est le corps de `index.html` sans l'enveloppe `<html>/<head>/<body>`, que la
+plateforme Artifact fournit elle-même. Après une modification de `index.html`, le régénérer :
+
+```bash
+python3 -c "src=open('index.html').read(); corps=src[src.index('>',src.index('<body'))+1:src.index('</body>')]; open('artifact.html','w').write('<title>Mon Carnet de Vocabulaire</title>\n<link rel=\"stylesheet\" href=\"styles.css\" />\n'+corps.strip()+'\n')"
+```
+
 ## Sauvegarde
 
 Les données vivent dans le navigateur (`localStorage`), donc **sur ce téléphone uniquement**.
-Deux façons de les emporter ailleurs :
+L'app choisit toute seule le coffre disponible pour les en sortir :
 
-1. **Sauvegarde en ligne (automatique)** — Réglages → Sauvegarde en ligne.
+0. **Base de l'Artifact Claude** — si la page tourne comme Artifact publié, rien à configurer :
+   le carnet est écrit dans le stockage de l'artifact après chaque ajout et revient sur tout
+   appareil ouvrant le même lien.
+1. **Sauvegarde GitHub (automatique)** — pour la version hébergée ailleurs. Réglages → Sauvegarde en ligne.
    Coller un jeton GitHub *classique* portant la seule autorisation `gist`
    ([créer le jeton](https://github.com/settings/tokens/new?scopes=gist&description=Carnet%20de%20vocabulaire)).
    Le carnet est alors écrit dans un gist **privé** du compte, mis à jour automatiquement après
