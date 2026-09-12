@@ -1,0 +1,303 @@
+<title>Six ambiances néon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" />
+
+<style>
+:root {
+  --page: #f4f4f2;
+  --sur-page: #23211e;
+  --gris: #77726c;
+  --filet: #e2dfd9;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --page: #17171a; --sur-page: #eceae6; --gris: #97928b; --filet: #2e2e33; }
+}
+:root[data-theme="dark"] { --page: #17171a; --sur-page: #eceae6; --gris: #97928b; --filet: #2e2e33; }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--sur-page);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.55;
+}
+
+.enveloppe { max-width: 1180px; margin: 0 auto; padding: 40px 20px 72px; }
+
+.intro { max-width: 60ch; margin-bottom: 38px; }
+.intro h1 { font-size: 28px; margin: 0 0 10px; letter-spacing: -0.02em; text-wrap: balance; }
+.intro p { margin: 0 0 8px; color: var(--gris); font-size: 15px; }
+.intro strong { color: var(--sur-page); font-weight: 600; }
+
+.grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+  align-items: start;
+}
+
+.piste { min-width: 0; }
+.entete h2 { font-size: 18px; margin: 0 0 2px; letter-spacing: -0.01em; }
+.pitch { color: var(--gris); font-size: 14px; margin: 0 0 14px; }
+
+.nuancier { display: flex; gap: 6px; margin-top: 12px; }
+.nuance { width: 24px; height: 24px; border-radius: 6px; border: 1px solid rgba(128,128,128,.25); }
+
+/* ---- L'écran, identique partout : seules les couleurs changent ---- */
+.tel {
+  width: 100%;
+  max-width: 300px;
+  height: 500px;
+  border-radius: 28px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 14px;
+  background: var(--fond);
+  color: var(--texte);
+  font-family: "Baloo 2", system-ui, sans-serif;
+  box-shadow: 0 18px 40px rgba(20, 15, 10, .16);
+}
+
+.bascule {
+  display: flex;
+  background: var(--carte);
+  border-radius: 999px;
+  padding: 4px;
+  font-weight: 700;
+  font-size: 14px;
+}
+.bascule span { flex: 1; text-align: center; padding: 7px 0; border-radius: 999px; color: var(--doux); }
+.bascule .on { background: var(--accent); color: var(--sur-accent); }
+.bascule .sep { flex: 0 0 2px; background: var(--doux); opacity: .5; margin: 6px 4px; padding: 0; border-radius: 2px; }
+
+.onglets { display: flex; gap: 16px; font-size: 12px; color: var(--doux); font-weight: 600; }
+.onglets .on { color: var(--accent); }
+
+.liste { flex: 1; display: flex; flex-direction: column; gap: 9px; }
+
+.carte {
+  background: var(--carte);
+  border-radius: 16px;
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.carte.su { box-shadow: inset 0 0 0 1.5px var(--accent); }
+.mot { font-size: 16px; font-weight: 700; }
+.fr {
+  background: var(--pastille);
+  color: var(--past-texte);
+  border-radius: 999px;
+  padding: 3px 11px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.plus {
+  align-self: center;
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--sur-accent);
+  font-size: 27px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 26px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.mangue {
+  --fond: #15161a; --carte: #212429; --texte: #f4f1ec; --doux: #8d8880;
+  --accent: #ff7a45; --pastille: #2e2119; --past-texte: #ff9d6b;
+  --sur-accent: #1b1109;
+}
+.lagon {
+  --fond: #06212a; --carte: #0f3140; --texte: #eafaf8; --doux: #7fa3ad;
+  --accent: #2fe3c7; --pastille: #123f47; --past-texte: #63efd8;
+  --sur-accent: #052027;
+}
+.fuchsia {
+  --fond: #180d1d; --carte: #271432; --texte: #f8effa; --doux: #a68bb0;
+  --accent: #ff4d8d; --pastille: #36193f; --past-texte: #ff85b0;
+  --sur-accent: #1d0a17;
+}
+.menthe {
+  --fond: #0d1a14; --carte: #15271d; --texte: #eef7f0; --doux: #87a394;
+  --accent: #6ee7a0; --pastille: #193220; --past-texte: #93f0bb;
+  --sur-accent: #07160e;
+}
+.miel {
+  --fond: #0c1524; --carte: #152238; --texte: #eef2fa; --doux: #8494b0;
+  --accent: #ffc857; --pastille: #1d2b44; --past-texte: #ffd782;
+  --sur-accent: #14100a;
+}
+.braise {
+  --fond: #1a1113; --carte: #271a1d; --texte: #fbf0f0; --doux: #a89092;
+  --accent: #ff5a5f; --pastille: #341f22; --past-texte: #ff8a8e;
+  --sur-accent: #1c0c0d;
+}
+
+@media (max-width: 700px) { .tel { max-width: 100%; } }
+</style>
+
+<div class="enveloppe">
+  <div class="intro">
+    <h1>Six ambiances pour la piste Néon</h1>
+    <p>Exactement la mise en page que tu as choisie : fond sombre, gros arrondis, traductions en pastilles, bouton d'ajout lumineux. <strong>Seules les couleurs changent.</strong></p>
+    <p>Toujours des images fixes. Dis-moi le nom de celle qui te plaît et je refais l'app entière — les trois pages — dans cette ambiance.</p>
+  </div>
+
+  <div class="grille">
+    <article class="piste">
+      <div class="entete"><h2>Mangue</h2></div>
+      <p class="pitch">L'orange de ton app de recettes, posé sur un gris très sombre. Les deux applis deviennent visiblement de la même famille.</p>
+
+      <div class="tel mangue">
+        <div class="bascule">
+          <span class="on">Espagnol</span>
+          <span class="sep"></span>
+          <span>Anglais</span>
+        </div>
+        <div class="onglets"><span class="on">Mes mots</span><span>Du jour</span><span>Révision</span></div>
+        <div class="liste">
+          <div class="carte"><span class="mot">el coche</span><span class="fr">la voiture</span></div>
+          <div class="carte su"><span class="mot">aprender</span><span class="fr">apprendre</span></div>
+          <div class="carte"><span class="mot">la palabra</span><span class="fr">le mot</span></div>
+          <div class="carte"><span class="mot">el trabajo</span><span class="fr">le travail</span></div>
+          <div class="carte"><span class="mot">la semana</span><span class="fr">la semaine</span></div>
+        </div>
+        <div class="plus">+</div>
+      </div>
+
+      <div class="nuancier"><span class="nuance" style="background:#15161a"></span><span class="nuance" style="background:#212429"></span><span class="nuance" style="background:#ff7a45"></span><span class="nuance" style="background:#2e2119"></span></div>
+    </article>
+
+    <article class="piste">
+      <div class="entete"><h2>Lagon</h2></div>
+      <p class="pitch">Bleu profond de fond marin et turquoise lumineux. Frais, calme, avec un accent qui claque sans agresser.</p>
+
+      <div class="tel lagon">
+        <div class="bascule">
+          <span class="on">Espagnol</span>
+          <span class="sep"></span>
+          <span>Anglais</span>
+        </div>
+        <div class="onglets"><span class="on">Mes mots</span><span>Du jour</span><span>Révision</span></div>
+        <div class="liste">
+          <div class="carte"><span class="mot">el coche</span><span class="fr">la voiture</span></div>
+          <div class="carte su"><span class="mot">aprender</span><span class="fr">apprendre</span></div>
+          <div class="carte"><span class="mot">la palabra</span><span class="fr">le mot</span></div>
+          <div class="carte"><span class="mot">el trabajo</span><span class="fr">le travail</span></div>
+          <div class="carte"><span class="mot">la semana</span><span class="fr">la semaine</span></div>
+        </div>
+        <div class="plus">+</div>
+      </div>
+
+      <div class="nuancier"><span class="nuance" style="background:#06212a"></span><span class="nuance" style="background:#0f3140"></span><span class="nuance" style="background:#2fe3c7"></span><span class="nuance" style="background:#123f47"></span></div>
+    </article>
+
+    <article class="piste">
+      <div class="entete"><h2>Fuchsia</h2></div>
+      <p class="pitch">Nuit violine et rose vif. C'est la plus pop des six, celle qui se remarque dès qu'on ouvre le téléphone.</p>
+
+      <div class="tel fuchsia">
+        <div class="bascule">
+          <span class="on">Espagnol</span>
+          <span class="sep"></span>
+          <span>Anglais</span>
+        </div>
+        <div class="onglets"><span class="on">Mes mots</span><span>Du jour</span><span>Révision</span></div>
+        <div class="liste">
+          <div class="carte"><span class="mot">el coche</span><span class="fr">la voiture</span></div>
+          <div class="carte su"><span class="mot">aprender</span><span class="fr">apprendre</span></div>
+          <div class="carte"><span class="mot">la palabra</span><span class="fr">le mot</span></div>
+          <div class="carte"><span class="mot">el trabajo</span><span class="fr">le travail</span></div>
+          <div class="carte"><span class="mot">la semana</span><span class="fr">la semaine</span></div>
+        </div>
+        <div class="plus">+</div>
+      </div>
+
+      <div class="nuancier"><span class="nuance" style="background:#180d1d"></span><span class="nuance" style="background:#271432"></span><span class="nuance" style="background:#ff4d8d"></span><span class="nuance" style="background:#36193f"></span></div>
+    </article>
+
+    <article class="piste">
+      <div class="entete"><h2>Menthe</h2></div>
+      <p class="pitch">Vert forêt très sombre et menthe claire. Reposant pour les yeux, y compris le soir au lit.</p>
+
+      <div class="tel menthe">
+        <div class="bascule">
+          <span class="on">Espagnol</span>
+          <span class="sep"></span>
+          <span>Anglais</span>
+        </div>
+        <div class="onglets"><span class="on">Mes mots</span><span>Du jour</span><span>Révision</span></div>
+        <div class="liste">
+          <div class="carte"><span class="mot">el coche</span><span class="fr">la voiture</span></div>
+          <div class="carte su"><span class="mot">aprender</span><span class="fr">apprendre</span></div>
+          <div class="carte"><span class="mot">la palabra</span><span class="fr">le mot</span></div>
+          <div class="carte"><span class="mot">el trabajo</span><span class="fr">le travail</span></div>
+          <div class="carte"><span class="mot">la semana</span><span class="fr">la semaine</span></div>
+        </div>
+        <div class="plus">+</div>
+      </div>
+
+      <div class="nuancier"><span class="nuance" style="background:#0d1a14"></span><span class="nuance" style="background:#15271d"></span><span class="nuance" style="background:#6ee7a0"></span><span class="nuance" style="background:#193220"></span></div>
+    </article>
+
+    <article class="piste">
+      <div class="entete"><h2>Miel</h2></div>
+      <p class="pitch">Bleu nuit et jaune miel. Chaleureux sans être criard : le jaune éclaire la page au lieu de la saturer.</p>
+
+      <div class="tel miel">
+        <div class="bascule">
+          <span class="on">Espagnol</span>
+          <span class="sep"></span>
+          <span>Anglais</span>
+        </div>
+        <div class="onglets"><span class="on">Mes mots</span><span>Du jour</span><span>Révision</span></div>
+        <div class="liste">
+          <div class="carte"><span class="mot">el coche</span><span class="fr">la voiture</span></div>
+          <div class="carte su"><span class="mot">aprender</span><span class="fr">apprendre</span></div>
+          <div class="carte"><span class="mot">la palabra</span><span class="fr">le mot</span></div>
+          <div class="carte"><span class="mot">el trabajo</span><span class="fr">le travail</span></div>
+          <div class="carte"><span class="mot">la semana</span><span class="fr">la semaine</span></div>
+        </div>
+        <div class="plus">+</div>
+      </div>
+
+      <div class="nuancier"><span class="nuance" style="background:#0c1524"></span><span class="nuance" style="background:#152238"></span><span class="nuance" style="background:#ffc857"></span><span class="nuance" style="background:#1d2b44"></span></div>
+    </article>
+
+    <article class="piste">
+      <div class="entete"><h2>Braise</h2></div>
+      <p class="pitch">Brun-rouge sombre et rouge corail. Une ambiance de soirée, plus douce qu'un vrai néon.</p>
+
+      <div class="tel braise">
+        <div class="bascule">
+          <span class="on">Espagnol</span>
+          <span class="sep"></span>
+          <span>Anglais</span>
+        </div>
+        <div class="onglets"><span class="on">Mes mots</span><span>Du jour</span><span>Révision</span></div>
+        <div class="liste">
+          <div class="carte"><span class="mot">el coche</span><span class="fr">la voiture</span></div>
+          <div class="carte su"><span class="mot">aprender</span><span class="fr">apprendre</span></div>
+          <div class="carte"><span class="mot">la palabra</span><span class="fr">le mot</span></div>
+          <div class="carte"><span class="mot">el trabajo</span><span class="fr">le travail</span></div>
+          <div class="carte"><span class="mot">la semana</span><span class="fr">la semaine</span></div>
+        </div>
+        <div class="plus">+</div>
+      </div>
+
+      <div class="nuancier"><span class="nuance" style="background:#1a1113"></span><span class="nuance" style="background:#271a1d"></span><span class="nuance" style="background:#ff5a5f"></span><span class="nuance" style="background:#341f22"></span></div>
+    </article>
+  </div>
+</div>
