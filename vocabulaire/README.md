@@ -4,8 +4,9 @@ Application de vocabulaire anglais 🇬🇧 et espagnol 🇪🇸, en trois pages
 
 ## Les trois pages
 
-1. **Mes mots** — la liste arrive tout de suite : une carte arrondie par mot, la traduction en
-   pastille orangée à droite. Le gros bouton **+** en bas ouvre les deux champs d'ajout. Toucher
+1. **Mes mots** — la liste arrive tout de suite : une carte arrondie par mot, la langue étrangère
+   à gauche et le français à droite, au même format (même taille, même graisse) de part et d'autre
+   d'un filet ; seule la couleur les distingue. Le gros bouton **+** en bas ouvre les deux champs d'ajout. Toucher
    une carte la prononce et déplie ses deux actions (écouter, supprimer). *Cacher les traductions*
    masque toute la colonne française pour se tester, et chaque pastille se révèle d'un clic.
    La recherche n'apparaît qu'au-delà de douze mots, et un contour vert marque les mots sus.
@@ -22,7 +23,8 @@ Application de vocabulaire anglais 🇬🇧 et espagnol 🇪🇸, en trois pages
 La mise en forme des applis de langue ludiques — fond uni, grosses cartes très arrondies,
 traductions en pastilles, bouton d'ajout rond et lumineux, typographie ronde (Baloo 2) — mais dans
 le code couleur de Mes Recettes : crème `#faf7f2`, cartes blanches, orange `#e85d3a`.
-Les deux langues sont séparées par une vraie barre dans une bascule en haut de l'écran.
+La page en cours fait le titre de l'écran (24px, souligné orange) et la bascule de langue reste
+discrète au-dessus (12px), séparée par une vraie barre.
 Les réglages (sauvegarde, export, import) vivent derrière le `⋯` et n'encombrent plus les pages.
 
 La langue choisie est retenue : à la réouverture, on retrouve celle de la dernière fois.

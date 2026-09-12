@@ -213,11 +213,14 @@ function afficherMots() {
     const cache = masque && !devoiles.has(m.id);
     const ouverte = ouvert === m.id;
     return `
-      <li class="ligne ${m.niveau >= NIVEAU_MAX ? 'sue' : ''}" data-id="${m.id}">
+      <li class="ligne" data-id="${m.id}">
         <div class="ligne-haut">
-          <span class="mot">${html(m.mot)}</span>
-          <span class="pastille ${cache ? 'cachee' : ''}" ${cache ? `data-voir="${m.id}"` : ''}>${
-            cache ? '• • •' : html(m.trad)}</span>
+          <span class="cote source">${
+            m.niveau >= NIVEAU_MAX ? '<span class="pastille-su" title="Su"></span>' : ''
+          }${html(m.mot)}</span>
+          <span class="filet"></span>
+          <span class="cote trad ${cache ? 'cachee' : ''}" ${
+            cache ? `data-voir="${m.id}"` : ''}>${cache ? '• • •' : html(m.trad)}</span>
         </div>
         ${m.note && !cache ? `<p class="note">${html(m.note)}</p>` : ''}
         ${ouverte ? `

@@ -5,17 +5,25 @@
 <link rel="stylesheet" href="styles.css" />
 <header class="tete">
     <div class="tete-inner">
-      <div class="bascule" id="langues">
-        <button class="langue" data-lang="es">Espagnol</button>
-        <span class="separateur"></span>
-        <button class="langue" data-lang="en">Anglais</button>
+      <div class="haut">
+        <div class="bascule" id="langues">
+          <button class="langue" data-lang="es">Espagnol</button>
+          <span class="separateur"></span>
+          <button class="langue" data-lang="en">Anglais</button>
+        </div>
+        <button class="points" id="ouvrir-panneau" title="Réglages" aria-label="Réglages">
+          <svg width="20" height="5" viewBox="0 0 20 5" fill="none" aria-hidden="true">
+            <circle cx="2.5" cy="2.5" r="1.9" fill="currentColor"></circle>
+            <circle cx="10" cy="2.5" r="1.9" fill="currentColor"></circle>
+            <circle cx="17.5" cy="2.5" r="1.9" fill="currentColor"></circle>
+          </svg>
+        </button>
       </div>
-      <div class="pages">
+      <nav class="pages">
         <button class="page-btn active" data-page="liste">Mes mots</button>
         <button class="page-btn" data-page="jour">Du jour</button>
         <button class="page-btn" data-page="revision">Révision</button>
-        <button class="points" id="ouvrir-panneau" title="Réglages" aria-label="Réglages">⋯</button>
-      </div>
+      </nav>
     </div>
   </header>
 
