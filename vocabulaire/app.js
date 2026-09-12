@@ -21,7 +21,7 @@ const CLES = {
 
 const NIVEAU_MAX = 5;        // « su » à la 5e réussite d'affilée
 const TAILLE_SERIE = 20;
-const SEUIL_RECHERCHE = 8;   // la recherche n'apparaît qu'au-delà
+const SEUIL_RECHERCHE = 12;  // la recherche n'apparaît qu'au-delà
 
 const SENS = [
   { cle: 'src2fr', texte: 'Deviner le français' },
@@ -46,6 +46,7 @@ let langue = LANGUES[store.get(CLES.langue, 'en')] ? store.get(CLES.langue, 'en'
 let masque = store.get(CLES.masque, false);
 let sens = SENS.some(s => s.cle === store.get(CLES.sens)) ? store.get(CLES.sens) : 'src2fr';
 let devoiles = new Set();
+let ouvert = null;              // ligne dont les actions sont dépliées
 let serie = { cartes: [], i: 0, vue: false, bons: 0 };
 
 const L = () => LANGUES[langue];
@@ -203,25 +204,27 @@ function afficherMots() {
     ? liste.filter(m => (m.mot + ' ' + m.trad + ' ' + m.note).toLowerCase().includes(recherche))
     : liste;
 
-  const sus = liste.filter(m => m.niveau >= NIVEAU_MAX).length;
-  $('compte').textContent = liste.length
-    ? `${liste.length} mot${liste.length > 1 ? 's' : ''}${sus ? ` · ${sus} su${sus > 1 ? 's' : ''}` : ''}`
-    : '';
   $('vide').hidden = liste.length > 0;
   $('recherche').hidden = liste.length < SEUIL_RECHERCHE;
   $('bascule-trad').hidden = liste.length === 0;
-  $('bascule-trad').textContent = masque ? 'montrer' : 'masquer';
+  $('bascule-trad').textContent = masque ? 'montrer les traductions' : 'cacher les traductions';
 
   $('mots').innerHTML = visibles.map(m => {
     const cache = masque && !devoiles.has(m.id);
-    const droite = cache
-      ? `<button class="cacher" data-voir="${m.id}">• • •</button>`
-      : `${html(m.trad)}${m.note ? `<span class="note-bulle">${html(m.note)}</span>` : ''}`;
+    const ouverte = ouvert === m.id;
     return `
       <li class="ligne ${m.niveau >= NIVEAU_MAX ? 'sue' : ''}" data-id="${m.id}">
-        <div class="bulle src" data-dire="${html(m.mot)}">${html(m.mot)}</div>
-        <div class="bulle fr">${droite}</div>
-        <button class="supprimer" data-suppr="1" title="Supprimer">✕</button>
+        <div class="ligne-haut">
+          <span class="mot">${html(m.mot)}</span>
+          <span class="pastille ${cache ? 'cachee' : ''}" ${cache ? `data-voir="${m.id}"` : ''}>${
+            cache ? '• • •' : html(m.trad)}</span>
+        </div>
+        ${m.note && !cache ? `<p class="note">${html(m.note)}</p>` : ''}
+        ${ouverte ? `
+        <div class="ligne-actions">
+          <button class="discret" data-dire="${html(m.mot)}">écouter</button>
+          <button class="discret" data-suppr="1">supprimer</button>
+        </div>` : ''}
       </li>`;
   }).join('');
 
@@ -280,7 +283,6 @@ function nouvelleSerie() {
     $('carte').hidden = true;
     $('revision-vide').hidden = false;
     $('revision-vide').textContent = `Ajoute d'abord quelques mots en ${L().adjectif}.`;
-    $('score').textContent = '';
     return;
   }
 
@@ -303,7 +305,6 @@ function afficherCarte() {
     $('carte').hidden = true;
     $('revision-vide').hidden = false;
     $('revision-vide').textContent = `Série terminée : ${serie.bons} sur ${total}.`;
-    $('score').textContent = '';
     afficherMots();
     return;
   }
@@ -324,8 +325,8 @@ function afficherCarte() {
   $('notes-carte').hidden = true;
   serie.vue = false;
 
-  $('avancement').textContent = `${serie.i + 1} / ${total}`;
-  $('score').textContent = serie.bons ? `${serie.bons} bonne${serie.bons > 1 ? 's' : ''}` : '';
+  $('avancement').textContent = `${serie.i + 1} / ${total}`
+    + (serie.bons ? ` · ${serie.bons} bonne${serie.bons > 1 ? 's' : ''}` : '');
 }
 
 function revelerCarte() {
@@ -649,8 +650,15 @@ $('mots').addEventListener('click', e => {
   const suppr = e.target.closest('[data-suppr]');
   if (suppr) {
     const id = e.target.closest('.ligne').dataset.id;
-    confirmer(suppr, 'supprimer ?', () => { supprimerMot(id); afficherMots(); });
+    return confirmer(suppr, 'confirmer ?', () => { ouvert = null; supprimerMot(id); afficherMots(); });
   }
+
+  const ligne = e.target.closest('.ligne');
+  if (!ligne) return;
+  const m = lireMots().find(x => x.id === ligne.dataset.id);
+  ouvert = ouvert === ligne.dataset.id ? null : ligne.dataset.id;
+  afficherMots();
+  if (m && ouvert) parler(m.mot);
 });
 
 $('phrase').addEventListener('click', e => parler(e.currentTarget.dataset.dire));
@@ -689,6 +697,7 @@ $('sens').addEventListener('click', () => {
 });
 
 document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !$('voile').hidden) return ouvrirPanneau(false);
   if (e.key === 'Escape' && !$('ajout').hidden) return basculerAjout(false);
   if (!$('revision').classList.contains('active') || $('carte').hidden) return;
   if (e.target.matches('input, select, textarea')) return;
@@ -696,6 +705,16 @@ document.addEventListener('keydown', e => {
   else if (serie.vue && (e.key === '1' || e.key === 'ArrowLeft')) noter(false);
   else if (serie.vue && (e.key === '2' || e.key === 'ArrowRight')) noter(true);
 });
+
+function ouvrirPanneau(ouvrirLe) {
+  const montrer = ouvrirLe ?? $('voile').hidden;
+  $('voile').hidden = !montrer;
+  if (montrer) afficherSauvegarde();
+}
+
+$('ouvrir-panneau').addEventListener('click', () => ouvrirPanneau());
+$('fermer-panneau').addEventListener('click', () => ouvrirPanneau(false));
+$('voile').addEventListener('click', e => { if (e.target === $('voile')) ouvrirPanneau(false); });
 
 $('exporter').addEventListener('click', exporter);
 $('importer').addEventListener('click', () => $('fichier').click());

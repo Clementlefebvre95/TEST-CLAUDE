@@ -4,11 +4,11 @@ Application de vocabulaire anglais 🇬🇧 et espagnol 🇪🇸, en trois pages
 
 ## Les trois pages
 
-1. **Mes mots** — la liste arrive tout de suite, en bulles : la langue étrangère à gauche, le
-   français à droite, sur la même ligne, comme une conversation. Le bouton **+** ouvre les deux
-   champs d'ajout ; *masquer* cache toutes les traductions pour se tester, et chaque bulle masquée
-   se révèle d'un clic. La recherche n'apparaît qu'au-delà de huit mots, une bordure verte et un ✓
-   marquent les mots sus, et toucher un mot le fait prononcer.
+1. **Mes mots** — la liste arrive tout de suite : une carte arrondie par mot, la traduction en
+   pastille orangée à droite. Le gros bouton **+** en bas ouvre les deux champs d'ajout. Toucher
+   une carte la prononce et déplie ses deux actions (écouter, supprimer). *Cacher les traductions*
+   masque toute la colonne française pour se tester, et chaque pastille se révèle d'un clic.
+   La recherche n'apparaît qu'au-delà de douze mots, et un contour vert marque les mots sus.
 2. **Du jour** — la phrase du jour (traduction masquée jusqu'au clic, note d'usage, ajout direct à
    la liste) puis la leçon du jour : résumé, tableau de conjugaison, exemples traduits, astuce,
    et le détail replié pour ceux qui veulent aller plus loin. Toucher la phrase la fait prononcer.
@@ -19,11 +19,11 @@ Application de vocabulaire anglais 🇬🇧 et espagnol 🇪🇸, en trois pages
 
 ## Parti pris visuel
 
-Même code couleur que Mes Recettes : fond crème `#faf7f2`, cartes blanches, orange `#e85d3a`.
-Le vocabulaire se lit comme une conversation — bulle blanche à gauche pour la langue étrangère,
-bulle orangée à droite pour le français. Les mots étrangers, les phrases et les questions sont
-composés en serif (Newsreader, repli Georgia) comme les entrées d'un dictionnaire ; l'interface
-reste dans la police système.
+La mise en forme des applis de langue ludiques — fond uni, grosses cartes très arrondies,
+traductions en pastilles, bouton d'ajout rond et lumineux, typographie ronde (Baloo 2) — mais dans
+le code couleur de Mes Recettes : crème `#faf7f2`, cartes blanches, orange `#e85d3a`.
+Les deux langues sont séparées par une vraie barre dans une bascule en haut de l'écran.
+Les réglages (sauvegarde, export, import) vivent derrière le `⋯` et n'encombrent plus les pages.
 
 La langue choisie est retenue : à la réouverture, on retrouve celle de la dernière fois.
 
