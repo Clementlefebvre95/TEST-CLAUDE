@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#fbf9f6"/>
-  <text x="50%" y="54%" font-size="300" text-anchor="middle" dominant-baseline="central" font-family="Georgia, serif" fill="#1b1714">M</text>
+  <rect width="512" height="512" rx="96" fill="#e85d3a"/>
+  <rect x="88" y="150" width="230" height="96" rx="42" fill="#ffffff"/>
+  <rect x="194" y="272" width="230" height="96" rx="42" fill="#fde8e2"/>
 </svg>

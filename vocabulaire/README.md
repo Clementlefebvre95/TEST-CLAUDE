@@ -4,10 +4,11 @@ Application de vocabulaire anglais 🇬🇧 et espagnol 🇪🇸, en trois pages
 
 ## Les trois pages
 
-1. **Mes mots** — la liste de la langue choisie. Ajout en deux champs et bouton
-   *masquer les traductions* pour se tester : chaque ligne masquée se révèle d'un clic, une par une.
-   La recherche n'apparaît qu'au-delà de huit mots. Un point vert marque les mots sus.
-   Toucher un mot le fait prononcer.
+1. **Mes mots** — la liste arrive tout de suite, en bulles : la langue étrangère à gauche, le
+   français à droite, sur la même ligne, comme une conversation. Le bouton **+** ouvre les deux
+   champs d'ajout ; *masquer* cache toutes les traductions pour se tester, et chaque bulle masquée
+   se révèle d'un clic. La recherche n'apparaît qu'au-delà de huit mots, une bordure verte et un ✓
+   marquent les mots sus, et toucher un mot le fait prononcer.
 2. **Du jour** — la phrase du jour (traduction masquée jusqu'au clic, note d'usage, ajout direct à
    la liste) puis la leçon du jour : résumé, tableau de conjugaison, exemples traduits, astuce,
    et le détail replié pour ceux qui veulent aller plus loin. Toucher la phrase la fait prononcer.
@@ -18,10 +19,11 @@ Application de vocabulaire anglais 🇬🇧 et espagnol 🇪🇸, en trois pages
 
 ## Parti pris visuel
 
-Papier chaud, encre sombre, une seule couleur d'accent, et aucune boîte : uniquement des filets
-fins et du blanc. Les mots étrangers, les phrases et les questions sont composés en serif
-(Newsreader, repli Georgia) comme les entrées d'un dictionnaire ; l'interface, elle, reste dans la
-police système. Le thème sombre suit celui de l'appareil.
+Même code couleur que Mes Recettes : fond crème `#faf7f2`, cartes blanches, orange `#e85d3a`.
+Le vocabulaire se lit comme une conversation — bulle blanche à gauche pour la langue étrangère,
+bulle orangée à droite pour le français. Les mots étrangers, les phrases et les questions sont
+composés en serif (Newsreader, repli Georgia) comme les entrées d'un dictionnaire ; l'interface
+reste dans la police système.
 
 La langue choisie est retenue : à la réouverture, on retrouve celle de la dernière fois.
 

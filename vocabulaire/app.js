@@ -210,20 +210,18 @@ function afficherMots() {
   $('vide').hidden = liste.length > 0;
   $('recherche').hidden = liste.length < SEUIL_RECHERCHE;
   $('bascule-trad').hidden = liste.length === 0;
-  $('bascule-trad').textContent = masque ? 'montrer les traductions' : 'masquer les traductions';
+  $('bascule-trad').textContent = masque ? 'montrer' : 'masquer';
 
   $('mots').innerHTML = visibles.map(m => {
     const cache = masque && !devoiles.has(m.id);
+    const droite = cache
+      ? `<button class="cacher" data-voir="${m.id}">• • •</button>`
+      : `${html(m.trad)}${m.note ? `<span class="note-bulle">${html(m.note)}</span>` : ''}`;
     return `
-      <li class="mot-ligne ${m.niveau >= NIVEAU_MAX ? 'su' : ''}" data-id="${m.id}">
-        <div class="mot-texte">
-          <div class="mot-source" data-dire="${html(m.mot)}">${html(m.mot)}</div>
-          <div class="mot-trad">${cache
-            ? `<button class="cacher" data-voir="${m.id}">• • •</button>`
-            : html(m.trad)}</div>
-          ${m.note && !cache ? `<div class="mot-note">${html(m.note)}</div>` : ''}
-        </div>
-        <button class="discret" data-suppr="1" title="Supprimer">✕</button>
+      <li class="ligne ${m.niveau >= NIVEAU_MAX ? 'sue' : ''}" data-id="${m.id}">
+        <div class="bulle src" data-dire="${html(m.mot)}">${html(m.mot)}</div>
+        <div class="bulle fr">${droite}</div>
+        <button class="supprimer" data-suppr="1" title="Supprimer">✕</button>
       </li>`;
   }).join('');
 
@@ -615,10 +613,22 @@ $('ajout').addEventListener('submit', e => {
     $('ajout').reset();
     $('mot').focus();
     afficherMots();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   } else {
     message($('ajout-message'), 'Ce mot est déjà dans ta liste.', 'warn');
   }
 });
+
+function basculerAjout(ouvrir) {
+  const ouvert = ouvrir ?? $('ajout').hidden;
+  $('ajout').hidden = !ouvert;
+  $('plus').classList.toggle('ouvert', ouvert);
+  $('plus').textContent = ouvert ? '×' : '+';
+  $('plus').title = ouvert ? 'Fermer' : 'Ajouter un mot';
+  if (ouvert) $('mot').focus();
+}
+
+$('plus').addEventListener('click', () => basculerAjout());
 
 $('recherche').addEventListener('input', afficherMots);
 
@@ -638,7 +648,7 @@ $('mots').addEventListener('click', e => {
 
   const suppr = e.target.closest('[data-suppr]');
   if (suppr) {
-    const id = e.target.closest('.mot-ligne').dataset.id;
+    const id = e.target.closest('.ligne').dataset.id;
     confirmer(suppr, 'supprimer ?', () => { supprimerMot(id); afficherMots(); });
   }
 });
@@ -679,6 +689,7 @@ $('sens').addEventListener('click', () => {
 });
 
 document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !$('ajout').hidden) return basculerAjout(false);
   if (!$('revision').classList.contains('active') || $('carte').hidden) return;
   if (e.target.matches('input, select, textarea')) return;
   if (e.code === 'Space' && !serie.vue) { e.preventDefault(); revelerCarte(); }

@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#fbf9f6" />
+  <meta name="theme-color" content="#faf7f2" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Mes Mots" />
   <link rel="apple-touch-icon" href="icon.svg" />
@@ -34,24 +34,24 @@
 
     <!-- ========== 1. MES MOTS ========== -->
     <section id="liste" class="vue active">
-      <form class="ajout" id="ajout">
+      <div class="barre">
+        <span class="compte" id="compte"></span>
+        <button class="discret" id="bascule-trad" hidden>masquer</button>
+        <button class="plus" id="plus" title="Ajouter un mot" aria-label="Ajouter un mot">+</button>
+      </div>
+
+      <form class="ajout" id="ajout" hidden>
         <div class="duo">
-          <input type="text" id="mot" class="mot-serif" placeholder="Mot en anglais" autocomplete="off" required />
-          <input type="text" id="trad" placeholder="Sa traduction" autocomplete="off" required />
+          <input type="text" id="mot" placeholder="Mot en anglais" autocomplete="off" required />
+          <input type="text" id="trad" placeholder="En français" autocomplete="off" required />
         </div>
-        <button type="submit" class="plein">Ajouter</button>
+        <button type="submit" class="valider">Ajouter</button>
       </form>
       <p class="message" id="ajout-message" hidden></p>
 
-      <hr class="trait" />
-
-      <div class="liste-tete">
-        <span class="compte" id="compte"></span>
-        <button class="discret" id="bascule-trad">masquer les traductions</button>
-      </div>
       <input type="search" id="recherche" placeholder="Rechercher" autocomplete="off" hidden />
       <ul class="mots" id="mots"></ul>
-      <p class="vide" id="vide" hidden>Rien encore. Ajoute ton premier mot ci-dessus.</p>
+      <p class="vide" id="vide" hidden>Aucun mot pour l'instant. Touche le + pour en ajouter un.</p>
     </section>
 
     <!-- ========== 2. DU JOUR ========== -->
@@ -61,7 +61,7 @@
       <p class="label">La phrase du jour</p>
       <p class="phrase" id="phrase" title="Toucher pour écouter"></p>
       <div id="bloc-trad" hidden>
-        <p class="traduction" id="phrase-fr"></p>
+        <p class="phrase-fr" id="phrase-fr"></p>
         <p class="note" id="phrase-note"></p>
       </div>
       <div class="actions">
@@ -86,7 +86,7 @@
 
     <!-- ========== 3. RÉVISION ========== -->
     <section id="revision" class="vue">
-      <div class="reglages-revision">
+      <div class="reglages">
         <span id="score"></span>
         <button class="discret" id="sens">Deviner le français</button>
         <button class="discret" id="rejouer">Nouvelle série</button>
@@ -98,10 +98,10 @@
           <p class="mot" id="reponse-mot"></p>
           <p class="note" id="reponse-note"></p>
         </div>
-        <button class="plein" id="reveler">Voir la réponse</button>
-        <div class="notes-carte" id="notes-carte" hidden>
+        <button class="valider" id="reveler">Voir la réponse</button>
+        <div class="boutons" id="notes-carte" hidden>
           <button class="contour" id="rate">À revoir</button>
-          <button class="plein" id="su">Je savais</button>
+          <button class="valider" id="su">Je savais</button>
         </div>
         <p class="avancement" id="avancement"></p>
       </div>
