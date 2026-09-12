@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap">
+  <style>
+    body { margin: 0; font-family: "Baloo 2", system-ui, sans-serif; }
+    a { color: #c84826; } a:hover { color: #e85d3a; }
+  </style>
+</helmet>
+
+<div style="width: 390px; height: 844px; background: #faf7f2; display: flex; flex-direction: column; overflow: hidden;">
+
+  <div style="display: flex; flex-direction: column; gap: 14px; padding: 16px 20px 16px;">
+
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="font-size: 12px; font-weight: 700; color: #2b2520; letter-spacing: .02em;">Espagnol</div>
+        <div style="width: 2px; height: 13px; background: #d6ccc0; border-radius: 2px;"></div>
+        <div style="font-size: 12px; font-weight: 700; color: #b7ada4; letter-spacing: .02em;">Anglais</div>
+      </div>
+      <svg width="18" height="4" viewBox="0 0 18 4" fill="none" aria-hidden="true"><circle cx="2" cy="2" r="1.6" fill="#b7ada4"></circle><circle cx="9" cy="2" r="1.6" fill="#b7ada4"></circle><circle cx="16" cy="2" r="1.6" fill="#b7ada4"></circle></svg>
+    </div>
+
+    <div style="display: flex; align-items: baseline; gap: 16px;">
+      <div style="font-size: 26px; font-weight: 700; color: #2b2520; line-height: 1;">Mes mots</div>
+      <div style="font-size: 19px; font-weight: 600; color: #c3b9af; line-height: 1;">Du jour</div>
+      <div style="font-size: 19px; font-weight: 600; color: #c3b9af; line-height: 1;">Révision</div>
+    </div>
+  </div>
+
+  <!-- Un seul panneau, un filet central : les deux langues strictement identiques -->
+  <div style="flex-grow: 1; margin: 0 16px; background: #ffffff; border-radius: 24px; padding: 6px 0; box-shadow: 0 1px 2px rgba(40,25,15,.04), 0 10px 26px rgba(40,25,15,.06); overflow: hidden;">
+
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 20px 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #b7ada4;">Espagnol</div>
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #b7ada4;">Français</div>
+    </div>
+
+    <div style="display: flex; align-items: center; padding: 13px 20px; border-top: 1px solid #f2ece4;">
+      <div style="flex-grow: 1; flex-basis: 0; min-width: 0; font-size: 16px; font-weight: 600; color: #2b2520;">el coche</div>
+      <div style="width: 1px; align-self: stretch; background: #f2ece4; margin: -13px 12px;"></div>
+      <div style="flex-grow: 1; flex-basis: 0; min-width: 0; font-size: 16px; font-weight: 600; color: #2b2520; text-align: right;">la voiture</div>
+    </div>
+
+    <div style="display: flex; align-items: center; padding: 13px 20px; border-top: 1px solid #f2ece4; background: #fdfbf8;">
+      <div style="display: flex; align-items: center; gap: 8px; flex-grow: 1; flex-basis: 0; min-width: 0;">
+        <div style="width: 6px; height: 6px; border-radius: 50%; background: #1d6e3a; flex-shrink: 0;"></div>
+        <div style="font-size: 16px; font-weight: 600; color: #2b2520;">aprender</div>
+      </div>
+      <div style="width: 1px; align-self: stretch; background: #f2ece4; margin: -13px 12px;"></div>
+      <div style="flex-grow: 1; flex-basis: 0; min-width: 0; font-size: 16px; font-weight: 600; color: #2b2520; text-align: right;">apprendre</div>
+    </div>
+
+    <div style="display: flex; align-items: center; padding: 13px 20px; border-top: 1px solid #f2ece4;">
+      <div style="flex-grow: 1; flex-basis: 0; min-width: 0; font-size: 16px; font-weight: 600; color: #2b2520;">la palabra</div>
+      <div style="width: 1px; align-self: stretch; background: #f2ece4; margin: -13px 12px;"></div>
+      <div style="flex-grow: 1; flex-basis: 0; min-width: 0; font-size: 16px; font-weight: 600; color: #2b2520; text-align: right;">le mot</div>
+    </div>
+
+    <div style="display: flex; align-items: center; padding: 13px 20px; border-top: 1px solid #f2ece4;">
+      <div style="flex-grow: 1; flex-basis: 0; min-width: 0; font-size: 16px; font-weight: 600; color: #2b2520;">el trabajo</div>
+      <div style="width: 1px; align-self: stretch; background: #f2ece4; margin: -13px 12px;"></div>
+      <div style="flex-grow: 1; flex-basis: 0; min-width: 0; font-size: 16px; font-weight: 600; color: #2b2520; text-align: right;">le travail</div>
+    </div>
+
+    <div style="display: flex; align-items: center; padding: 13px 20px; border-top: 1px solid #f2ece4;">
+      <div style="flex-grow: 1; flex-basis: 0; min-width: 0; font-size: 16px; font-weight: 600; color: #2b2520;">la semana</div>
+      <div style="width: 1px; align-self: stretch; background: #f2ece4; margin: -13px 12px;"></div>
+      <div style="flex-grow: 1; flex-basis: 0; min-width: 0; font-size: 16px; font-weight: 600; color: #2b2520; text-align: right;">la semaine</div>
+    </div>
+
+    <div style="display: flex; align-items: center; padding: 13px 20px; border-top: 1px solid #f2ece4;">
+      <div style="flex-grow: 1; flex-basis: 0; min-width: 0; font-size: 16px; font-weight: 600; color: #2b2520;">esperar</div>
+      <div style="width: 1px; align-self: stretch; background: #f2ece4; margin: -13px 12px;"></div>
+      <div style="flex-grow: 1; flex-basis: 0; min-width: 0; font-size: 16px; font-weight: 600; color: #2b2520; text-align: right;">attendre</div>
+    </div>
+
+    <div style="display: flex; align-items: center; padding: 13px 20px; border-top: 1px solid #f2ece4;">
+      <div style="flex-grow: 1; flex-basis: 0; min-width: 0; font-size: 16px; font-weight: 600; color: #2b2520;">la llave</div>
+      <div style="width: 1px; align-self: stretch; background: #f2ece4; margin: -13px 12px;"></div>
+      <div style="flex-grow: 1; flex-basis: 0; min-width: 0; font-size: 16px; font-weight: 600; color: #2b2520; text-align: right;">la clé</div>
+    </div>
+
+    <div style="display: flex; align-items: center; padding: 13px 20px; border-top: 1px solid #f2ece4;">
+      <div style="flex-grow: 1; flex-basis: 0; min-width: 0; font-size: 16px; font-weight: 600; color: #2b2520;">el camino</div>
+      <div style="width: 1px; align-self: stretch; background: #f2ece4; margin: -13px 12px;"></div>
+      <div style="flex-grow: 1; flex-basis: 0; min-width: 0; font-size: 16px; font-weight: 600; color: #2b2520; text-align: right;">le chemin</div>
+    </div>
+
+  </div>
+
+  <div style="display: flex; justify-content: center; padding: 20px 20px 26px;">
+    <div style="display: flex; align-items: center; gap: 9px; background: #e85d3a; border-radius: 999px; padding: 13px 26px; box-shadow: 0 8px 22px rgba(232,93,58,.38);">
+      <svg width="18" height="18" viewBox="0 0 26 26" fill="none" aria-hidden="true"><path d="M13 5.5v15M5.5 13h15" stroke="#ffffff" stroke-width="3.4" stroke-linecap="round"></path></svg>
+      <div style="font-size: 16px; font-weight: 700; color: #ffffff;">Nouveau mot</div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
