@@ -1,0 +1,260 @@
+<title>Du jour, en plus léger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&display=swap" />
+
+<style>
+/* ---- Page de présentation ---- */
+:root { --page: #f4f4f2; --sur: #23211e; --gris: #77726c; --trait: #e2dfd9; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --page: #17171a; --sur: #eceae6; --gris: #97928b; --trait: #2e2e33; }
+}
+:root[data-theme="dark"] { --page: #17171a; --sur: #eceae6; --gris: #97928b; --trait: #2e2e33; }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--sur); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.55; }
+.enveloppe { max-width: 1120px; margin: 0 auto; padding: 40px 20px 72px; }
+.intro { max-width: 62ch; margin-bottom: 40px; }
+.intro h1 { font-size: 28px; margin: 0 0 10px; letter-spacing: -0.02em; text-wrap: balance; }
+.intro p { margin: 0 0 8px; color: var(--gris); font-size: 15px; }
+.intro strong { color: var(--sur); font-weight: 600; }
+
+.piste { margin-bottom: 56px; }
+.piste-tete { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+.lettre { font-size: 12px; font-weight: 700; letter-spacing: .1em; color: var(--gris); border: 1px solid var(--trait); border-radius: 4px; padding: 1px 7px; }
+.piste h2 { font-size: 20px; margin: 0; letter-spacing: -0.01em; }
+.pitch { color: var(--gris); font-size: 15px; margin: 0 0 20px; max-width: 70ch; }
+.pitch b { color: var(--sur); font-weight: 600; }
+.ecrans { display: flex; gap: 28px; flex-wrap: wrap; }
+.ecran { display: flex; flex-direction: column; gap: 10px; }
+.legende { font-size: 13px; color: var(--gris); max-width: 300px; }
+
+/* ---- Le téléphone : exactement l'habillage de l'app ---- */
+.tel {
+  width: 300px; height: 590px; max-width: 100%;
+  background: #faf7f2; color: #2b2520;
+  border-radius: 26px; overflow: hidden;
+  font-family: "Baloo 2", system-ui, sans-serif;
+  display: flex; flex-direction: column;
+  box-shadow: 0 16px 36px rgba(20, 15, 10, .13);
+}
+.tete { background: linear-gradient(#ffffff, #fdfbf8); border-bottom: 1px solid #ece6dd; padding: 12px 16px 0; display: flex; flex-direction: column; gap: 11px; }
+.haut { display: flex; justify-content: space-between; align-items: center; }
+.bascule { display: flex; align-items: center; background: #f3ede4; border-radius: 999px; padding: 2px; }
+.bascule span { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 999px; color: #8a8079; }
+.bascule .on { background: #e85d3a; color: #fff; }
+.bascule .sep { width: 2px; height: 10px; padding: 0; background: #8a8079; opacity: .35; margin: 0 3px; border-radius: 2px; }
+.points { display: flex; gap: 3px; }
+.points i { width: 3px; height: 3px; border-radius: 50%; background: #b7ada4; }
+.onglets { display: flex; align-items: baseline; gap: 12px; padding-bottom: 9px; }
+.onglets span { font-size: 15px; font-weight: 600; color: #b7ada4; line-height: 1; white-space: nowrap; }
+.onglets .on { font-size: 18px; font-weight: 700; color: #2b2520; position: relative; }
+.onglets .on::after { content: ""; position: absolute; left: 0; right: 0; bottom: -7px; height: 3px; border-radius: 3px; background: #e85d3a; }
+
+.corps { flex: 1; padding: 16px 18px; display: flex; flex-direction: column; overflow: hidden; }
+
+/* Éléments légers communs */
+.date { font-size: 12px; color: #a1978e; font-weight: 600; margin-bottom: 14px; }
+.petit { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #b7ada4; font-weight: 700; }
+.lien { font-size: 13px; color: #e85d3a; font-weight: 600; }
+.doux { color: #8a8079; }
+.filet { height: 1px; background: #ece6dd; }
+.titre-lecon { font-size: 21px; font-weight: 700; line-height: 1.2; }
+.etoile { width: 18px; height: 18px; flex-shrink: 0; }
+
+.tableau { display: grid; grid-template-columns: auto 1fr; column-gap: 14px; font-size: 13px; }
+.tableau div { padding: 6px 0; border-top: 1px solid #ece6dd; }
+.tableau .g { font-weight: 700; }
+.tableau .d { color: #8a8079; text-align: right; }
+
+/* A : sous-onglets */
+.sous { display: flex; gap: 16px; margin-bottom: 18px; }
+.sous span { font-size: 13px; font-weight: 600; color: #b7ada4; padding-bottom: 3px; }
+.sous .on { color: #2b2520; border-bottom: 2px solid #e85d3a; }
+.sous .n { font-size: 11px; color: #c9bfb5; }
+
+.ligne-lecon { display: flex; flex-direction: column; gap: 1px; padding: 11px 0; border-top: 1px solid #ece6dd; }
+.ligne-lecon b { font-size: 15px; font-weight: 700; }
+.ligne-lecon small { font-size: 11px; color: #a1978e; }
+
+/* B : deux entrées */
+.entree { display: flex; flex-direction: column; gap: 6px; padding: 16px 0; }
+.phrase { font-size: 19px; font-weight: 600; line-height: 1.3; }
+.suite { display: flex; justify-content: space-between; align-items: center; }
+.retour { font-size: 13px; color: #8a8079; font-weight: 600; margin-bottom: 14px; }
+.pilule-legere { display: inline-flex; align-items: center; gap: 5px; border: 1px solid #ece6dd; border-radius: 999px; padding: 3px 11px 3px 8px; font-size: 12px; font-weight: 600; color: #c84826; background: #fff; }
+
+/* C : étapes */
+.progression { display: flex; gap: 5px; margin-bottom: 26px; }
+.progression i { flex: 1; height: 3px; border-radius: 3px; background: #ece6dd; }
+.progression .fait { background: #e85d3a; }
+.grand { font-size: 24px; font-weight: 700; line-height: 1.2; margin: 6px 0 14px; }
+.idee { font-size: 15px; line-height: 1.45; color: #5a524b; }
+.idee b { color: #2b2520; }
+.exemple-c { font-size: 16px; font-weight: 600; margin-top: 14px; }
+.exemple-c span { display: block; font-size: 13px; font-weight: 500; color: #8a8079; }
+.pied-etape { margin-top: auto; display: flex; justify-content: space-between; align-items: center; }
+.suivant { background: #e85d3a; color: #fff; border-radius: 999px; padding: 8px 20px; font-size: 14px; font-weight: 700; }
+.tuiles { display: flex; flex-wrap: wrap; gap: 8px; }
+.tuile { border: 1px solid #ece6dd; background: #fff; border-radius: 14px; padding: 8px 12px; font-size: 13px; font-weight: 600; }
+.tuile small { display: block; font-size: 10px; color: #a1978e; font-weight: 600; }
+</style>
+
+<div class="enveloppe">
+  <div class="intro">
+    <h1>Trois façons d'alléger « Du jour »</h1>
+    <p>« Mes mots » ne change pas. Ici, seulement la page du jour, et l'endroit où iront <strong>tes leçons enregistrées</strong> — rangées à part de tes mots, pour ne jamais les mélanger.</p>
+    <p>Partout : plus de grosses cartes blanches ni d'ombres, juste du crème, des filets fins et du blanc. Une étoile sur la leçon pour l'enregistrer. Toujours des images fixes. Dis-moi <strong>A</strong>, <strong>B</strong> ou <strong>C</strong>.</p>
+  </div>
+
+  <!-- ================= A ================= -->
+  <section class="piste">
+    <div class="piste-tete"><span class="lettre">A</span><h2>Sous-onglets</h2></div>
+    <p class="pitch">« Du jour » reçoit trois petits onglets : <b>Phrase</b>, <b>Leçon</b>, <b>Enregistrées</b>. On ne voit qu'une chose à la fois. Tes leçons gardées sont le troisième onglet, à un toucher. <b>Le plus simple à comprendre</b> ; en contrepartie, la phrase et la leçon ne sont plus visibles ensemble.</p>
+    <div class="ecrans">
+      <div class="ecran">
+        <div class="tel">
+          <div class="tete">
+            <div class="haut"><div class="bascule"><span class="on">Espagnol</span><span class="sep"></span><span>Anglais</span></div><div class="points"><i></i><i></i><i></i></div></div>
+            <div class="onglets"><span>Mes mots</span><span class="on">Du jour</span><span>Révision</span></div>
+          </div>
+          <div class="corps">
+            <div class="sous"><span>Phrase</span><span class="on">Leçon</span><span>Enregistrées <span class="n">3</span></span></div>
+            <div class="petit">Grammaire</div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin:4px 0 6px;">
+              <div class="titre-lecon">Ser ou estar ?</div>
+              <svg class="etoile" viewBox="0 0 24 24" fill="none" stroke="#e85d3a" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>
+            </div>
+            <div class="doux" style="font-size:14px; margin-bottom:16px;">Deux verbes pour « être » : ce qui définit, ou ce qui change.</div>
+            <div class="tableau">
+              <div class="g">Es guapo</div><div class="d">beau, en général</div>
+              <div class="g">Está guapo</div><div class="d">beau, ce soir</div>
+              <div class="g">Soy de Francia</div><div class="d">je viens de France</div>
+              <div class="g">Estoy en Francia</div><div class="d">je suis en France</div>
+            </div>
+            <div class="lien" style="margin-top:16px;">Voir les exemples</div>
+          </div>
+        </div>
+        <p class="legende">L'onglet Leçon : l'essentiel seulement. L'étoile enregistre.</p>
+      </div>
+      <div class="ecran">
+        <div class="tel">
+          <div class="tete">
+            <div class="haut"><div class="bascule"><span class="on">Espagnol</span><span class="sep"></span><span>Anglais</span></div><div class="points"><i></i><i></i><i></i></div></div>
+            <div class="onglets"><span>Mes mots</span><span class="on">Du jour</span><span>Révision</span></div>
+          </div>
+          <div class="corps">
+            <div class="sous"><span>Phrase</span><span>Leçon</span><span class="on">Enregistrées <span class="n">3</span></span></div>
+            <div class="ligne-lecon"><b>Ser ou estar ?</b><small>Grammaire · 23 septembre</small></div>
+            <div class="ligne-lecon"><b>Por ou para ?</b><small>Grammaire · 19 septembre</small></div>
+            <div class="ligne-lecon"><b>Le pretérito indefinido</b><small>Conjugaison · 14 septembre</small></div>
+            <div class="filet"></div>
+          </div>
+        </div>
+        <p class="legende">Tes leçons gardées, les plus récentes en haut. Un toucher la rouvre.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= B ================= -->
+  <section class="piste">
+    <div class="piste-tete"><span class="lettre">B</span><h2>Deux entrées</h2></div>
+    <p class="pitch">« Du jour » devient un simple sommaire : la phrase, le titre de la leçon, et tes leçons enregistrées en bas. <b>La leçon s'ouvre sur son propre écran</b>, avec un retour. Tout tient sur un écran sans défiler ; il faut un toucher de plus pour lire la leçon.</p>
+    <div class="ecrans">
+      <div class="ecran">
+        <div class="tel">
+          <div class="tete">
+            <div class="haut"><div class="bascule"><span class="on">Espagnol</span><span class="sep"></span><span>Anglais</span></div><div class="points"><i></i><i></i><i></i></div></div>
+            <div class="onglets"><span>Mes mots</span><span class="on">Du jour</span><span>Révision</span></div>
+          </div>
+          <div class="corps">
+            <div class="date">Mardi 23 septembre</div>
+            <div class="entree" style="padding-top:0;">
+              <div class="petit">Phrase</div>
+              <div class="phrase">¿Me puedes echar una mano?</div>
+              <div class="lien">Voir la traduction</div>
+            </div>
+            <div class="filet"></div>
+            <div class="entree">
+              <div class="petit">Leçon · Grammaire</div>
+              <div class="suite"><div class="titre-lecon">Ser ou estar ?</div><div class="lien">Ouvrir ›</div></div>
+            </div>
+            <div class="filet"></div>
+            <div class="entree">
+              <div class="suite"><div style="font-size:14px; font-weight:600;">Mes leçons enregistrées</div><div class="doux" style="font-size:13px; font-weight:600;">3 ›</div></div>
+            </div>
+          </div>
+        </div>
+        <p class="legende">Le sommaire : trois lignes, rien d'autre.</p>
+      </div>
+      <div class="ecran">
+        <div class="tel">
+          <div class="tete">
+            <div class="haut"><div class="bascule"><span class="on">Espagnol</span><span class="sep"></span><span>Anglais</span></div><div class="points"><i></i><i></i><i></i></div></div>
+            <div class="onglets"><span>Mes mots</span><span class="on">Du jour</span><span>Révision</span></div>
+          </div>
+          <div class="corps">
+            <div class="retour">‹ Du jour</div>
+            <div class="petit">Grammaire</div>
+            <div class="titre-lecon" style="margin:4px 0 6px;">Ser ou estar ?</div>
+            <div class="doux" style="font-size:14px; margin-bottom:12px;">Deux verbes pour « être » : ce qui définit, ou ce qui change.</div>
+            <div style="margin-bottom:16px;"><span class="pilule-legere"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c84826" stroke-width="2" stroke-linejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>Enregistrer</span></div>
+            <div class="tableau">
+              <div class="g">Es guapo</div><div class="d">beau, en général</div>
+              <div class="g">Está guapo</div><div class="d">beau, ce soir</div>
+              <div class="g">Soy de Francia</div><div class="d">je viens de France</div>
+            </div>
+            <div class="lien" style="margin-top:16px;">Voir les exemples</div>
+          </div>
+        </div>
+        <p class="legende">La leçon ouverte, avec le bouton pour l'enregistrer.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= C ================= -->
+  <section class="piste">
+    <div class="piste-tete"><span class="lettre">C</span><h2>Étapes</h2></div>
+    <p class="pitch">La leçon se lit <b>une idée par écran</b>, comme des fiches qu'on fait défiler : la phrase, l'idée, le tableau, les exemples. Chaque écran est presque vide. Tes leçons enregistrées s'affichent en petites tuiles. <b>Le plus aéré et le plus ludique</b> ; il faut plusieurs touchers pour aller au bout.</p>
+    <div class="ecrans">
+      <div class="ecran">
+        <div class="tel">
+          <div class="tete">
+            <div class="haut"><div class="bascule"><span class="on">Espagnol</span><span class="sep"></span><span>Anglais</span></div><div class="points"><i></i><i></i><i></i></div></div>
+            <div class="onglets"><span>Mes mots</span><span class="on">Du jour</span><span>Révision</span></div>
+          </div>
+          <div class="corps">
+            <div class="progression"><i class="fait"></i><i class="fait"></i><i></i><i></i></div>
+            <div style="display:flex; justify-content:space-between;"><div class="petit">Leçon · 2 sur 4</div><svg class="etoile" viewBox="0 0 24 24" fill="none" stroke="#e85d3a" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg></div>
+            <div class="grand">Ser, c'est ce qui définit</div>
+            <div class="idee">Identité, origine, métier, caractère : <b>ce qui ne change pas</b>.</div>
+            <div class="exemple-c">Soy profesor.<span>Je suis professeur.</span></div>
+            <div class="exemple-c">Es de Madrid.<span>Il est de Madrid.</span></div>
+            <div class="pied-etape"><div class="doux" style="font-size:13px; font-weight:600;">‹ Précédent</div><div class="suivant">Suivant</div></div>
+          </div>
+        </div>
+        <p class="legende">Une idée, deux exemples, un bouton. Rien d'autre à l'écran.</p>
+      </div>
+      <div class="ecran">
+        <div class="tel">
+          <div class="tete">
+            <div class="haut"><div class="bascule"><span class="on">Espagnol</span><span class="sep"></span><span>Anglais</span></div><div class="points"><i></i><i></i><i></i></div></div>
+            <div class="onglets"><span>Mes mots</span><span class="on">Du jour</span><span>Révision</span></div>
+          </div>
+          <div class="corps">
+            <div class="petit" style="margin-bottom:12px;">Mes leçons enregistrées</div>
+            <div class="tuiles">
+              <div class="tuile">Ser ou estar ?<small>Grammaire</small></div>
+              <div class="tuile">Por ou para ?<small>Grammaire</small></div>
+              <div class="tuile">Pretérito indefinido<small>Conjugaison</small></div>
+              <div class="tuile">Gustar<small>Grammaire</small></div>
+              <div class="tuile">Muy ou mucho ?<small>Grammaire</small></div>
+            </div>
+            <div class="pied-etape"><div></div><div class="lien">Leçon du jour ›</div></div>
+          </div>
+        </div>
+        <p class="legende">Tes leçons gardées en tuiles ; une tuile rouvre la leçon en étapes.</p>
+      </div>
+    </div>
+  </section>
+</div>
