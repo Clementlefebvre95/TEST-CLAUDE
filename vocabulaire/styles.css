@@ -271,79 +271,114 @@ input:focus { outline: 2px solid var(--accent); }
 .plus:hover { background: var(--accent-fonce); }
 .plus.ouvert { background: var(--chip); color: var(--doux); box-shadow: var(--ombre-haute); font-size: 26px; }
 
-/* ---------- Page 2 : du jour ---------- */
-.date { font-size: 14px; color: var(--doux); margin: 0 0 20px; font-weight: 600; }
+/* ---------- Page 2 : du jour ----------
+   Version légère : pas de cartes ni d'ombres, du texte sur le crème
+   et des filets fins. Un seul contenu visible à la fois. */
+.sous-onglets { display: flex; gap: 20px; margin: 4px 0 22px; }
+
+.sous-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0 0 4px;
+  font-family: var(--rond);
+  font-size: 15px;
+  font-weight: 600;
+  color: #b7ada4;
+  cursor: pointer;
+}
+.sous-btn.active { color: var(--texte); border-bottom-color: var(--accent); }
+.sous-btn .nb { font-size: 12px; color: #c9bfb5; margin-left: 2px; }
+
+.sous-vue { display: none; }
+.sous-vue.active { display: block; }
+
+.date { font-size: 13px; color: #a1978e; margin: 0 0 16px; font-weight: 600; }
 
 .phrase {
-  background: var(--carte);
-  border-radius: 22px;
-  padding: 18px 20px;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.3;
   margin: 0;
-  box-shadow: var(--ombre);
   cursor: pointer;
   text-wrap: balance;
 }
+.phrase:hover { color: var(--accent-fonce); }
 
-.phrase-fr {
-  background: var(--pastille);
-  color: var(--accent-fonce);
-  border-radius: 22px;
-  padding: 14px 20px;
-  font-size: 17px;
-  font-weight: 600;
-  margin: 10px 0 0 auto;
-  max-width: 88%;
-  text-align: right;
-}
+.phrase-fr { font-size: 18px; font-weight: 600; color: var(--accent-fonce); margin: 12px 0 0; }
+.phrase-note { font-size: 14px; color: var(--doux); margin: 6px 0 0; }
 
-.astuce-phrase { font-size: 14px; color: var(--doux); margin: 10px 0 0; }
+.actions { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 18px; }
 
-.actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
-
-.pilule {
-  background: var(--carte);
+.lien {
+  background: none;
   border: none;
-  border-radius: 999px;
-  padding: 9px 18px;
+  padding: 0;
   font-family: var(--rond);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  color: var(--accent-fonce);
+  color: var(--accent);
   cursor: pointer;
-  box-shadow: var(--ombre);
 }
-.pilule:hover { background: var(--pastille); }
+.lien:hover { color: var(--accent-fonce); }
+.retour { color: var(--doux); margin-bottom: 14px; display: block; }
 
-.bloc {
-  background: var(--carte);
-  border-radius: 22px;
-  padding: 20px;
-  margin-top: 26px;
-  box-shadow: var(--ombre);
+.lecon-tete { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin: 2px 0 6px; }
+.lecon-titre { font-size: 23px; font-weight: 700; line-height: 1.2; margin: 0; }
+
+.etoile {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  margin: -10px -10px 0 0;
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
 }
+.etoile svg path { fill: none; }
+.etoile[aria-pressed="true"] svg path { fill: currentColor; }
 
-.lecon-titre { font-size: 22px; font-weight: 700; line-height: 1.25; margin: 0 0 6px; }
-.resume { color: var(--doux); margin: 0 0 18px; }
+.resume { color: var(--doux); margin: 0 0 18px; font-size: 16px; }
 
-.conj { background: var(--fond); border-radius: 16px; padding: 14px 18px; margin: 0 0 18px; overflow-x: auto; }
-.conj-titre { font-size: 13px; color: var(--doux); margin: 0 0 8px; font-weight: 600; }
-.conj table { border-collapse: collapse; font-size: 16px; }
-.conj th { text-align: left; font-weight: 400; color: var(--doux); padding: 2px 20px 2px 0; white-space: nowrap; }
-.conj td { padding: 2px 0; font-weight: 700; }
+/* Tableau en filets fins */
+.conj { margin: 0 0 18px; overflow-x: auto; }
+.conj-titre { font-size: 13px; color: #a1978e; margin: 0 0 4px; font-weight: 600; }
+.conj table { border-collapse: collapse; width: 100%; font-size: 15px; }
+.conj th, .conj td { padding: 7px 0; border-top: 1px solid var(--filet); }
+.conj th { text-align: left; font-weight: 700; padding-right: 16px; white-space: nowrap; }
+.conj td { color: var(--doux); text-align: right; }
+
+details { margin-top: 4px; }
+summary { cursor: pointer; font-size: 15px; font-weight: 600; color: var(--accent); list-style: none; }
+summary::-webkit-details-marker { display: none; }
+details[open] summary { color: var(--doux); margin-bottom: 14px; }
 
 .exemple { margin: 0 0 14px; cursor: pointer; }
 .exemple .src { font-size: 17px; font-weight: 600; margin: 0; }
 .exemple .fr { color: var(--doux); font-size: 15px; margin: 0; }
 
-.astuce { background: var(--chip); border-radius: 16px; padding: 12px 16px; font-size: 15px; margin: 18px 0 0; }
+.astuce { font-size: 15px; color: var(--doux); margin: 16px 0 0; }
+.astuce::before { content: "Astuce — "; font-weight: 700; color: var(--texte); }
 
-details { margin-top: 18px; }
-summary { cursor: pointer; font-size: 15px; font-weight: 600; color: var(--accent); }
-details ul { margin: 12px 0 0; padding-left: 18px; color: var(--doux); font-size: 15px; }
-details li { margin-bottom: 8px; }
+.points-lecon { margin: 14px 0 0; padding-left: 18px; color: var(--doux); font-size: 15px; }
+.points-lecon li { margin-bottom: 8px; }
+
+/* Leçons enregistrées */
+.gardees { list-style: none; margin: 0; padding: 0; border-bottom: 1px solid var(--filet); }
+.gardees li {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 12px 0;
+  border-top: 1px solid var(--filet);
+  cursor: pointer;
+}
+.gardees li:hover .titre-gardee { color: var(--accent-fonce); }
+.titre-gardee { font-size: 17px; font-weight: 700; }
+.meta-gardee { font-size: 13px; color: #a1978e; }
 
 /* ---------- Page 3 : révision ---------- */
 .reglages { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
@@ -396,6 +431,19 @@ details li { margin-bottom: 8px; }
 .avancement { font-size: 14px; color: var(--doux); margin-top: 24px; }
 
 /* ---------- Panneau réglages ---------- */
+.pilule {
+  background: var(--carte);
+  border: 1px solid var(--filet);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-family: var(--rond);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-fonce);
+  cursor: pointer;
+}
+.pilule:hover { background: var(--pastille); }
+
 .voile {
   position: fixed;
   inset: 0;
