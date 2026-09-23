@@ -10,9 +10,15 @@ Application de vocabulaire anglais 🇬🇧 et espagnol 🇪🇸, en trois pages
    une carte la prononce et déplie ses deux actions (écouter, supprimer). *Cacher les traductions*
    masque toute la colonne française pour se tester, et chaque pastille se révèle d'un clic.
    La recherche n'apparaît qu'au-delà de douze mots, et un contour vert marque les mots sus.
-2. **Du jour** — la phrase du jour (traduction masquée jusqu'au clic, note d'usage, ajout direct à
-   la liste) puis la leçon du jour : résumé, tableau de conjugaison, exemples traduits, astuce,
-   et le détail replié pour ceux qui veulent aller plus loin. Toucher la phrase la fait prononcer.
+2. **Du jour** — trois petits onglets, un seul contenu visible à la fois, sans cartes ni ombres :
+   - *Phrase* : la phrase du jour, sa traduction cachée jusqu'au toucher, et l'ajout à « Mes mots » ;
+   - *Leçon* : la leçon du jour réduite à l'essentiel (titre, résumé, tableau), les exemples, l'astuce
+     et le détail repliés derrière « Voir les exemples ». L'étoile enregistre la leçon ;
+   - *Enregistrées* : les leçons gardées, les plus récentes en haut. Un toucher rouvre la leçon, un
+     lien ramène à celle du jour.
+   Les leçons enregistrées ont leur propre rangement (`voc_lecons_<langue>`), séparé des mots, et
+   voyagent avec la sauvegarde. Retirer une leçon la marque « retirée » au lieu de l'effacer, pour que
+   le retrait l'emporte aussi sur les autres appareils.
    34 leçons et 50 phrases par langue, une nouvelle chaque jour.
 3. **Révision** — cartes mémo tirées en priorité parmi les mots les moins sûrs. Un mot réussi monte
    d'un niveau, un mot raté repart à zéro. Le sens de la question se change d'un clic ; au clavier :

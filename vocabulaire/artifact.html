@@ -50,31 +50,55 @@
 
     <!-- ========== 2. DU JOUR ========== -->
     <section id="jour" class="vue">
-      <p class="date" id="date"></p>
-
-      <p class="label">La phrase du jour</p>
-      <p class="phrase" id="phrase" title="Toucher pour écouter"></p>
-      <div id="bloc-trad" hidden>
-        <p class="phrase-fr" id="phrase-fr"></p>
-        <p class="astuce-phrase" id="phrase-note"></p>
+      <div class="sous-onglets">
+        <button class="sous-btn active" data-sous="phrase">Phrase</button>
+        <button class="sous-btn" data-sous="lecon">Leçon</button>
+        <button class="sous-btn" data-sous="gardees">Enregistrées <span class="nb" id="nb-gardees"></span></button>
       </div>
-      <div class="actions">
-        <button class="pilule" id="voir-trad">Voir la traduction</button>
-        <button class="pilule" id="ajouter-phrase">Ajouter à mes mots</button>
-      </div>
-      <p class="message" id="phrase-message" hidden></p>
 
-      <div class="bloc">
+      <!-- La phrase du jour -->
+      <div class="sous-vue active" id="sv-phrase">
+        <p class="date" id="date"></p>
+        <p class="phrase" id="phrase" title="Toucher pour écouter"></p>
+        <div id="bloc-trad" hidden>
+          <p class="phrase-fr" id="phrase-fr"></p>
+          <p class="phrase-note" id="phrase-note"></p>
+        </div>
+        <div class="actions">
+          <button class="lien" id="voir-trad">Voir la traduction</button>
+          <button class="lien" id="ajouter-phrase">Ajouter à mes mots</button>
+        </div>
+        <p class="message" id="phrase-message" hidden></p>
+      </div>
+
+      <!-- La leçon : celle du jour, ou une leçon enregistrée rouverte -->
+      <div class="sous-vue" id="sv-lecon">
+        <button class="lien retour" id="retour-lecon" hidden>‹ Leçon du jour</button>
         <p class="label" id="lecon-cat"></p>
-        <h2 class="lecon-titre" id="lecon-titre"></h2>
+        <div class="lecon-tete">
+          <h2 class="lecon-titre" id="lecon-titre"></h2>
+          <button class="etoile" id="etoile" aria-pressed="false" aria-label="Enregistrer la leçon" title="Enregistrer la leçon">
+            <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"
+                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path>
+            </svg>
+          </button>
+        </div>
         <p class="resume" id="lecon-resume"></p>
         <div id="lecon-conj"></div>
-        <div id="lecon-exemples"></div>
-        <p class="astuce" id="lecon-astuce"></p>
-        <details>
-          <summary>Voir le détail</summary>
-          <ul id="lecon-points"></ul>
+        <details id="lecon-plus">
+          <summary>Voir les exemples</summary>
+          <div id="lecon-exemples"></div>
+          <p class="astuce" id="lecon-astuce"></p>
+          <ul class="points-lecon" id="lecon-points"></ul>
         </details>
+        <p class="message" id="lecon-message" hidden></p>
+      </div>
+
+      <!-- Les leçons enregistrées, rangées à part des mots -->
+      <div class="sous-vue" id="sv-gardees">
+        <ul class="gardees" id="gardees"></ul>
+        <p class="vide" id="gardees-vide" hidden>Aucune leçon enregistrée.<br />Touche l'étoile d'une leçon pour la garder ici.</p>
       </div>
     </section>
 

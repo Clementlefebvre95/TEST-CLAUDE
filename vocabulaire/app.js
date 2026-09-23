@@ -12,6 +12,7 @@ const LANGUES = {
 const CLES = {
   langue: 'voc_last_lang',
   mots: code => `voc_words_${code}`,
+  lecons: code => `voc_lecons_${code}`,   // leçons enregistrées, rangées à part des mots
   masque: 'voc_masque',
   sens: 'voc_sens',
   jeton: 'voc_gh_token',
@@ -47,6 +48,8 @@ let masque = store.get(CLES.masque, false);
 let sens = SENS.some(s => s.cle === store.get(CLES.sens)) ? store.get(CLES.sens) : 'src2fr';
 let devoiles = new Set();
 let ouvert = null;              // ligne dont les actions sont dépliées
+let sousPage = 'phrase';        // sous-onglet de « Du jour »
+let leconOuverte = null;        // titre d'une leçon enregistrée rouverte (null = celle du jour)
 let serie = { cartes: [], i: 0, vue: false, bons: 0 };
 
 const L = () => LANGUES[langue];
@@ -190,10 +193,72 @@ function fusionner(parLangue) {
   return { ajoutes, majs };
 }
 
+// ---------- Les leçons enregistrées ----------
+// Chaque entrée garde sa date de modification : retirer une leçon la marque
+// « retirée » au lieu de l'effacer, pour que le retrait gagne aussi sur les
+// autres appareils au lieu d'être annulé par leur copie.
+const lireLecons = (code = langue) => {
+  const l = store.get(CLES.lecons(code), []);
+  return Array.isArray(l) ? l : [];
+};
+
+function ecrireLecons(liste, code = langue) {
+  store.set(CLES.lecons(code), liste);
+  planifierSauvegarde();
+}
+
+const leconsGardees = (code = langue) =>
+  lireLecons(code).filter(l => !l.retiree).sort((a, b) => b.gardee - a.gardee);
+
+const estGardee = titre => leconsGardees().some(l => l.titre === titre);
+
+function basculerGarde(lecon) {
+  const liste = lireLecons();
+  const deja = liste.find(l => l.titre === lecon.titre);
+  const maintenant = Date.now();
+  if (deja && !deja.retiree) {
+    deja.retiree = true;
+    deja.maj = maintenant;
+  } else if (deja) {
+    Object.assign(deja, { retiree: false, gardee: maintenant, maj: maintenant, categorie: lecon.categorie });
+  } else {
+    liste.push({ titre: lecon.titre, categorie: lecon.categorie, gardee: maintenant, maj: maintenant, retiree: false });
+  }
+  ecrireLecons(liste);
+  return !(deja && !deja.retiree);
+}
+
+// Pour chaque leçon, la version modifiée le plus récemment l'emporte
+function fusionnerLecons(parLangue) {
+  let changements = 0;
+  ['en', 'es'].forEach(code => {
+    const entrants = Array.isArray(parLangue?.[code]) ? parLangue[code] : [];
+    if (!entrants.length) return;
+    const locales = lireLecons(code);
+    const index = new Map(locales.map(l => [l.titre, l]));
+    entrants.forEach(l => {
+      if (!l || !l.titre) return;
+      const propre = {
+        titre: String(l.titre),
+        categorie: String(l.categorie || ''),
+        gardee: Number(l.gardee) || Date.now(),
+        maj: Number(l.maj) || Number(l.gardee) || 0,
+        retiree: Boolean(l.retiree),
+      };
+      const deja = index.get(propre.titre);
+      if (!deja) { locales.push(propre); index.set(propre.titre, propre); changements++; }
+      else if (propre.maj > (deja.maj || 0)) { Object.assign(deja, propre); changements++; }
+    });
+    store.set(CLES.lecons(code), locales);
+  });
+  return changements;
+}
+
 const contenu = () => ({
   format: 'mes-mots-v1',
   exporte: new Date().toISOString(),
   mots: { en: lireMots('en'), es: lireMots('es') },
+  lecons: { en: lireLecons('en'), es: lireLecons('es') },
 });
 
 // ---------- Page 1 : la liste ----------
@@ -237,27 +302,64 @@ function afficherMots() {
 }
 
 // ---------- Page 2 : le contenu du jour ----------
-function afficherJour() {
-  const lecon = duJour(L().lecons, langue === 'es' ? 7 : 0);
-  const phrase = duJour(L().phrases, langue === 'es' ? 11 : 3);
+const leconDuJour = () => duJour(L().lecons, langue === 'es' ? 7 : 0);
 
+function dateCourte(ms) {
+  return new Date(ms).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+}
+
+function afficherJour() {
+  // Sous-onglets
+  document.querySelectorAll('.sous-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.sous === sousPage));
+  document.querySelectorAll('.sous-vue').forEach(v =>
+    v.classList.toggle('active', v.id === `sv-${sousPage}`));
+  const gardees = leconsGardees();
+  $('nb-gardees').textContent = gardees.length || '';
+
+  // Phrase
+  const phrase = duJour(L().phrases, langue === 'es' ? 11 : 3);
   const d = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
   $('date').textContent = d.charAt(0).toUpperCase() + d.slice(1);
-
+  if ($('phrase').dataset.dire !== phrase.src) {         // nouvelle phrase : traduction de nouveau cachée
+    $('bloc-trad').hidden = true;
+    $('voir-trad').textContent = 'Voir la traduction';
+  }
   $('phrase').textContent = phrase.src;
   $('phrase').dataset.dire = phrase.src;
   $('phrase-fr').textContent = phrase.fr;
   $('phrase-note').textContent = phrase.note || '';
   $('phrase-note').hidden = !phrase.note;
-  $('bloc-trad').hidden = true;
-  $('voir-trad').hidden = false;
   $('ajouter-phrase').dataset.mot = phrase.src;
   $('ajouter-phrase').dataset.trad = phrase.fr;
   $('ajouter-phrase').dataset.note = phrase.note || '';
 
-  $('lecon-cat').textContent = `Leçon du jour · ${lecon.categorie}`;
+  // Leçon : celle du jour, ou une leçon enregistrée rouverte
+  const rouverte = leconOuverte && L().lecons.find(l => l.titre === leconOuverte);
+  if (leconOuverte && !rouverte) leconOuverte = null;
+  const lecon = rouverte || leconDuJour();
+  afficherLecon(lecon, Boolean(rouverte));
+
+  // Leçons enregistrées
+  $('gardees-vide').hidden = gardees.length > 0;
+  $('gardees').innerHTML = gardees.map(l => `
+    <li data-titre="${html(l.titre)}">
+      <span class="titre-gardee">${html(l.titre)}</span>
+      <span class="meta-gardee">${html(l.categorie)} · ${dateCourte(l.gardee)}</span>
+    </li>`).join('');
+}
+
+function afficherLecon(lecon, rouverte) {
+  $('retour-lecon').hidden = !rouverte;
+  $('lecon-cat').textContent = rouverte ? lecon.categorie : `Leçon du jour · ${lecon.categorie}`;
   $('lecon-titre').textContent = lecon.titre;
   $('lecon-resume').textContent = lecon.resume;
+
+  const gardee = estGardee(lecon.titre);
+  $('etoile').setAttribute('aria-pressed', String(gardee));
+  $('etoile').title = gardee ? 'Retirer des leçons enregistrées' : 'Enregistrer la leçon';
+  $('etoile').setAttribute('aria-label', $('etoile').title);
+  $('etoile').dataset.titre = lecon.titre;
 
   $('lecon-conj').innerHTML = lecon.tableau ? `
     <div class="conj">
@@ -266,12 +368,15 @@ function afficherJour() {
         `<tr><th>${html(g)}</th><td>${html(d2)}</td></tr>`).join('')}</table>
     </div>` : '';
 
+  // Le détail reste replié à chaque changement de leçon
+  if ($('lecon-plus').dataset.titre !== lecon.titre) $('lecon-plus').open = false;
+  $('lecon-plus').dataset.titre = lecon.titre;
+
   $('lecon-exemples').innerHTML = lecon.exemples.map(ex => `
     <div class="exemple">
       <p class="src" data-dire="${html(ex.src)}">${html(ex.src)}</p>
       <p class="fr">${html(ex.fr)}</p>
     </div>`).join('');
-
   $('lecon-astuce').textContent = lecon.astuce || '';
   $('lecon-astuce').hidden = !lecon.astuce;
   $('lecon-points').innerHTML = lecon.points.map(p => `<li>${html(p)}</li>`).join('');
@@ -379,20 +484,29 @@ function coffreClaude(db) {
   return {
     async pousser() {
       const c = contenu();
-      await Promise.all(['en', 'es'].map(code =>
-        db.doc(`mots/${code}`).set({ mots: c.mots[code], maj: Date.now() })));
+      await Promise.all(['en', 'es'].flatMap(code => [
+        db.doc(`mots/${code}`).set({ mots: c.mots[code], maj: Date.now() }),
+        db.doc(`lecons/${code}`).set({ lecons: c.lecons[code], maj: Date.now() }),
+      ]));
       store.set(CLES.maj, Date.now());
     },
     async tirer() {
-      const snaps = await Promise.all(['en', 'es'].map(code => db.doc(`mots/${code}`).get()));
-      const mots = {};
+      const codes = ['en', 'es'];
+      const [snapsMots, snapsLecons] = await Promise.all([
+        Promise.all(codes.map(code => db.doc(`mots/${code}`).get())),
+        Promise.all(codes.map(code => db.doc(`lecons/${code}`).get())),
+      ]);
+      const mots = {}, lecons = {};
       let vide = true;
-      snaps.forEach((s, i) => {
-        const d = s.exists ? s.data() : null;
-        if (d && Array.isArray(d.mots)) { mots[['en', 'es'][i]] = d.mots; vide = false; }
+      codes.forEach((code, i) => {
+        const dm = snapsMots[i].exists ? snapsMots[i].data() : null;
+        const dl = snapsLecons[i].exists ? snapsLecons[i].data() : null;
+        if (dm && Array.isArray(dm.mots)) { mots[code] = dm.mots; vide = false; }
+        if (dl && Array.isArray(dl.lecons)) { lecons[code] = dl.lecons; vide = false; }
       });
       if (vide) return { ajoutes: 0, majs: 0, vide: true };
       const res = fusionner(mots);
+      fusionnerLecons(lecons);
       store.set(CLES.maj, Date.now());
       return res;
     },
@@ -451,7 +565,9 @@ function coffreGitHub() {
       const f = g.files && g.files[FICHIER_GIST];
       if (!f) return { ajoutes: 0, majs: 0, vide: true };
       const texte = f.truncated ? await (await fetch(f.raw_url)).text() : f.content;
-      const res = fusionner(JSON.parse(texte).mots);
+      const data = JSON.parse(texte);
+      const res = fusionner(data.mots);
+      fusionnerLecons(data.lecons);
       store.set(CLES.maj, Date.now());
       return res;
     },
@@ -562,7 +678,9 @@ function importer(fichier) {
       const data = JSON.parse(lecteur.result);
       if (!data || !data.mots) throw new Error('format');
       const { ajoutes, majs } = fusionner(data.mots);
-      message($('pied-message'), `${ajoutes} mot(s) importé(s), ${majs} mis à jour.`);
+      const lecons = fusionnerLecons(data.lecons);
+      message($('pied-message'), `${ajoutes} mot(s) importé(s), ${majs} mis à jour`
+        + (lecons ? `, ${lecons} leçon(s).` : '.'));
       toutAfficher();
       planifierSauvegarde();
     } catch {
@@ -578,6 +696,7 @@ function choisirLangue(code) {
   langue = code;
   store.set(CLES.langue, code);
   devoiles.clear();
+  leconOuverte = null;
   document.querySelectorAll('.langue').forEach(b =>
     b.classList.toggle('active', b.dataset.lang === code));
   $('mot').placeholder = `Mot en ${L().adjectif}`;
@@ -597,6 +716,9 @@ document.querySelectorAll('.page-btn').forEach(btn => {
     document.querySelectorAll('.vue').forEach(v => v.classList.remove('active'));
     btn.classList.add('active');
     $(btn.dataset.page).classList.add('active');
+    // Le + ajoute un mot : il n'a sa place que sur la page des mots
+    $('plus').hidden = btn.dataset.page !== 'liste';
+    if (btn.dataset.page !== 'liste') basculerAjout(false);
     if (btn.dataset.page === 'revision') nouvelleSerie();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
@@ -666,9 +788,41 @@ $('mots').addEventListener('click', e => {
 
 $('phrase').addEventListener('click', e => parler(e.currentTarget.dataset.dire));
 
-$('voir-trad').addEventListener('click', e => {
-  $('bloc-trad').hidden = false;
-  e.target.hidden = true;
+$('voir-trad').addEventListener('click', () => {
+  const ouvrir = $('bloc-trad').hidden;
+  $('bloc-trad').hidden = !ouvrir;
+  $('voir-trad').textContent = ouvrir ? 'Cacher la traduction' : 'Voir la traduction';
+});
+
+document.querySelectorAll('.sous-btn').forEach(b => b.addEventListener('click', () => {
+  sousPage = b.dataset.sous;
+  if (sousPage === 'lecon' && b.classList.contains('active')) leconOuverte = null;
+  afficherJour();
+}));
+
+$('etoile').addEventListener('click', () => {
+  const titre = $('etoile').dataset.titre;
+  const lecon = L().lecons.find(l => l.titre === titre);
+  if (!lecon) return;
+  const gardee = basculerGarde(lecon);
+  afficherJour();
+  message($('lecon-message'), gardee
+    ? 'Leçon enregistrée. Tu la retrouves dans « Enregistrées ».'
+    : 'Leçon retirée de tes leçons enregistrées.', gardee ? 'ok' : 'warn');
+});
+
+$('gardees').addEventListener('click', e => {
+  const li = e.target.closest('li[data-titre]');
+  if (!li) return;
+  leconOuverte = li.dataset.titre;
+  sousPage = 'lecon';
+  afficherJour();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+$('retour-lecon').addEventListener('click', () => {
+  leconOuverte = null;
+  afficherJour();
 });
 
 $('ajouter-phrase').addEventListener('click', e => {
