@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tableau Sage</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Connexion en cours -->
+  <section id="screen-loading" class="screen center" hidden>
+    <div class="spinner" aria-hidden="true"></div>
+    <p id="loading-text">Connexion à Sage…</p>
+  </section>
+
+  <!-- Configuration -->
+  <section id="screen-setup" class="screen" hidden>
+    <div class="setup">
+      <header class="setup-head">
+        <img src="icon.svg" alt="" width="40" height="40">
+        <div>
+          <h1>Connecter le tableau de bord à Sage 100</h1>
+          <p class="muted">À faire une seule fois. L'application ne fait que lire les données : elle ne modifie jamais rien dans Sage.</p>
+        </div>
+      </header>
+
+      <div id="setup-error" class="alert" role="alert" hidden></div>
+
+      <form id="setup-form" autocomplete="off">
+        <fieldset class="step">
+          <legend><span class="step-no">1</span> Le serveur SQL de Sage</legend>
+          <label for="server">Nom du serveur</label>
+          <div class="row">
+            <input id="server" name="server" type="text" placeholder="SERVEUR\SAGE100" spellcheck="false" required>
+            <button type="button" id="discover" class="btn secondary">Rechercher sur le réseau</button>
+          </div>
+          <div id="servers-found" class="chips" hidden></div>
+          <p class="help">C'est le nom qu'utilise Sage pour se connecter à ses données, souvent sous la forme <code>NOMDUPC\SAGE100</code>. Si la recherche ne trouve rien, demandez-le à la personne qui s'occupe de Sage.</p>
+        </fieldset>
+
+        <fieldset class="step">
+          <legend><span class="step-no">2</span> Identification</legend>
+          <div class="choices">
+            <label class="choice">
+              <input type="radio" name="auth" value="windows" checked>
+              <span><strong>Mon compte Windows</strong><small>Rien à saisir : utilise la session ouverte sur ce PC.</small></span>
+            </label>
+            <label class="choice">
+              <input type="radio" name="auth" value="sql">
+              <span><strong>Identifiant SQL</strong><small>Un identifiant et un mot de passe fournis par votre informaticien ou revendeur Sage.</small></span>
+            </label>
+          </div>
+          <div id="sql-fields" class="grid2" hidden>
+            <div>
+              <label for="user">Identifiant</label>
+              <input id="user" name="user" type="text" spellcheck="false" autocomplete="username">
+            </div>
+            <div>
+              <label for="password">Mot de passe</label>
+              <input id="password" name="password" type="password" autocomplete="current-password">
+            </div>
+          </div>
+          <button type="submit" id="connect" class="btn primary">Se connecter</button>
+        </fieldset>
+
+        <fieldset class="step" id="step-company" hidden>
+          <legend><span class="step-no">3</span> La société</legend>
+          <div id="companies" class="choices"></div>
+          <details id="other-dbs" hidden>
+            <summary>Ma société n'apparaît pas</summary>
+            <p class="help">Ces bases ne ressemblent pas à des sociétés Sage 100 Gestion commerciale. Choisissez-en une seulement si vous êtes sûr de vous.</p>
+            <div id="other-dbs-list" class="choices"></div>
+          </details>
+          <div class="currency">
+            <label for="currency">Devise affichée</label>
+            <input id="currency" name="currency" type="text" value="€" maxlength="6">
+          </div>
+          <button type="button" id="finish" class="btn primary" disabled>Ouvrir le tableau de bord</button>
+        </fieldset>
+      </form>
+
+      <p class="demo-link"><button type="button" class="link" id="try-demo">Voir une démonstration avec des données fictives</button></p>
+    </div>
+  </section>
+
+  <!-- Tableau de bord -->
+  <section id="screen-dash" class="screen" hidden>
+    <header class="topbar">
+      <div class="brand">
+        <img src="icon.svg" alt="" width="28" height="28">
+        <div>
+          <h1 id="company">—</h1>
+          <p class="muted small" id="updated"></p>
+        </div>
+        <span id="demo-badge" class="badge" hidden>Démonstration : données fictives</span>
+      </div>
+      <nav class="tabs" role="tablist">
+        <button role="tab" id="tab-sales" aria-controls="view-sales" aria-selected="true">Chiffre d'affaires</button>
+        <button role="tab" id="tab-stock" aria-controls="view-stock" aria-selected="false">Stocks</button>
+      </nav>
+      <div class="actions">
+        <button type="button" id="refresh" class="btn secondary">Actualiser</button>
+        <button type="button" id="settings" class="btn ghost" aria-haspopup="dialog">Paramètres</button>
+      </div>
+    </header>
+
+    <main>
+      <div id="dash-error" class="alert" role="alert" hidden></div>
+
+      <section id="view-sales" role="tabpanel" aria-labelledby="tab-sales">
+        <div class="tiles" id="sales-tiles"></div>
+        <article class="card">
+          <header class="card-head">
+            <div>
+              <h2>Chiffre d'affaires HT par mois</h2>
+              <div class="legend" id="chart-legend"></div>
+            </div>
+            <div class="seg" role="group" aria-label="Affichage">
+              <button type="button" id="show-chart" aria-pressed="true">Graphique</button>
+              <button type="button" id="show-table" aria-pressed="false">Tableau</button>
+            </div>
+          </header>
+          <div id="chart" class="chart"></div>
+          <div id="chart-table" hidden></div>
+        </article>
+        <div class="grid2 cards">
+          <article class="card">
+            <header class="card-head"><h2>Meilleurs clients depuis le 1er janvier</h2></header>
+            <div id="top-clients"></div>
+          </article>
+          <article class="card">
+            <header class="card-head"><h2>Articles les plus vendus depuis le 1er janvier</h2></header>
+            <div id="top-articles"></div>
+          </article>
+        </div>
+        <p class="note">Factures de vente et factures comptabilisées, hors taxes, avoirs et retours déduits.</p>
+      </section>
+
+      <section id="view-stock" role="tabpanel" aria-labelledby="tab-stock" hidden>
+        <div class="filters">
+          <label class="inline">Dépôt
+            <select id="depot"><option value="0">Tous les dépôts</option></select>
+          </label>
+          <input id="search" type="search" placeholder="Rechercher un article (référence ou désignation)" spellcheck="false">
+          <div class="seg" role="group" aria-label="Filtrer">
+            <button type="button" data-filter="all" aria-pressed="true">Tous</button>
+            <button type="button" data-filter="out" aria-pressed="false">En rupture</button>
+            <button type="button" data-filter="low" aria-pressed="false">Sous le minimum</button>
+          </div>
+        </div>
+        <div class="tiles" id="stock-tiles"></div>
+        <article class="card">
+          <div class="table-wrap">
+            <table id="stock-table" class="data">
+              <thead><tr></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="table-foot">
+            <span id="stock-count" class="muted small"></span>
+            <button type="button" id="stock-more" class="btn secondary" hidden>Afficher plus</button>
+          </div>
+        </article>
+        <p class="note">Articles actifs dont Sage suit le stock. Disponible = en stock − réservé (commandes clients).</p>
+      </section>
+    </main>
+  </section>
+
+  <dialog id="settings-dialog">
+    <form method="dialog">
+      <h2>Paramètres</h2>
+      <dl id="settings-info" class="info"></dl>
+      <p class="help">Pour changer de serveur ou de société, reprenez la configuration. Rien n'est modifié dans Sage.</p>
+      <div class="dialog-actions">
+        <button type="button" id="reconfigure" class="btn secondary">Reprendre la configuration</button>
+        <button value="close" class="btn primary">Fermer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="tooltip" class="tooltip" role="status" hidden></div>
+  <script src="app.js"></script>
+</body>
+</html>
