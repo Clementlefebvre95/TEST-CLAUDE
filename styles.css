@@ -349,3 +349,22 @@ main { max-width: 720px; margin: 0 auto; padding: 16px 14px 24px; }
 
 .card + .card { margin-top: 14px; }
 .card-title { margin: 0 0 6px; font-size: 1.1rem; }
+
+/* ---------- Choix du symbole d'une recette ---------- */
+.emoji-row { display: flex; gap: 10px; }
+.emoji-choice {
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fffdfa;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.emoji-choice.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.emoji-choice:active { transform: scale(.95); }

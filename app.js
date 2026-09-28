@@ -15,13 +15,20 @@ const GIST_FILE = 'mes-recettes.json';
 const CATEGORIES = [
   { id: 'aperitif', name: 'Apéritif', emoji: '🥂' },
   { id: 'entree',   name: 'Entrée',   emoji: '🥒' },
-  { id: 'plat',     name: 'Plat',     emoji: '🥩' },
+  { id: 'plat',     name: 'Plat',     emoji: '🥩', emojis: ['🥩', '🥕'] },
   { id: 'dessert',  name: 'Dessert',  emoji: '🍫' },
   { id: 'sauce',    name: 'Sauce',    emoji: '🥣' },
   { id: 'boisson',  name: 'Boisson',  emoji: '🥤' },
 ];
 
 const catById = id => CATEGORIES.find(c => c.id === id) || CATEGORIES[2];
+
+// Symboles disponibles pour une catégorie, et celui d'une recette donnée.
+const catEmojis = id => catById(id).emojis || [catById(id).emoji];
+function recipeEmoji(r) {
+  const choix = catEmojis(r.category);
+  return choix.includes(r.emoji) ? r.emoji : catById(r.category).emoji;
+}
 
 // ---------- Stockage ----------
 function loadRecipes() {
@@ -194,7 +201,7 @@ function rowHtml(r, where = '') {
   const meta = [cat.name, r.time, r.servings, where].filter(Boolean).join(' · ');
   return `
     <button class="recipe-row" data-id="${r.id}">
-      <span class="dot">${cat.emoji}</span>
+      <span class="dot">${recipeEmoji(r)}</span>
       <span class="info">
         <span class="title">${escapeHtml(r.title)}</span><br />
         <span class="meta">${escapeHtml(meta)}</span>
@@ -224,7 +231,7 @@ function renderCategory(catId) {
 
   const container = $('#category-list');
   container.innerHTML = list.length
-    ? list.map(rowHtml).join('')
+    ? list.map(r => rowHtml(r)).join('')
     : `<div class="empty">Aucune recette dans « ${cat.name} » pour le moment.</div>`;
   bindRows(container);
 }
@@ -239,7 +246,7 @@ function renderRecipe(id) {
   }
   const cat = catById(r.category);
   const tags = [
-    `<span class="tag">${cat.emoji} ${cat.name}</span>`,
+    `<span class="tag">${recipeEmoji(r)} ${cat.name}</span>`,
     r.time ? `<span class="tag">⏱ ${escapeHtml(r.time)}</span>` : '',
     r.servings ? `<span class="tag">👥 ${escapeHtml(r.servings)}</span>` : '',
   ].filter(Boolean).join('');
@@ -265,6 +272,32 @@ function renderRecipe(id) {
 }
 
 // ---------- Éditeur ----------
+// Le choix n'apparaît que pour les catégories qui proposent plusieurs symboles.
+let selectedEmoji = '';
+
+function renderEmojiChoice(catId, chosen) {
+  const choix = catEmojis(catId);
+  const field = $('#emoji-field');
+  if (choix.length < 2) {
+    field.classList.add('hidden');
+    selectedEmoji = '';
+    return;
+  }
+  selectedEmoji = choix.includes(chosen) ? chosen : choix[0];
+  field.classList.remove('hidden');
+  $('#f-emoji').innerHTML = choix
+    .map(e => `<button type="button" class="emoji-choice${e === selectedEmoji ? ' active' : ''}" data-emoji="${e}">${e}</button>`)
+    .join('');
+  $('#f-emoji').querySelectorAll('.emoji-choice').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedEmoji = btn.dataset.emoji;
+      $('#f-emoji').querySelectorAll('.emoji-choice').forEach(b => b.classList.toggle('active', b === btn));
+    });
+  });
+}
+
+$('#f-category').addEventListener('change', e => renderEmojiChoice(e.target.value, selectedEmoji));
+
 function fillCategorySelect() {
   $('#f-category').innerHTML = CATEGORIES
     .map(c => `<option value="${c.id}">${c.emoji} ${c.name}</option>`)
@@ -281,6 +314,7 @@ function openEditor(id) {
   $('#f-ingredients').value = r ? (r.ingredients || []).join('\n') : '';
   $('#f-steps').value = r ? (r.steps || []).join('\n') : '';
   $('#f-notes').value = r ? (r.notes || '') : '';
+  renderEmojiChoice($('#f-category').value, r ? r.emoji : '');
   goTo({ name: 'edit', title: r ? 'Modifier la recette' : 'Nouvelle recette' });
 }
 
@@ -295,6 +329,7 @@ $('#recipe-form').addEventListener('submit', e => {
     ingredients: toLines($('#f-ingredients').value),
     steps: toLines($('#f-steps').value),
     notes: $('#f-notes').value.trim(),
+    emoji: selectedEmoji,
     updatedAt: Date.now(),
   };
   if (!data.title) return;
