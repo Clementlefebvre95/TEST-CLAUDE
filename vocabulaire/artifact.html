@@ -1,63 +1,90 @@
 <title>Mes Mots</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&display=swap" />
 <link rel="stylesheet" href="styles.css" />
-<header class="tete">
+<!-- ================= En-tête ================= -->
+  <header class="tete">
     <div class="tete-inner">
-      <div class="haut">
-        <div class="bascule" id="langues">
-          <button class="langue" data-lang="es">Espagnol</button>
-          <span class="separateur"></span>
-          <button class="langue" data-lang="en">Anglais</button>
-        </div>
+      <div class="bascule" id="langues">
+        <button class="langue" data-lang="es">Espagnol</button>
+        <span class="separateur"></span>
+        <button class="langue" data-lang="en">Anglais</button>
+      </div>
+      <div class="tete-droite">
+        <span class="km" id="km" title="Kilomètres parcourus : 10 km par bonne réponse">
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15.5v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0v5l-8 5v2l8-2.5V18l-2 1.5V21l3.5-1 3.5 1v-1.5L13 18v-5z" fill="currentColor"></path></svg>
+          <span id="km-valeur">0 km</span>
+        </span>
         <button class="points" id="ouvrir-panneau" title="Réglages" aria-label="Réglages">
-          <svg width="20" height="5" viewBox="0 0 20 5" fill="none" aria-hidden="true">
-            <circle cx="2.5" cy="2.5" r="1.9" fill="currentColor"></circle>
-            <circle cx="10" cy="2.5" r="1.9" fill="currentColor"></circle>
-            <circle cx="17.5" cy="2.5" r="1.9" fill="currentColor"></circle>
-          </svg>
+          <svg width="20" height="5" viewBox="0 0 20 5" aria-hidden="true"><circle cx="2.5" cy="2.5" r="1.9" fill="currentColor"></circle><circle cx="10" cy="2.5" r="1.9" fill="currentColor"></circle><circle cx="17.5" cy="2.5" r="1.9" fill="currentColor"></circle></svg>
         </button>
       </div>
-      <nav class="pages">
-        <button class="page-btn active" data-page="liste">Mes mots</button>
-        <button class="page-btn" data-page="jour">Du jour</button>
-        <button class="page-btn" data-page="revision">Révision</button>
-      </nav>
     </div>
   </header>
 
   <main>
 
-    <!-- ========== 1. MES MOTS ========== -->
-    <section id="liste" class="vue active">
+    <!-- ================= MOTS ================= -->
+    <section id="page-mots" class="vue active">
+      <h1 class="titre-page">Mes mots</h1>
+
       <form class="ajout" id="ajout" hidden>
         <div class="duo">
           <input type="text" id="mot" placeholder="Mot en espagnol" autocomplete="off" required />
           <input type="text" id="trad" placeholder="En français" autocomplete="off" required />
         </div>
-        <button type="submit" class="valider">Ajouter</button>
+        <button type="submit" class="bouton">Ajouter</button>
       </form>
       <p class="message" id="ajout-message" hidden></p>
 
       <input type="search" id="recherche" placeholder="Rechercher" autocomplete="off" hidden />
-      <div class="barre">
-        <button class="discret" id="bascule-trad" hidden>cacher les traductions</button>
+      <div class="barre"><button class="discret" id="bascule-trad" hidden>cacher les traductions</button></div>
+      <ul class="liste-mots" id="liste-mots"></ul>
+      <div class="vide" id="vide" hidden>
+        <p>Aucun mot pour l'instant.</p>
+        <p>Touche le <b>+</b> pour en noter un, ou pars en voyage : chaque escale te propose dix mots.</p>
+        <button class="lien" id="aller-voyage">Voir la carte du voyage</button>
       </div>
-      <ul class="mots" id="mots"></ul>
-      <p class="vide" id="vide" hidden>Aucun mot pour l'instant.<br />Touche le + pour en ajouter un.</p>
     </section>
 
-    <!-- ========== 2. DU JOUR ========== -->
-    <section id="jour" class="vue">
+    <!-- ================= VOYAGE ================= -->
+    <section id="page-voyage" class="vue">
+      <h1 class="titre-page">Mon voyage</h1>
+      <p class="sous-titre" id="voyage-sous"></p>
+
       <div class="sous-onglets">
-        <button class="sous-btn active" data-sous="phrase">Phrase</button>
+        <button class="sous-btn active" data-sous="carte">Carte</button>
+        <button class="sous-btn" data-sous="phrase">Phrase</button>
         <button class="sous-btn" data-sous="lecon">Leçon</button>
         <button class="sous-btn" data-sous="gardees">Enregistrées <span class="nb" id="nb-gardees"></span></button>
       </div>
 
+      <!-- La carte des escales -->
+      <div class="sous-vue active" id="sv-carte">
+        <div class="prochaine" id="prochaine"></div>
+        <div class="carte" id="carte-voyage"></div>
+      </div>
+
+      <!-- Une escale ouverte : sa carte postale -->
+      <div class="sous-vue" id="sv-postale">
+        <button class="lien retour" id="retour-carte">‹ La carte</button>
+        <article class="postale">
+          <div class="timbre" id="timbre"></div>
+          <p class="postale-num" id="postale-num"></p>
+          <h2 class="postale-titre" id="postale-titre"></h2>
+          <p class="postale-accroche" id="postale-accroche"></p>
+          <div class="grille-mots" id="postale-mots"></div>
+        </article>
+        <div class="actions-postale">
+          <button class="bouton" id="jouer-theme">Jouer et tamponner</button>
+          <button class="lien" id="ajouter-theme">Ajouter ces mots à ma liste</button>
+        </div>
+        <p class="message" id="postale-message" hidden></p>
+      </div>
+
       <!-- La phrase du jour -->
-      <div class="sous-vue active" id="sv-phrase">
+      <div class="sous-vue" id="sv-phrase">
         <p class="date" id="date"></p>
         <p class="phrase" id="phrase" title="Toucher pour écouter"></p>
         <div id="bloc-trad" hidden>
@@ -71,17 +98,14 @@
         <p class="message" id="phrase-message" hidden></p>
       </div>
 
-      <!-- La leçon : celle du jour, ou une leçon enregistrée rouverte -->
+      <!-- La leçon du jour, ou une leçon enregistrée rouverte -->
       <div class="sous-vue" id="sv-lecon">
         <button class="lien retour" id="retour-lecon" hidden>‹ Leçon du jour</button>
         <p class="label" id="lecon-cat"></p>
         <div class="lecon-tete">
           <h2 class="lecon-titre" id="lecon-titre"></h2>
           <button class="etoile" id="etoile" aria-pressed="false" aria-label="Enregistrer la leçon" title="Enregistrer la leçon">
-            <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"
-                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path>
-            </svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path></svg>
           </button>
         </div>
         <p class="resume" id="lecon-resume"></p>
@@ -95,42 +119,81 @@
         <p class="message" id="lecon-message" hidden></p>
       </div>
 
-      <!-- Les leçons enregistrées, rangées à part des mots -->
+      <!-- Les leçons enregistrées -->
       <div class="sous-vue" id="sv-gardees">
         <ul class="gardees" id="gardees"></ul>
         <p class="vide" id="gardees-vide" hidden>Aucune leçon enregistrée.<br />Touche l'étoile d'une leçon pour la garder ici.</p>
       </div>
     </section>
 
-    <!-- ========== 3. RÉVISION ========== -->
-    <section id="revision" class="vue">
-      <div class="reglages">
-        <button class="discret" id="sens">Deviner le français</button>
-        <button class="discret" id="rejouer">Nouvelle série</button>
-      </div>
+    <!-- ================= JOUER ================= -->
+    <section id="page-jouer" class="vue">
+      <h1 class="titre-page">Jouer</h1>
+      <p class="sous-titre" id="jouer-sous"></p>
+      <p class="note-source" id="note-source" hidden></p>
 
-      <div class="carte-revision" id="carte" hidden>
-        <p class="question" id="question" title="Toucher pour écouter"></p>
-        <div class="reponse" id="reponse" hidden>
-          <p class="mot-reponse" id="reponse-mot"></p>
-          <p class="note" id="reponse-note"></p>
-        </div>
-        <button class="valider" id="reveler">Voir la réponse</button>
-        <div class="boutons" id="notes-carte" hidden>
-          <button class="contour" id="rate">À revoir</button>
-          <button class="valider" id="su">Je savais</button>
-        </div>
-        <p class="avancement" id="avancement"></p>
+      <div class="billets">
+        <button class="billet-jeu" data-jeu="quiz">
+          <span class="talon" style="--c: #e76f51">
+            <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z" fill="#fff"></path></svg>
+          </span>
+          <span class="billet-texte"><b>Quiz éclair</b><small>Choisis la bonne traduction parmi quatre portes.</small><i>8 questions</i></span>
+        </button>
+        <button class="billet-jeu" data-jeu="paires">
+          <span class="talon" style="--c: #2a9d8f">
+            <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="8" height="10" rx="2" fill="#fff"></rect><rect x="13" y="10" width="8" height="10" rx="2" fill="none" stroke="#fff" stroke-width="2.4"></rect></svg>
+          </span>
+          <span class="billet-texte"><b>Paires</b><small>Relie chaque mot à sa traduction.</small><i>6 paires</i></span>
+        </button>
+        <button class="billet-jeu" data-jeu="lettres">
+          <span class="talon" style="--c: #f4a261">
+            <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="17" text-anchor="middle" font-family="Bricolage Grotesque, sans-serif" font-weight="800" font-size="14" fill="#fff">Ab</text></svg>
+          </span>
+          <span class="billet-texte"><b>Lettres mélangées</b><small>Remets les lettres dans le bon ordre.</small><i>6 mots</i></span>
+        </button>
+        <button class="billet-jeu" data-jeu="ecoute">
+          <span class="talon" style="--c: #1d3557">
+            <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z" fill="#fff"></path><path d="M16 9a4 4 0 0 1 0 6" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"></path></svg>
+          </span>
+          <span class="billet-texte"><b>Écoute</b><small>Entends le mot et retrouve-le.</small><i>8 sons</i></span>
+        </button>
       </div>
-
-      <p class="vide" id="revision-vide" hidden></p>
     </section>
 
   </main>
 
-  <button class="plus" id="plus" title="Ajouter un mot" aria-label="Ajouter un mot">+</button>
+  <button class="plus" id="plus" title="Ajouter un mot" aria-label="Ajouter un mot">
+    <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 5.5v15M5.5 13h15" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"></path></svg>
+  </button>
 
-  <!-- ========== Panneau réglages ========== -->
+  <!-- ================= Navigation ================= -->
+  <nav class="nav">
+    <button class="nav-btn active" data-page="mots">
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="4" rx="2" fill="none" stroke="currentColor" stroke-width="2"></rect><rect x="4" y="11" width="16" height="4" rx="2" fill="none" stroke="currentColor" stroke-width="2"></rect><rect x="4" y="17" width="10" height="3" rx="1.5" fill="currentColor"></rect></svg>
+      Mots
+    </button>
+    <button class="nav-btn" data-page="voyage">
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="2"></path><circle cx="12" cy="9.5" r="2.5" fill="currentColor"></circle></svg>
+      Voyage
+    </button>
+    <button class="nav-btn" data-page="jouer">
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8a2 2 0 0 0 0 4v5h18v-5a2 2 0 0 1 0-4V5H3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path><path d="M15 5v12" stroke="currentColor" stroke-width="2" stroke-dasharray="2 2"></path></svg>
+      Jouer
+    </button>
+  </nav>
+
+  <!-- ================= Partie en cours ================= -->
+  <div class="partie" id="partie" hidden>
+    <div class="partie-tete">
+      <button class="fermer" id="quitter-partie" aria-label="Quitter la partie">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path></svg>
+      </button>
+      <div class="etapes" id="etapes"></div>
+    </div>
+    <div class="partie-corps" id="partie-corps"></div>
+  </div>
+
+  <!-- ================= Réglages ================= -->
   <div class="voile" id="voile" hidden>
     <div class="panneau" role="dialog" aria-label="Réglages">
       <h2>Réglages</h2>
@@ -149,21 +212,18 @@
           (<a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=Mes%20Mots" target="_blank" rel="noopener">le créer</a>)
           enregistre tes mots en ligne après chaque ajout. Le même jeton les récupère sur un autre téléphone.
         </p>
-        <div class="duo">
-          <input type="password" id="jeton" placeholder="ghp_..." autocomplete="off" />
-        </div>
+        <div class="duo"><input type="password" id="jeton" placeholder="ghp_..." autocomplete="off" /></div>
         <div class="rangee">
           <button class="pilule" id="activer-sync">Activer</button>
           <button class="discret" id="oublier-sync" hidden>Oublier</button>
         </div>
       </details>
 
-      <div class="rangee">
-        <button class="valider" id="fermer-panneau">Fermer</button>
-      </div>
+      <div class="rangee"><button class="bouton" id="fermer-panneau">Fermer</button></div>
     </div>
   </div>
 
   <script src="data-en.js"></script>
   <script src="data-es.js"></script>
+  <script src="data-themes.js"></script>
   <script src="app.js"></script>
