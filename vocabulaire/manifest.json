@@ -1,16 +1,36 @@
 {
   "name": "Mes Mots",
   "short_name": "Mes Mots",
-  "description": "Vocabulaire anglais et espagnol, avec la leçon et la phrase du jour",
+  "description": "Vocabulaire anglais et espagnol en voyage : escales, jeux et leçon du jour",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#faf7f2",
-  "theme_color": "#e85d3a",
+  "background_color": "#eef5f9",
+  "theme_color": "#dcebf5",
   "orientation": "portrait",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
-    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
   ]
 }

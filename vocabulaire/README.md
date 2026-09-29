@@ -1,64 +1,55 @@
-# 📖 Mes Mots
+# ✈️ Mes Mots — le voyage
 
-Application de vocabulaire anglais 🇬🇧 et espagnol 🇪🇸, en trois pages.
+Application de vocabulaire anglais 🇬🇧 et espagnol 🇪🇸, pensée comme un voyage : chaque thème de
+vocabulaire est une escale sur une carte, chaque escale réussie reçoit un tampon, et chaque bonne
+réponse fait avancer de 10 km.
 
 ## Les trois pages
 
-1. **Mes mots** — la liste arrive tout de suite : une carte arrondie par mot, la langue étrangère
-   à gauche et le français à droite, au même format (même taille, même graisse) de part et d'autre
-   d'un filet ; seule la couleur les distingue. Le gros bouton **+** en bas ouvre les deux champs d'ajout. Toucher
-   une carte la prononce et déplie ses deux actions (écouter, supprimer). *Cacher les traductions*
-   masque toute la colonne française pour se tester, et chaque pastille se révèle d'un clic.
-   La recherche n'apparaît qu'au-delà de douze mots, et un contour vert marque les mots sus.
-2. **Du jour** — trois petits onglets, un seul contenu visible à la fois, sans cartes ni ombres :
-   - *Phrase* : la phrase du jour, sa traduction cachée jusqu'au toucher, et l'ajout à « Mes mots » ;
-   - *Leçon* : la leçon du jour réduite à l'essentiel (titre, résumé, tableau), les exemples, l'astuce
-     et le détail repliés derrière « Voir les exemples ». L'étoile enregistre la leçon ;
-   - *Enregistrées* : les leçons gardées, les plus récentes en haut. Un toucher rouvre la leçon, un
-     lien ramène à celle du jour.
-   Les leçons enregistrées ont leur propre rangement (`voc_lecons_<langue>`), séparé des mots, et
-   voyagent avec la sauvegarde. Retirer une leçon la marque « retirée » au lieu de l'effacer, pour que
-   le retrait l'emporte aussi sur les autres appareils.
-   34 leçons et 50 phrases par langue, une nouvelle chaque jour.
-3. **Révision** — cartes mémo tirées en priorité parmi les mots les moins sûrs. Un mot réussi monte
-   d'un niveau, un mot raté repart à zéro. Le sens de la question se change d'un clic ; au clavier :
-   espace révèle, 1 = à revoir, 2 = je savais.
+1. **Mots** — ta liste, la langue étrangère à gauche et le français à droite, au même format.
+   Le **+** ouvre l'ajout ; *cacher les traductions* masque la colonne française pour se tester, et
+   chaque traduction se révèle d'un toucher. Toucher une ligne prononce le mot et déplie
+   *écouter* / *supprimer*. La recherche apparaît au-delà de douze mots ; une pastille verte marque
+   les mots sus.
+2. **Voyage** — quatre sous-onglets :
+   - *Carte* : les douze escales de vocabulaire (Au café, La maison, Voyager, En ville…) reliées par
+     un chemin. Une escale ouverte s'affiche en **carte postale** : ses dix mots, son timbre, le jeu
+     pour la tamponner (75 % de bonnes réponses), et un lien pour ajouter ses mots à ta liste ;
+   - *Phrase* : la phrase du jour, traduction cachée jusqu'au toucher ;
+   - *Leçon* : la leçon de grammaire du jour, l'essentiel visible, le détail replié ; l'étoile
+     l'enregistre ;
+   - *Enregistrées* : les leçons gardées, rangées à part de tes mots.
+3. **Jouer** — quatre jeux présentés en billets :
+   - *Quiz éclair* : choisir la traduction parmi quatre « portes » ;
+   - *Paires* : relier chaque mot à sa traduction ;
+   - *Lettres mélangées* : remettre les lettres dans l'ordre (l'article est retiré) ;
+   - *Écoute* : entendre le mot et le retrouver.
+   Les jeux utilisent tes mots, les moins sûrs d'abord ; avec moins de quatre mots, ils piochent
+   dans les escales. Une bonne réponse fait monter le mot d'un niveau, une erreur le fait
+   redescendre.
+
+La langue choisie, les kilomètres et les jours d'affilée sont retenus d'une ouverture à l'autre.
 
 ## Parti pris visuel
 
-La mise en forme des applis de langue ludiques — fond uni, grosses cartes très arrondies,
-traductions en pastilles, bouton d'ajout rond et lumineux, typographie ronde (Baloo 2) — mais dans
-le code couleur de Mes Recettes : crème `#faf7f2`, cartes blanches, orange `#e85d3a`.
-La page en cours fait le titre de l'écran (24px, souligné orange) et la bascule de langue reste
-discrète au-dessus (12px), séparée par une vraie barre.
-Les réglages (sauvegarde, export, import) vivent derrière le `⋯` et n'encombrent plus les pages.
-
-La langue choisie est retenue : à la réouverture, on retrouve celle de la dernière fois.
-
-## Où tourne l'app
-
-- **Artifact Claude** (`artifact.html`) : hébergée sur claude.ai, rien à installer, sauvegarde
-  automatique sur le compte — les mots suivent d'un appareil à l'autre.
-- **Site statique** (`index.html`, par exemple GitHub Pages) : installable sur l'écran d'accueil et
-  utilisable hors ligne.
-
-`artifact.html` est le corps de `index.html` sans l'enveloppe `<html>/<head>/<body>`, fournie par la
-plateforme. Après modification de `index.html`, le régénérer :
-
-```bash
-python3 -c "src=open('index.html').read(); corps=src[src.index('>',src.index('<body'))+1:src.index('</body>')]; open('artifact.html','w').write('<title>Mes Mots</title>\n<link rel=\"stylesheet\" href=\"styles.css\" />\n'+corps.strip()+'\n')"
-```
+Un ciel clair en dégradé, du papier de carte postale, une encre marine `#1d3557` et des tampons
+terre cuite `#e76f51`, avec le soleil `#f4a261` et la menthe `#2a9d8f` pour les réussites. Une
+seule police, Bricolage Grotesque. Les jeux reprennent les objets du voyage : billet d'embarquement
+perforé, portes, cachet de fin de partie.
 
 ## Sauvegarde
 
-Les mots vivent dans le navigateur (`localStorage`). Pour qu'ils survivent à un changement de
-téléphone, l'app choisit toute seule le coffre disponible :
+Tout est d'abord enregistré dans le navigateur (`localStorage`). Pour changer de téléphone :
 
-- **Sur Claude** : stockage de l'artifact, aucune configuration.
-- **Ailleurs** : un jeton GitHub coché sur la seule case `gist`, à coller dans le pied de page. Les
-  mots partent dans un gist privé après chaque ajout ; le même jeton les récupère sur un autre
-  appareil. Rien n'est écrasé : à la fusion, chaque mot garde son meilleur niveau.
-- **Dans tous les cas** : export et import d'un fichier JSON depuis le pied de page.
+- **Sur Claude** (`artifact.html`) : stockage de l'artifact, sans rien configurer
+  (documents `mots/<langue>`, `lecons/<langue>`, `voyage/progres`).
+- **Ailleurs** (`index.html`, GitHub Pages) : un jeton GitHub coché sur la seule case `gist`, dans
+  les réglages (`⋯`). Le même jeton récupère tout sur un autre appareil.
+- **Partout** : export et import d'un fichier JSON depuis les réglages.
+
+À la fusion rien n'est écrasé : chaque mot garde son meilleur niveau, les tampons s'additionnent,
+les kilomètres gardent le plus grand total, et le retrait d'une leçon enregistrée l'emporte s'il
+est plus récent.
 
 ## Lancer en local
 
@@ -68,17 +59,26 @@ npx http-server -p 8080     # puis http://localhost:8080/vocabulaire/
 
 Ni dépendance ni build : HTML, CSS et JavaScript natifs.
 
+`artifact.html` est le corps de `index.html` sans l'enveloppe `<html>/<head>/<body>`, fournie par la
+plateforme Artifact. Après une modification de `index.html`, le régénérer :
+
+```bash
+python3 -c "src=open('index.html').read(); corps=src[src.index('>',src.index('<body'))+1:src.index('</body>')]; open('artifact.html','w').write('<title>Mes Mots</title>\n<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&display=swap\" />\n<link rel=\"stylesheet\" href=\"styles.css\" />\n'+corps.strip()+'\n')"
+```
+
 ## Fichiers
 
 | Fichier | Rôle |
 | --- | --- |
 | `index.html` / `artifact.html` | les trois pages, pour chacun des deux hébergements |
-| `styles.css` | mise en forme : papier chaud, un seul accent, aucune boîte |
-| `app.js` | mots, contenu du jour, révision, sauvegarde |
-| `data-en.js` / `data-es.js` | leçons et phrases |
-| `sw.js`, `manifest.json`, `icon.svg` | installation et mode hors ligne |
+| `styles.css` | l'habillage « voyage » |
+| `app.js` | mots, voyage, jeux, sauvegarde |
+| `data-themes.js` | les douze escales de vocabulaire par langue (dix mots chacune) |
+| `data-en.js` / `data-es.js` | leçons de grammaire et phrases du jour |
+| `sw.js`, `manifest.json`, `icon*` | installation et mode hors ligne |
+| `maquettes*.html`, `neon.html`, `design/` | maquettes des pistes explorées, hors application |
 
 ## Ajouter du contenu
 
-Les leçons et les phrases sont de simples tableaux dans `data-en.js` et `data-es.js` : ajouter une
-entrée suffit, la rotation quotidienne s'adapte à la longueur du tableau.
+Une escale de plus : un objet `{ id, titre, accroche, mots: [[étranger, français], …] }` dans
+`THEMES_ES` et `THEMES_EN`, avec le même `id` dans les deux langues. La carte s'allonge toute seule.

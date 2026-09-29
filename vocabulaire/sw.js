@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mes-mots-v2';
+const CACHE_NAME = 'mes-mots-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -6,6 +6,7 @@ const ASSETS = [
   './app.js',
   './data-en.js',
   './data-es.js',
+  './data-themes.js',
   './manifest.json',
   './icon.svg',
   './icon-180.png',
