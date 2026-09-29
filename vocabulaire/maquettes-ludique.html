@@ -1,0 +1,380 @@
+<title>Mes Mots, version ludique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;700;800;900&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Grandstander:wght@500;700;800&display=swap" />
+
+<style>
+/* ================= Page de présentation ================= */
+:root { --page: #f3f3f1; --sur: #22201d; --gris: #75706a; --trait: #e0ddd7; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --page: #17171a; --sur: #eceae6; --gris: #98938c; --trait: #2e2e33; }
+}
+:root[data-theme="dark"] { --page: #17171a; --sur: #eceae6; --gris: #98938c; --trait: #2e2e33; }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--sur); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.55; }
+.env { max-width: 1060px; margin: 0 auto; padding: 40px 20px 80px; }
+.intro { max-width: 64ch; margin-bottom: 44px; }
+.intro h1 { font-size: 28px; margin: 0 0 12px; letter-spacing: -.02em; text-wrap: balance; }
+.intro p { margin: 0 0 10px; color: var(--gris); font-size: 15px; }
+.intro strong { color: var(--sur); font-weight: 600; }
+.plan { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin: 18px 0 8px; }
+.plan div { border: 1px solid var(--trait); border-radius: 10px; padding: 12px 14px; font-size: 14px; color: var(--gris); }
+.plan b { display: block; color: var(--sur); font-size: 15px; margin-bottom: 2px; }
+
+.piste { margin-top: 64px; }
+.piste-tete { display: flex; align-items: baseline; gap: 10px; }
+.lettre { font-size: 12px; font-weight: 700; letter-spacing: .1em; color: var(--gris); border: 1px solid var(--trait); border-radius: 4px; padding: 1px 7px; }
+.piste h2 { font-size: 21px; margin: 0; letter-spacing: -.01em; }
+.pitch { color: var(--gris); font-size: 15px; margin: 6px 0 22px; max-width: 72ch; }
+.pitch b { color: var(--sur); font-weight: 600; }
+.ecrans { display: flex; gap: 24px; flex-wrap: wrap; }
+.ecran { display: flex; flex-direction: column; gap: 10px; width: 300px; max-width: 100%; }
+.legende { font-size: 13px; color: var(--gris); }
+
+.tel { width: 300px; max-width: 100%; height: 600px; border-radius: 28px; overflow: hidden; position: relative; display: flex; flex-direction: column; box-shadow: 0 18px 40px rgba(20,15,10,.14); }
+
+/* ================= A — ARCADE ================= */
+.a { background: #fff8e7; color: #1b1b2f; font-family: "Nunito", system-ui, sans-serif;
+     background-image: radial-gradient(#1b1b2f14 1.2px, transparent 1.2px); background-size: 16px 16px; }
+.a .haut { display: flex; justify-content: space-between; align-items: center; padding: 16px 16px 0; }
+.a .langues { display: flex; align-items: center; border: 2px solid #1b1b2f; border-radius: 999px; background: #fff; font-weight: 900; font-size: 11px; overflow: hidden; }
+.a .langues span { padding: 3px 10px; }
+.a .langues .on { background: #1b1b2f; color: #ffd23f; }
+.a .langues .sep { width: 2px; align-self: stretch; padding: 0; background: #1b1b2f; }
+.a .compteurs { display: flex; gap: 8px; }
+.a .compteur { display: flex; align-items: center; gap: 3px; border: 2px solid #1b1b2f; background: #fff; border-radius: 999px; padding: 1px 9px 1px 5px; font-weight: 900; font-size: 13px; }
+.a .titre { font-family: "Lilita One", "Nunito", sans-serif; font-size: 34px; line-height: 1; margin: 14px 16px 12px; }
+.a .bloc { border: 2.5px solid #1b1b2f; border-radius: 18px; box-shadow: 4px 4px 0 #1b1b2f; background: #fff; }
+.a .niveau { margin: 0 16px 16px; padding: 10px 12px; }
+.a .niveau-ligne { display: flex; justify-content: space-between; font-weight: 900; font-size: 13px; }
+.a .barre { height: 14px; border: 2px solid #1b1b2f; border-radius: 999px; margin-top: 6px; background: #fff; overflow: hidden; }
+.a .barre i { display: block; height: 100%; width: 64%; background: #ffd23f; border-right: 2px solid #1b1b2f; }
+.a .jeux { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0 16px; }
+.a .jeu { padding: 12px; display: flex; flex-direction: column; gap: 6px; min-height: 118px; }
+.a .jeu b { font-family: "Lilita One", sans-serif; font-weight: 400; font-size: 19px; line-height: 1.05; }
+.a .jeu small { font-size: 11px; font-weight: 800; opacity: .75; margin-top: auto; }
+.a .ico { width: 34px; height: 34px; border: 2.5px solid #1b1b2f; border-radius: 10px; background: #fff; display: grid; place-items: center; }
+.a .nav { margin-top: auto; display: flex; justify-content: space-around; border-top: 2.5px solid #1b1b2f; background: #fff; padding: 9px 0 14px; font-weight: 900; font-size: 12px; }
+.a .nav span { display: flex; flex-direction: column; align-items: center; gap: 3px; color: #1b1b2f99; }
+.a .nav .on { color: #1b1b2f; }
+.a .nav i { width: 26px; height: 6px; border-radius: 3px; }
+.a .nav .on i { background: #ff6b6b; border: 2px solid #1b1b2f; height: 8px; }
+
+.a .jeu-tete { display: flex; align-items: center; gap: 10px; padding: 16px 16px 0; }
+.a .fermer { width: 30px; height: 30px; border: 2.5px solid #1b1b2f; border-radius: 10px; background: #fff; display: grid; place-items: center; font-weight: 900; }
+.a .temps { flex: 1; height: 12px; border: 2px solid #1b1b2f; border-radius: 999px; background: #fff; overflow: hidden; }
+.a .temps i { display: block; height: 100%; width: 58%; background: #2ec4b6; }
+.a .combo { font-family: "Lilita One", sans-serif; background: #ff6b6b; color: #fff; border: 2.5px solid #1b1b2f; border-radius: 10px; padding: 0 8px; font-size: 16px; transform: rotate(-4deg); box-shadow: 2px 2px 0 #1b1b2f; }
+.a .consigne { font-weight: 800; font-size: 14px; margin: 16px 16px 12px; opacity: .8; }
+.a .tuiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; margin: 0 16px; }
+.a .tuile { border: 2.5px solid #1b1b2f; border-radius: 14px; background: #fff; box-shadow: 3px 3px 0 #1b1b2f; height: 62px; display: grid; place-items: center; text-align: center; font-weight: 900; font-size: 13px; padding: 4px; line-height: 1.15; }
+.a .tuile.choisie { background: #ffd23f; transform: translate(-2px, -2px); box-shadow: 5px 5px 0 #1b1b2f; }
+.a .tuile.trouvee { background: #2ec4b6; opacity: .35; box-shadow: none; transform: none; }
+.a .gain { position: absolute; right: 22px; bottom: 96px; font-family: "Lilita One", sans-serif; font-size: 22px; background: #ffd23f; border: 2.5px solid #1b1b2f; border-radius: 12px; padding: 2px 10px; transform: rotate(5deg); box-shadow: 3px 3px 0 #1b1b2f; }
+
+.a .banniere { margin: 14px 16px 14px; background: #ff6b6b; color: #fff; padding: 14px; display: flex; gap: 12px; align-items: center; }
+.a .banniere b { font-family: "Lilita One", sans-serif; font-weight: 400; font-size: 26px; line-height: 1; display: block; }
+.a .banniere small { font-weight: 800; font-size: 12px; }
+.a .motsl { margin: 0 16px; display: flex; flex-direction: column; gap: 7px; }
+.a .motl { display: flex; align-items: center; justify-content: space-between; border: 2px solid #1b1b2f; border-radius: 12px; background: #fff; padding: 7px 10px; font-size: 13px; font-weight: 800; }
+.a .motl span:last-child { font-weight: 700; opacity: .65; }
+.a .genre { display: inline-block; width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid #1b1b2f; margin-right: 6px; }
+.a .cta { margin: auto 16px 20px; background: #ffd23f; text-align: center; font-family: "Lilita One", sans-serif; font-size: 20px; padding: 11px; }
+
+/* ================= B — VOYAGE ================= */
+.b { background: linear-gradient(#dcebf5, #eef5f9 45%); color: #1d3557; font-family: "Bricolage Grotesque", system-ui, sans-serif; }
+.b .haut { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px 0; }
+.b .langues { display: flex; align-items: center; background: #ffffffb3; border-radius: 999px; padding: 2px; font-size: 11px; font-weight: 700; }
+.b .langues span { padding: 3px 10px; border-radius: 999px; color: #1d355799; }
+.b .langues .on { background: #1d3557; color: #fff; }
+.b .langues .sep { width: 1.5px; height: 11px; background: #1d355755; padding: 0; margin: 0 3px; }
+.b .tampons { font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+.b .titre { font-weight: 800; font-size: 28px; line-height: 1.05; margin: 14px 18px 2px; letter-spacing: -.02em; }
+.b .sous { font-size: 13px; opacity: .7; margin: 0 18px; font-weight: 500; }
+.b .carte { position: relative; flex: 1; }
+.b .escale { position: absolute; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
+.b .rond { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; }
+.b .fait .rond { background: #e76f51; color: #fff; box-shadow: 0 0 0 4px #e76f5133; }
+.b .ici .rond { background: #fff; border: 3px solid #1d3557; box-shadow: 0 0 0 6px #1d355722; }
+.b .loin .rond { background: #ffffff99; border: 2px dashed #1d355766; }
+.b .loin { opacity: .6; }
+.b .prochaine { margin: 0 14px 14px; background: #fffdf8; border-radius: 20px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 22px #1d355718; }
+.b .prochaine small { display: block; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #e76f51; }
+.b .prochaine b { font-size: 18px; }
+.b .partir { background: #e76f51; color: #fff; border-radius: 999px; padding: 8px 16px; font-weight: 700; font-size: 14px; }
+.b .nav { display: flex; justify-content: space-around; background: #fffdf8; padding: 10px 0 14px; font-size: 11px; font-weight: 700; color: #1d355788; }
+.b .nav .on { color: #e76f51; }
+
+.b .billet { margin: 18px 16px 0; background: #fffdf8; border-radius: 18px; box-shadow: 0 10px 26px #1d35571c; overflow: hidden; }
+.b .billet-haut { background: #1d3557; color: #fff; padding: 10px 16px; display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.b .billet-mot { text-align: center; padding: 20px 16px 16px; }
+.b .billet-mot small { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .55; }
+.b .billet-mot b { display: block; font-size: 34px; font-weight: 800; letter-spacing: -.02em; margin-top: 2px; }
+.b .perfo { border-top: 2px dashed #1d355733; margin: 0 14px; position: relative; }
+.b .perfo::before, .b .perfo::after { content: ""; position: absolute; top: -10px; width: 18px; height: 18px; border-radius: 50%; background: #e4eff6; }
+.b .perfo::before { left: -24px; } .b .perfo::after { right: -24px; }
+.b .portes { padding: 14px 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.b .porte { display: flex; align-items: center; gap: 10px; border: 1.5px solid #1d355722; border-radius: 12px; padding: 9px 12px; font-size: 15px; font-weight: 600; }
+.b .porte i { font-style: normal; font-size: 10px; font-weight: 800; background: #1d35570f; border-radius: 6px; padding: 2px 6px; letter-spacing: .05em; }
+.b .porte.bonne { border-color: #2a9d8f; background: #2a9d8f14; color: #1f7a6f; }
+.b .etapes { display: flex; gap: 4px; margin: 16px 18px 0; }
+.b .etapes i { flex: 1; height: 5px; border-radius: 3px; background: #1d355722; }
+.b .etapes .ok { background: #e76f51; }
+
+.b .postale { margin: 16px 14px 0; background: #fffdf8; border-radius: 6px; padding: 16px; box-shadow: 0 10px 26px #1d35571c; position: relative; }
+.b .timbre { position: absolute; top: 12px; right: 12px; width: 58px; height: 68px; background: #f4a261; border: 3px dotted #fffdf8; outline: 2px solid #f4a261; display: grid; place-items: center; transform: rotate(4deg); }
+.b .postale h3 { font-size: 26px; font-weight: 800; margin: 2px 0 0; letter-spacing: -.02em; }
+.b .postale .de { font-size: 12px; opacity: .6; font-weight: 600; margin-bottom: 14px; }
+.b .grille-mots { display: grid; grid-template-columns: 1fr 1fr; font-size: 14px; }
+.b .grille-mots span { padding: 6px 0; border-top: 1px solid #1d35571a; }
+.b .grille-mots span:nth-child(odd) { font-weight: 700; }
+.b .grille-mots span:nth-child(even) { opacity: .65; text-align: right; }
+.b .tamponner { margin: auto 14px 16px; background: #1d3557; color: #fff; text-align: center; border-radius: 999px; padding: 12px; font-weight: 700; font-size: 15px; }
+
+/* ================= C — JARDIN ================= */
+.c { background: #f1f6ea; color: #26402b; font-family: "Nunito", system-ui, sans-serif; }
+.c .haut { display: flex; justify-content: space-between; align-items: center; padding: 16px 16px 0; }
+.c .langues { display: flex; align-items: center; background: #fff; border-radius: 999px; padding: 2px; font-size: 11px; font-weight: 800; box-shadow: 0 1px 3px #26402b1a; }
+.c .langues span { padding: 3px 10px; border-radius: 999px; color: #26402b88; }
+.c .langues .on { background: #3a7d44; color: #fff; }
+.c .langues .sep { width: 2px; height: 11px; background: #26402b33; padding: 0; margin: 0 3px; border-radius: 2px; }
+.c .arrosoir { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; }
+.c .gouttes { display: flex; gap: 2px; }
+.c .gouttes i { width: 8px; height: 11px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; background: #7cc6e8; }
+.c .gouttes i.vide { background: #26402b1f; }
+.c .titre { font-family: "Grandstander", "Nunito", sans-serif; font-weight: 800; font-size: 30px; margin: 12px 16px 2px; line-height: 1; }
+.c .sous { font-size: 13px; font-weight: 700; opacity: .65; margin: 0 16px 14px; }
+.c .pots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 8px; margin: 0 14px; }
+.c .pot { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.c .pot svg { width: 70px; height: 74px; }
+.c .pot b { font-size: 12px; font-weight: 800; }
+.c .pot small { font-size: 10px; font-weight: 700; opacity: .55; margin-top: -3px; }
+.c .nav { margin-top: auto; display: flex; justify-content: space-around; background: #fff; border-radius: 22px 22px 0 0; padding: 12px 0 16px; font-size: 11px; font-weight: 800; color: #26402b77; box-shadow: 0 -2px 12px #26402b0f; }
+.c .nav .on { color: #3a7d44; }
+
+.c .jeu-tete { display: flex; justify-content: space-between; align-items: center; padding: 16px 16px 0; font-weight: 800; font-size: 13px; }
+.c .consigne { text-align: center; margin: 22px 16px 4px; font-family: "Grandstander", sans-serif; font-weight: 700; font-size: 22px; }
+.c .indice { text-align: center; font-size: 14px; font-weight: 700; opacity: .65; }
+.c .cases { display: flex; justify-content: center; gap: 5px; margin: 22px 10px 0; }
+.c .case { width: 28px; height: 36px; border-bottom: 3px solid #3a7d44; display: grid; place-items: center; font-family: "Grandstander", sans-serif; font-weight: 800; font-size: 20px; }
+.c .case.vide { border-bottom-color: #26402b33; }
+.c .graines { display: flex; flex-wrap: wrap; justify-content: center; gap: 9px; margin: 28px 20px 0; }
+.c .graine { width: 44px; height: 44px; border-radius: 48% 52% 46% 54% / 55% 50% 50% 45%; background: #d9a878; color: #3b2a1a; display: grid; place-items: center; font-family: "Grandstander", sans-serif; font-weight: 800; font-size: 19px; box-shadow: inset 0 -4px 0 #0000001a; }
+.c .graine.utilisee { opacity: .25; }
+.c .pousse { margin: auto 16px 20px; background: #fff; border-radius: 18px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 800; box-shadow: 0 2px 10px #26402b14; }
+
+.c .sachet { margin: 16px 18px 0; background: #ffb38a; border-radius: 4px 4px 14px 14px; position: relative; padding: 18px 16px 16px; color: #4a2e1c; }
+.c .sachet::before { content: ""; position: absolute; top: -8px; left: 0; right: 0; height: 9px; background: linear-gradient(135deg, transparent 50%, #ffb38a 50%) 0 0/12px 9px repeat-x, linear-gradient(225deg, transparent 50%, #ffb38a 50%) 0 0/12px 9px repeat-x; }
+.c .sachet small { font-size: 10px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+.c .sachet h3 { font-family: "Grandstander", sans-serif; font-weight: 800; font-size: 28px; margin: 2px 0 0; line-height: 1; }
+.c .sachet .fenetre { background: #fff8f1; border-radius: 12px; margin-top: 12px; padding: 4px 12px; }
+.c .sachet .fenetre div { display: flex; justify-content: space-between; font-size: 13px; padding: 5px 0; border-bottom: 1px dashed #4a2e1c33; font-weight: 800; }
+.c .sachet .fenetre div:last-child { border-bottom: none; }
+.c .sachet .fenetre span:last-child { font-weight: 700; opacity: .65; }
+.c .planter { margin: auto 18px 20px; background: #3a7d44; color: #fff; text-align: center; border-radius: 999px; padding: 12px; font-weight: 900; font-size: 15px; box-shadow: 0 4px 0 #26562e; }
+</style>
+
+<div class="env">
+  <div class="intro">
+    <h1>Trois univers pour rendre Mes Mots ludique</h1>
+    <p>Trois styles complets, très différents. Chacun montre les trois nouveautés : <strong>une page de jeux</strong>, <strong>des leçons de vocabulaire par thème</strong>, et une récompense qui donne envie de revenir chaque jour.</p>
+    <p>Ce sont des images fixes. <strong>Dis-moi A, B ou C</strong> et je refais toute l'app dans ce style.</p>
+    <div class="plan">
+      <div><b>Mots</b>Ta liste, comme aujourd'hui, avec la traduction à cacher.</div>
+      <div><b>Leçons</b>Des thèmes de vocabulaire (Au café, La maison, Voyager…), plus la phrase et la leçon du jour, et tes leçons enregistrées.</div>
+      <div><b>Jouer</b>Quatre jeux sur tes mots : Quiz éclair, Paires, Lettres mélangées, Écoute. La révision devient l'un d'eux.</div>
+    </div>
+  </div>
+
+  <!-- ===================================================== A -->
+  <section class="piste">
+    <div class="piste-tete"><span class="lettre">A</span><h2>Arcade</h2></div>
+    <p class="pitch">Un jeu vidéo en papier : gros traits noirs, ombres franches, couleurs vives. Des points d'expérience, un niveau, une série de jours et des combos quand tu enchaînes les bonnes réponses. <b>Le plus énergique, celui qui ressemble le plus à un jeu.</b> Il peut sembler chargé si tu restes sur l'envie de légèreté.</p>
+    <div class="ecrans">
+      <div class="ecran">
+        <div class="tel a">
+          <div class="haut">
+            <div class="langues"><span class="on">Espagnol</span><span class="sep"></span><span>Anglais</span></div>
+            <div class="compteurs">
+              <div class="compteur"><svg width="15" height="15" viewBox="0 0 24 24"><path d="M12 2c1 4 5 5.5 5 11a5 5 0 0 1-10 0c0-3 2-4 2-7 2 1 3 3 3 3s1-3 0-7z" fill="#ff6b6b" stroke="#1b1b2f" stroke-width="2" stroke-linejoin="round"/></svg>6</div>
+              <div class="compteur"><svg width="15" height="15" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z" fill="#ffd23f" stroke="#1b1b2f" stroke-width="2" stroke-linejoin="round"/></svg>320</div>
+            </div>
+          </div>
+          <div class="titre">Jouer</div>
+          <div class="bloc niveau"><div class="niveau-ligne"><span>Niveau 4</span><span>320 / 500 XP</span></div><div class="barre"><i></i></div></div>
+          <div class="jeux">
+            <div class="bloc jeu" style="background:#ffd23f"><div class="ico"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z" fill="#1b1b2f"/></svg></div><b>Quiz éclair</b><small>10 questions · 1 min</small></div>
+            <div class="bloc jeu" style="background:#2ec4b6"><div class="ico"><svg width="18" height="18" viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="10" rx="2" fill="#1b1b2f"/><rect x="13" y="10" width="8" height="10" rx="2" fill="none" stroke="#1b1b2f" stroke-width="2.5"/></svg></div><b>Paires</b><small>12 cartes · 2 min</small></div>
+            <div class="bloc jeu" style="background:#ff6b6b"><div class="ico"><svg width="18" height="18" viewBox="0 0 24 24"><text x="12" y="17" text-anchor="middle" font-family="Lilita One, sans-serif" font-size="15" fill="#1b1b2f">Ab</text></svg></div><b>Lettres mélangées</b><small>8 mots</small></div>
+            <div class="bloc jeu" style="background:#b39dff"><div class="ico"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z" fill="#1b1b2f"/><path d="M16 9a4 4 0 0 1 0 6" fill="none" stroke="#1b1b2f" stroke-width="2.5" stroke-linecap="round"/></svg></div><b>Écoute</b><small>10 sons</small></div>
+          </div>
+          <div class="nav"><span><i></i>Mots</span><span><i></i>Leçons</span><span class="on"><i></i>Jouer</span></div>
+        </div>
+        <p class="legende">La page Jouer : ton niveau, tes jours d'affilée, quatre jeux.</p>
+      </div>
+
+      <div class="ecran">
+        <div class="tel a">
+          <div class="jeu-tete"><div class="fermer">×</div><div class="temps"><i></i></div><div class="combo">x3</div></div>
+          <div class="consigne">Relie chaque mot à sa traduction</div>
+          <div class="tuiles">
+            <div class="tuile trouvee">el café</div><div class="tuile">la cuenta</div><div class="tuile trouvee">le café</div>
+            <div class="tuile choisie">la taza</div><div class="tuile">le serveur</div><div class="tuile">l'addition</div>
+            <div class="tuile">el camarero</div><div class="tuile trouvee">le lait</div><div class="tuile">la tasse</div>
+            <div class="tuile">el azúcar</div><div class="tuile trouvee">la leche</div><div class="tuile">le sucre</div>
+          </div>
+          <div class="gain">+30 XP</div>
+        </div>
+        <p class="legende">Le jeu des Paires en cours : trois bonnes réponses d'affilée, combo x3.</p>
+      </div>
+
+      <div class="ecran">
+        <div class="tel a">
+          <div class="haut"><div class="fermer">‹</div><div class="compteur">10 mots</div></div>
+          <div class="bloc banniere">
+            <svg width="54" height="54" viewBox="0 0 54 54"><rect x="9" y="18" width="28" height="24" rx="6" fill="#fff" stroke="#1b1b2f" stroke-width="2.5"/><path d="M37 23h4a5 5 0 0 1 0 10h-4" fill="none" stroke="#1b1b2f" stroke-width="2.5"/><path d="M17 8c-2 3 2 4 0 7M25 8c-2 3 2 4 0 7" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><rect x="6" y="42" width="34" height="5" rx="2.5" fill="#1b1b2f"/></svg>
+            <div><b>Au café</b><small>Vocabulaire · niveau facile</small></div>
+          </div>
+          <div class="motsl">
+            <div class="motl"><span><span class="genre" style="background:#2ec4b6"></span>el café</span><span>le café</span></div>
+            <div class="motl"><span><span class="genre" style="background:#ff6b6b"></span>la taza</span><span>la tasse</span></div>
+            <div class="motl"><span><span class="genre" style="background:#ff6b6b"></span>la cuenta</span><span>l'addition</span></div>
+            <div class="motl"><span><span class="genre" style="background:#2ec4b6"></span>el camarero</span><span>le serveur</span></div>
+            <div class="motl"><span><span class="genre" style="background:#2ec4b6"></span>el azúcar</span><span>le sucre</span></div>
+            <div class="motl"><span><span class="genre" style="background:#ff6b6b"></span>la leche</span><span>le lait</span></div>
+          </div>
+          <div class="bloc cta">Jouer avec ces mots</div>
+        </div>
+        <p class="legende">Une leçon de vocabulaire. La pastille de couleur donne le genre (el / la).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== B -->
+  <section class="piste">
+    <div class="piste-tete"><span class="lettre">B</span><h2>Voyage</h2></div>
+    <p class="pitch">Apprendre, c'est voyager. Les thèmes sont des escales sur une carte, chaque leçon finie reçoit un tampon, les quiz se jouent sur des billets d'embarquement. <b>Le plus doux et le plus élégant des trois</b>, avec le fil d'une histoire. Plus calme qu'un vrai jeu.</p>
+    <div class="ecrans">
+      <div class="ecran">
+        <div class="tel b">
+          <div class="haut">
+            <div class="langues"><span class="on">Espagnol</span><span class="sep"></span><span>Anglais</span></div>
+            <div class="tampons"><svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="#e76f51" stroke-width="2.4" stroke-dasharray="3 2"/><circle cx="12" cy="12" r="4" fill="#e76f51"/></svg>7 tampons</div>
+          </div>
+          <div class="titre">Mon voyage</div>
+          <div class="sous">Espagnol · 6 jours d'affilée</div>
+          <div class="carte">
+            <svg width="300" height="330" viewBox="0 0 300 330" style="position:absolute; inset:0;"><path d="M60 300 C 210 290, 250 245, 180 210 S 40 160, 110 110 S 260 70, 200 22" fill="none" stroke="#1d3557" stroke-width="2.5" stroke-dasharray="2 9" stroke-linecap="round" opacity=".45"/></svg>
+            <div class="escale fait" style="left:40px; top:278px;"><div class="rond"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Au café</div>
+            <div class="escale fait" style="left:160px; top:190px;"><div class="rond"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>La maison</div>
+            <div class="escale ici" style="left:88px; top:90px;"><div class="rond"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5 2 7.5L12 16l-6.5 5 2-7.5L2 9h7z" fill="#1d3557"/></svg></div>Voyager</div>
+            <div class="escale loin" style="left:182px; top:4px;"><div class="rond"></div>Le corps</div>
+          </div>
+          <div class="prochaine"><div><small>Prochaine escale</small><b>Voyager · 12 mots</b></div><div class="partir">Partir</div></div>
+          <div class="nav"><span>Mots</span><span class="on">Voyage</span><span>Jouer</span></div>
+        </div>
+        <p class="legende">La carte : les thèmes finis sont tamponnés, l'escale en cours t'attend.</p>
+      </div>
+
+      <div class="ecran">
+        <div class="tel b">
+          <div class="etapes"><i class="ok"></i><i class="ok"></i><i class="ok"></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="billet">
+            <div class="billet-haut"><span>ES → FR</span><span>Question 4 / 8</span></div>
+            <div class="billet-mot"><small>Traduis</small><b>la cuenta</b></div>
+            <div class="perfo"></div>
+            <div class="portes">
+              <div class="porte"><i>PORTE A</i>la tasse</div>
+              <div class="porte bonne"><i>PORTE B</i>l'addition</div>
+              <div class="porte"><i>PORTE C</i>le compte-gouttes</div>
+              <div class="porte"><i>PORTE D</i>la cuillère</div>
+            </div>
+          </div>
+        </div>
+        <p class="legende">Le Quiz éclair sur un billet d'embarquement. Quatre portes, une seule bonne.</p>
+      </div>
+
+      <div class="ecran">
+        <div class="tel b">
+          <div class="postale">
+            <div class="timbre"><svg width="30" height="30" viewBox="0 0 30 30"><rect x="5" y="10" width="15" height="13" rx="3" fill="#fffdf8"/><path d="M20 13h2.5a3 3 0 0 1 0 6H20" fill="none" stroke="#fffdf8" stroke-width="2"/></svg></div>
+            <div class="de">Carte postale n° 1</div>
+            <h3>Au café</h3>
+            <div class="de" style="margin-top:2px;">10 mots pour commander</div>
+            <div class="grille-mots">
+              <span>el café</span><span>le café</span>
+              <span>la taza</span><span>la tasse</span>
+              <span>la cuenta</span><span>l'addition</span>
+              <span>el camarero</span><span>le serveur</span>
+              <span>el azúcar</span><span>le sucre</span>
+              <span>pedir</span><span>commander</span>
+            </div>
+          </div>
+          <div class="tamponner">Jouer et tamponner</div>
+        </div>
+        <p class="legende">Une leçon de vocabulaire en carte postale, avec son timbre.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== C -->
+  <section class="piste">
+    <div class="piste-tete"><span class="lettre">C</span><h2>Jardin</h2></div>
+    <p class="pitch">Chaque mot est une plante. Elle germe quand tu l'ajoutes et fleurit quand tu la connais par cœur. Chaque bonne réponse l'arrose. Les leçons de vocabulaire sont des sachets de graines. <b>Le plus tendre et le plus visuel</b> : tu vois ton jardin pousser au fil des jours. Moins de compétition, plus de satisfaction.</p>
+    <div class="ecrans">
+      <div class="ecran">
+        <div class="tel c">
+          <div class="haut">
+            <div class="langues"><span class="on">Espagnol</span><span class="sep"></span><span>Anglais</span></div>
+            <div class="arrosoir">Aujourd'hui<div class="gouttes"><i></i><i></i><i></i><i class="vide"></i><i class="vide"></i></div></div>
+          </div>
+          <div class="titre">Mon jardin</div>
+          <div class="sous">5 fleurs · 3 boutons · 4 pousses</div>
+          <div class="pots">
+            <div class="pot"><svg viewBox="0 0 70 74"><path d="M35 50V22" stroke="#3a7d44" stroke-width="3"/><path d="M35 34c-8-2-12-8-12-14 8 1 12 6 12 14zM35 30c7-2 11-7 11-12-7 1-11 5-11 12z" fill="#6aa84f"/><circle cx="35" cy="16" r="7" fill="#ff8fab"/><circle cx="35" cy="16" r="3" fill="#ffd166"/><path d="M20 50h30l-4 20H24z" fill="#c8794f"/><rect x="18" y="47" width="34" height="6" rx="2" fill="#a8603c"/></svg><b>el café</b><small>en fleur</small></div>
+            <div class="pot"><svg viewBox="0 0 70 74"><path d="M35 50V24" stroke="#3a7d44" stroke-width="3"/><path d="M35 36c-8-2-12-8-12-14 8 1 12 6 12 14z" fill="#6aa84f"/><circle cx="35" cy="20" r="6" fill="#ffc6d3"/><path d="M20 50h30l-4 20H24z" fill="#c8794f"/><rect x="18" y="47" width="34" height="6" rx="2" fill="#a8603c"/></svg><b>la taza</b><small>bouton</small></div>
+            <div class="pot"><svg viewBox="0 0 70 74"><path d="M35 50V36" stroke="#3a7d44" stroke-width="3"/><path d="M35 40c-6-1-9-5-9-10 6 1 9 4 9 10zM35 38c5-1 8-5 8-9-5 1-8 4-8 9z" fill="#8bc34a"/><path d="M20 50h30l-4 20H24z" fill="#c8794f"/><rect x="18" y="47" width="34" height="6" rx="2" fill="#a8603c"/></svg><b>la cuenta</b><small>pousse</small></div>
+            <div class="pot"><svg viewBox="0 0 70 74"><path d="M35 50V22" stroke="#3a7d44" stroke-width="3"/><path d="M35 34c-8-2-12-8-12-14 8 1 12 6 12 14zM35 30c7-2 11-7 11-12-7 1-11 5-11 12z" fill="#6aa84f"/><circle cx="35" cy="16" r="7" fill="#ffd166"/><circle cx="35" cy="16" r="3" fill="#f4a261"/><path d="M20 50h30l-4 20H24z" fill="#c8794f"/><rect x="18" y="47" width="34" height="6" rx="2" fill="#a8603c"/></svg><b>la leche</b><small>en fleur</small></div>
+            <div class="pot"><svg viewBox="0 0 70 74"><ellipse cx="35" cy="46" rx="4" ry="3" fill="#7a5c45"/><path d="M20 50h30l-4 20H24z" fill="#c8794f"/><rect x="18" y="47" width="34" height="6" rx="2" fill="#a8603c"/></svg><b>pedir</b><small>graine</small></div>
+            <div class="pot"><svg viewBox="0 0 70 74"><path d="M35 50V36" stroke="#3a7d44" stroke-width="3"/><path d="M35 40c-6-1-9-5-9-10 6 1 9 4 9 10zM35 38c5-1 8-5 8-9-5 1-8 4-8 9z" fill="#8bc34a"/><path d="M20 50h30l-4 20H24z" fill="#c8794f"/><rect x="18" y="47" width="34" height="6" rx="2" fill="#a8603c"/></svg><b>el vaso</b><small>pousse</small></div>
+          </div>
+          <div class="nav"><span class="on">Jardin</span><span>Graines</span><span>Jouer</span></div>
+        </div>
+        <p class="legende">Ton jardin : tes mots, de la graine à la fleur. Trois arrosages faits aujourd'hui sur cinq.</p>
+      </div>
+
+      <div class="ecran">
+        <div class="tel c">
+          <div class="jeu-tete"><span>× Quitter</span><span>Mot 3 / 8</span></div>
+          <div class="consigne">Reforme le mot</div>
+          <div class="indice">« le serveur »</div>
+          <div class="cases"><div class="case">C</div><div class="case">A</div><div class="case">M</div><div class="case">A</div><div class="case vide"></div><div class="case vide"></div><div class="case vide"></div><div class="case vide"></div></div>
+          <div class="graines"><div class="graine">R</div><div class="graine utilisee">A</div><div class="graine">E</div><div class="graine utilisee">M</div><div class="graine">R</div><div class="graine utilisee">C</div><div class="graine">O</div><div class="graine utilisee">A</div></div>
+          <div class="pousse"><svg width="34" height="34" viewBox="0 0 34 34"><path d="M17 30V16" stroke="#3a7d44" stroke-width="2.5"/><path d="M17 20c-6-1-9-5-9-10 6 1 9 4 9 10zM17 18c5-1 8-5 8-9-5 1-8 4-8 9z" fill="#8bc34a"/></svg><span>Chaque bonne réponse arrose ta plante « el camarero ».</span></div>
+        </div>
+        <p class="legende">Lettres mélangées : les lettres sont des graines à replacer dans l'ordre.</p>
+      </div>
+
+      <div class="ecran">
+        <div class="tel c">
+          <div class="haut"><span style="font-weight:800; font-size:13px;">‹ Graines</span><span style="font-weight:800; font-size:13px;">10 graines</span></div>
+          <div class="sachet">
+            <small>Sachet de graines</small>
+            <h3>Au café</h3>
+            <div class="fenetre">
+              <div><span>el café</span><span>le café</span></div>
+              <div><span>la taza</span><span>la tasse</span></div>
+              <div><span>la cuenta</span><span>l'addition</span></div>
+              <div><span>el camarero</span><span>le serveur</span></div>
+              <div><span>el azúcar</span><span>le sucre</span></div>
+              <div><span>pedir</span><span>commander</span></div>
+            </div>
+          </div>
+          <div class="planter">Planter ces 10 mots</div>
+        </div>
+        <p class="legende">Une leçon de vocabulaire, présentée en sachet de graines à planter dans ton jardin.</p>
+      </div>
+    </div>
+  </section>
+</div>
