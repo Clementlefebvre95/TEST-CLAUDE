@@ -35,9 +35,14 @@ func main() {
 	demo := flag.Bool("demo", false, "démarrer avec des données de démonstration")
 	port := flag.Int("port", defaultPort, "port local de l'interface")
 	noBrowser := flag.Bool("no-browser", false, "ne pas ouvrir le navigateur")
+	autostart := flag.Bool("autostart", false, "lancé par Windows à l'ouverture de session")
 	flag.Parse()
 
 	setupConsole()
+	if *autostart {
+		*noBrowser = true
+		minimizeConsole()
+	}
 	fmt.Println("==============================================")
 	fmt.Println("  Tableau Sage", version)
 	fmt.Println("==============================================")
@@ -47,6 +52,9 @@ func main() {
 	if err != nil {
 		// Déjà lancé ? On rouvre simplement la page de l'instance existante.
 		if alreadyRunning(addr) {
+			if *autostart {
+				return
+			}
 			fmt.Println("Le tableau de bord est déjà ouvert, j'affiche la page.")
 			openBrowser("http://" + addr + "/")
 			time.Sleep(2 * time.Second)
@@ -58,20 +66,14 @@ func main() {
 		}
 	}
 	url := "http://" + ln.Addr().String() + "/"
+	_, listenPort, _ := net.SplitHostPort(ln.Addr().String())
 
-	app := newApp()
-	if *demo {
-		app.useDemo()
-	} else if cfg, err := loadConfig(); err == nil {
-		app.cfg = cfg
-		app.connectInBackground()
-	}
-
+	phone := newPhoneAccess(listenPort)
+	app := newApp(phone)
 	static, _ := fs.Sub(webFiles, "web")
-	srv := &http.Server{
-		Handler:           app.routes(http.FileServer(http.FS(static)), ln.Addr().String()),
-		ReadHeaderTimeout: 10 * time.Second,
-	}
+	handler := app.routes(http.FileServer(http.FS(static)), ln.Addr().String())
+	phone.setHandler(handler)
+	srv := &http.Server{Handler: handler, ReadHeaderTimeout: 10 * time.Second}
 
 	fmt.Println()
 	fmt.Println("Le tableau de bord est ouvert dans votre navigateur :")
@@ -79,6 +81,17 @@ func main() {
 	fmt.Println()
 	fmt.Println("Laissez cette fenêtre ouverte pendant que vous l'utilisez.")
 	fmt.Println("Fermez-la pour arrêter le tableau de bord.")
+	fmt.Println()
+
+	if *demo {
+		app.useDemo()
+	} else if cfg, err := loadConfig(); err == nil {
+		app.cfg = cfg
+		app.connectInBackground()
+		phone.set(cfg.Phone, cfg.PhoneCode, cfg.PhoneSecret)
+		setKeepAwake(cfg.KeepAwake)
+	}
+	go phone.run()
 	if !*noBrowser {
 		openBrowser(url)
 	}

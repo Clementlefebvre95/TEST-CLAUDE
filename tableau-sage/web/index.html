@@ -2,9 +2,15 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2a78d6">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Tableau Sage">
   <title>Tableau Sage</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -12,6 +18,28 @@
   <section id="screen-loading" class="screen center" hidden>
     <div class="spinner" aria-hidden="true"></div>
     <p id="loading-text">Connexion à Sage…</p>
+  </section>
+
+  <!-- Téléphone : code d'accès -->
+  <section id="screen-login" class="screen" hidden>
+    <form id="login-form" class="login" autocomplete="off">
+      <img src="icon.svg" alt="" width="56" height="56">
+      <h1>Tableau Sage</h1>
+      <p class="muted">Saisissez le code d'accès affiché sur le PC du bureau, dans Tableau Sage, bouton « Accès téléphone ».</p>
+      <div id="login-error" class="alert" role="alert" hidden></div>
+      <label for="login-code">Code d'accès</label>
+      <input id="login-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="12" placeholder="1234 5678" spellcheck="false">
+      <button type="submit" id="login-submit" class="btn primary block">Se connecter</button>
+      <p class="help">Le code n'est demandé qu'une fois sur ce téléphone.</p>
+    </form>
+  </section>
+
+  <!-- Téléphone : le PC du bureau n'est pas connecté à Sage -->
+  <section id="screen-unavailable" class="screen center" hidden>
+    <img src="icon.svg" alt="" width="56" height="56">
+    <h1>Tableau Sage</h1>
+    <p class="narrow">Le tableau de bord du bureau n'est pas connecté à Sage pour le moment. Réessayez dans un instant.</p>
+    <button type="button" id="retry" class="btn secondary">Réessayer</button>
   </section>
 
   <!-- Configuration -->
@@ -96,17 +124,24 @@
         <span id="demo-badge" class="badge" hidden>Démonstration : données fictives</span>
       </div>
       <nav class="tabs" role="tablist">
-        <button role="tab" id="tab-sales" aria-controls="view-sales" aria-selected="true">Chiffre d'affaires</button>
+        <button role="tab" id="tab-sales" aria-controls="view-sales" aria-selected="true">Ventes</button>
         <button role="tab" id="tab-stock" aria-controls="view-stock" aria-selected="false">Stocks</button>
+        <button role="tab" id="tab-purchases" aria-controls="view-purchases" aria-selected="false">Fournisseurs</button>
       </nav>
       <div class="actions">
         <button type="button" id="refresh" class="btn secondary">Actualiser</button>
+        <button type="button" id="phone-btn" class="btn ghost" aria-haspopup="dialog">Accès téléphone</button>
         <button type="button" id="settings" class="btn ghost" aria-haspopup="dialog">Paramètres</button>
+        <button type="button" id="logout" class="btn ghost" hidden>Se déconnecter</button>
       </div>
     </header>
 
     <main>
       <div id="dash-error" class="alert" role="alert" hidden></div>
+      <div id="home-hint" class="hint" hidden>
+        <p><strong>Astuce :</strong> pour l'ouvrir comme une appli, ajoutez cette page à l'écran d'accueil. Sur iPhone : bouton Partager, puis « Sur l'écran d'accueil ». Sur Android : menu ⋮, puis « Ajouter à l'écran d'accueil ».</p>
+        <button type="button" id="home-hint-close" class="btn ghost">OK</button>
+      </div>
 
       <section id="view-sales" role="tabpanel" aria-labelledby="tab-sales">
         <div class="tiles" id="sales-tiles"></div>
@@ -114,15 +149,15 @@
           <header class="card-head">
             <div>
               <h2>Chiffre d'affaires HT par mois</h2>
-              <div class="legend" id="chart-legend"></div>
+              <div class="legend" id="sales-legend"></div>
             </div>
             <div class="seg" role="group" aria-label="Affichage">
-              <button type="button" id="show-chart" aria-pressed="true">Graphique</button>
-              <button type="button" id="show-table" aria-pressed="false">Tableau</button>
+              <button type="button" data-chart="sales" data-mode="chart" aria-pressed="true">Graphique</button>
+              <button type="button" data-chart="sales" data-mode="table" aria-pressed="false">Tableau</button>
             </div>
           </header>
-          <div id="chart" class="chart"></div>
-          <div id="chart-table" hidden></div>
+          <div id="sales-chart" class="chart" data-key="sales"></div>
+          <div id="sales-chart-table" hidden></div>
         </article>
         <div class="grid2 cards">
           <article class="card">
@@ -142,7 +177,7 @@
           <label class="inline">Dépôt
             <select id="depot"><option value="0">Tous les dépôts</option></select>
           </label>
-          <input id="search" type="search" placeholder="Rechercher un article (référence ou désignation)" spellcheck="false">
+          <input id="search" type="search" placeholder="Article, famille ou fournisseur" spellcheck="false">
           <div class="seg" role="group" aria-label="Filtrer">
             <button type="button" data-filter="all" aria-pressed="true">Tous</button>
             <button type="button" data-filter="out" aria-pressed="false">En rupture</button>
@@ -162,7 +197,47 @@
             <button type="button" id="stock-more" class="btn secondary" hidden>Afficher plus</button>
           </div>
         </article>
-        <p class="note">Articles actifs dont Sage suit le stock. Disponible = en stock − réservé (commandes clients).</p>
+        <p class="note">Articles actifs dont Sage suit le stock. Disponible = en stock − réservé (commandes clients). Commandé = attendu des fournisseurs.</p>
+      </section>
+
+      <section id="view-purchases" role="tabpanel" aria-labelledby="tab-purchases" hidden>
+        <div class="tiles" id="purchase-tiles"></div>
+        <article class="card">
+          <header class="card-head">
+            <div>
+              <h2>Achats HT par mois</h2>
+              <div class="legend" id="purchases-legend"></div>
+            </div>
+            <div class="seg" role="group" aria-label="Affichage">
+              <button type="button" data-chart="purchases" data-mode="chart" aria-pressed="true">Graphique</button>
+              <button type="button" data-chart="purchases" data-mode="table" aria-pressed="false">Tableau</button>
+            </div>
+          </header>
+          <div id="purchases-chart" class="chart" data-key="purchases"></div>
+          <div id="purchases-chart-table" hidden></div>
+        </article>
+        <div class="grid2 cards">
+          <article class="card">
+            <header class="card-head"><h2>Principaux fournisseurs depuis le 1er janvier</h2></header>
+            <div id="top-suppliers"></div>
+          </article>
+          <article class="card" id="orders-card">
+            <header class="card-head"><h2>Commandes fournisseurs en cours</h2></header>
+            <div id="orders"></div>
+          </article>
+        </div>
+        <article class="card cards">
+          <header class="card-head">
+            <h2>Tous les fournisseurs</h2>
+            <input id="supplier-search" type="search" placeholder="Nom, code ou ville" spellcheck="false">
+          </header>
+          <div id="suppliers"></div>
+          <div class="table-foot">
+            <span id="suppliers-count" class="muted small"></span>
+            <button type="button" id="suppliers-more" class="btn secondary" hidden>Afficher plus</button>
+          </div>
+        </article>
+        <p class="note">Achats : factures fournisseurs de la gestion commerciale, hors taxes, avoirs et retours déduits. Commandes en cours : bons de commande fournisseurs pas encore reçus. Touchez un fournisseur pour voir sa fiche.</p>
       </section>
     </main>
   </section>
@@ -174,6 +249,25 @@
       <p class="help">Pour changer de serveur ou de société, reprenez la configuration. Rien n'est modifié dans Sage.</p>
       <div class="dialog-actions">
         <button type="button" id="reconfigure" class="btn secondary">Reprendre la configuration</button>
+        <button value="close" class="btn primary">Fermer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="phone-dialog" class="wide">
+    <form method="dialog">
+      <h2>Accès depuis un téléphone</h2>
+      <div id="phone-body"></div>
+      <div class="dialog-actions">
+        <button value="close" class="btn primary">Fermer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="supplier-dialog" class="wide sheet">
+    <form method="dialog">
+      <div id="supplier-body"></div>
+      <div class="dialog-actions">
         <button value="close" class="btn primary">Fermer</button>
       </div>
     </form>
